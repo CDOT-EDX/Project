@@ -1,3 +1,37 @@
+// best structure to control slide content
+var slideContent = [
+  { 
+    title: "This is some title",
+    text: "This is some text",
+    //image: "",
+    //custom: ""
+    audio: 0 // starting index at 0
+    second: 1
+  },
+  {
+    title: "Title number two",
+    text: "We probably hit the 10th second of the first audio",
+    second: 10,
+    audio: 0
+  },
+  {
+    title: "Starting audio two",
+    text: "This is the text for the second audio followed by a picture",
+    second: 0,
+    audio: 1
+  },
+  {
+    title: "Audio 2 Image",
+    image: "someImage.png",
+    second: 10,
+    audio: 1
+  }
+];
+
+var audios = [
+
+];
+
 var AVIATION = AVIATION || {};
 
 // begin a javascript class "Slide"
@@ -19,6 +53,7 @@ AVIATION.common.Slide = function( options ){
 
 AVIATION.common.Slide.prototype = {
 
+  // constructor which initiates the building process
   constructor: function(){
   	// check type of slide and run the proper initFunc
     if (this["type"] === "simple"){
@@ -29,24 +64,17 @@ AVIATION.common.Slide.prototype = {
       this._initHighlights();
     }
   },
-/*
-  buildHighlights: function(){
 
-  },
-
-  buildModals: function(){
-
-  },
-*/
+  // method that initializes building of simple slides
   _initSimple: function(options){
 	  var avatars, content = [], audio = [];
 
   	var defaults = {
-      //id: "#slideContainer",
       showAvatars: false,
       showSlideControls: true,
       showStatus: true,
       showControls: true,
+      showBorder: true
     };
 
     console.log("this initSimple:");
@@ -70,27 +98,71 @@ AVIATION.common.Slide.prototype = {
 
     try {
       // if smth might cause an error....
-      if(!this.id) throw "an id is required";
+      this.container.nothingHere.text = "test";
+      if(!this.container) throw "a container is required, thus provide an id";
     } catch(error){
       console.log("error: ");
       console.debug(error);
     } finally {
       console.log("using a default id instead");
       // do something to continue running
-      this["id"] = "#slideContainer";
+      this.container = "#slideContainer";
     }
 
     // let's add some elements to our base div inside the slide
-    var 
+    var container = $(this.container);
 
-  }
+    if(options.showAvatars){
+      this.buildAvatars();
+    } else {
+      this.buildContent();
+    }
+  },
+
+  // method for building avatars into the slide
+  buildAvatars: function(){
+    console.log("buidling avatars");
+    var avatarLeft, avatarRight;
+
+
+  },
+
+  // method for building the content of the slide
+  buildContent: function(){
+    console.log("building content");
+
+    var content = jQuery('<div/>', {
+      "class": "cdot_contentText col-xs-12",
+      "html": "<h3>This is a title</h3><p>And some text</p>"
+    }).appendTo(this.container);
+
+  },
+
+  buildSlideControls: function(){
+
+  },
+
+  buildCourseControls: function(){
+
+  },
+  /*
+  buildHighlights: function(){
+
+  },
+
+  buildModals: function(){
+
+  },
+  */
+
 };
 /**
   var newSlide = new Slide();
   newSlide.constructor();
 **/
-console.log("before slide creation");
-
+/*
 var testSlide = new Slide();
 console.log("this is a test slide...");
 console.log(testSlide);
+*/
+console.log("testing this class execution");
