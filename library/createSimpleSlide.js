@@ -264,6 +264,8 @@ AVIATION.common.Slide.prototype = {
 
   buildSlideAudios: function(){
     var slideObject = this;
+    // check hasPlayer parameter if has been loaded/listend to previously
+    // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
 
     this.audioFiles.forEach( function(audio, a){
       // lets make sure that the filename provided is without the extension
@@ -296,7 +298,21 @@ AVIATION.common.Slide.prototype = {
         }).appendTo(addedSlideAudio);
       }
 
-      slideObject.slideAudios.push(addedSlideAudio);
+      try {
+        slideObject.slideAudios.push(Popcorn("#" + audio + "_" + a));
+      } catch(error) {
+        // was popcorn initialized ok?
+        console.log("slide audio init error: ");
+        console.log(error);
+      } finally {
+        // just added the added audio to the slideObject
+        slideObject.slideAudios.push(addedSlideAudio);
+      }
+
+      // check var from the outside function to see if it is true
+      // if so, we probably assigned the slideHasListened to the slideObject
+      // already and thus do not need to push again
+      slideObject.slideHasListened.push(false);
     })
   },
 
@@ -332,6 +348,43 @@ AVIATION.common.Slide.prototype = {
 
   },
   */
+
+  // start playback control methods
+  activateTimer = function(e){
+
+  },
+
+  resetTimer = function(e){
+
+  },
+
+  playCurrent = function(e){
+
+  },
+  
+  pauseCurrent = function(e){
+    
+  },
+
+  playPrevious = function(e){
+
+  },
+
+  playNext = function(e){
+
+  },
+
+  replayAll = function(e){
+
+  },
+
+  replayCurrent = function(e){
+
+  },
+
+  buttonOnClicks = function(){
+
+  },
 
 };
 /**
