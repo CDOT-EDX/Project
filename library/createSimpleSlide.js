@@ -3,7 +3,7 @@
 var slideContent = [
   { 
     title: "This is some title",
-    text: "This is some text",
+    html: "This is some text",
     //image: "",
     //custom: ""
     audio: 0 // starting index at 0
@@ -11,13 +11,13 @@ var slideContent = [
   },
   {
     title: "Title number two",
-    text: "We probably hit the 10th second of the first audio",
+    html: "We probably hit the 10th second of the first audio",
     second: 10,
     audio: 0
   },
   {
     title: "Starting audio two",
-    text: "This is the text for the second audio followed by a picture",
+    html: "This is the text for the second audio followed by a picture",
     second: 0,
     audio: 1
   },
@@ -29,16 +29,32 @@ var slideContent = [
   }
 ];
 
-var audios = [
 
+// init all audios with mp3/wav/ogg
+
+var audios = [
+  "someAudio", "anotherAudio"
 ];
+
+var options = {
+  
+};
 */
+
 var AVIATION = AVIATION || {};
 
 // begin a javascript class "Slide"
 AVIATION.common = {};
 
-AVIATION.common.Slide = function( options ){
+AVIATION.common.Slide = function( options, slideContent, audioFiles ){
+  var md = new MobileDetect(window.navigator.userAgent);
+
+  if(md){
+    this.isMobile = md.mobile();
+  } else {
+    this.isMobile = false;
+  }
+
   if(!options){
     options = {};
   }
@@ -48,8 +64,17 @@ AVIATION.common.Slide = function( options ){
 	this["options"] = options["options"];
 	this.avatars = options.avatars;
 
+  this.activeIndex = options.activeIndex || 0;
+
+  this.slideContent = slideContent || [{ title: "No Content Provided", html: "Check your slideContent object"}];
+
+  this.audioFiles = audioFiles || [];
+  this.slideAudios = []; // init an empty array to store audio elements in
+  this.slideHasListened = []; // store which audios have been listened to
+
   console.log("this inside Slide:");
   console.log(this);
+
 };
 
 AVIATION.common.Slide.prototype = {
@@ -62,7 +87,7 @@ AVIATION.common.Slide.prototype = {
       this._initSimple( this["options"] );
     } else {
       console.log("not simple slide");
-      this._initHighlights();
+      this._initPanel( this["options"] );
     }
   },
 
@@ -99,7 +124,6 @@ AVIATION.common.Slide.prototype = {
 
     try {
       // if smth might cause an error....
-      this.container.nothingHere.text = "test";
       if(!this.container) throw "a container is required, thus provide an id";
     } catch(error){
       console.log("error: ");
@@ -111,16 +135,40 @@ AVIATION.common.Slide.prototype = {
     }
 
     // let's add some elements to our base div inside the slide
-    var container = $(this.container);
+    //var container = $(this.container);
 
     if(options.showAvatars){
       this.buildAvatars();
-    } else {
-      this.buildContent();
     }
+
+    this.buildContent();
 
     this.buildSlideControls();
     this.buildCourseControls();
+
+    // create events for audio/video interactions and a way to track them
+  },
+
+  // build titles on the slide
+  buildTitle: function(parent, title, callback){
+    console.log("building titles");
+    console.log("title: ")
+    console.log(title);
+    console.log(parent);
+    console.log("inserting title...");
+    if(title){
+      var titleElement = jQuery('<h3/>',{
+        "id": "slideTitle",
+        "class": "text-center",
+        html: title
+      }).appendTo(parent);
+    } else {
+      // check if title exists and remove it or make it blank
+    }
+
+    if(callback){
+      callback();
+    }
   },
 
   // method for building avatars into the slide
@@ -134,19 +182,47 @@ AVIATION.common.Slide.prototype = {
   // method for building the content of the slide
   buildContent: function(){
     console.log("building content");
+    console.log(this);
+    var slideContent = this.slideContent,
+        activeIndex = this.activeIndex;
+    
+    var setupInnerContent = function(){
+      var closingTag = "", src="", classes, html;
+
+      if (slideContent[activeIndex].html){
+        classes = "";
+        closingTag = '<div/>';
+        html = slideContent[activeIndex].html;
+      } else {
+        classes = "";
+        closingTag = '<image/>';
+        src = slideContent[activeIndex].image;
+        html = "";
+      }
+
+      var innerContent = jQuery(closingTag, {
+        "class": classes,
+        src: src,
+        html: html
+      }).appendTo(content);
+
+
+    };
 
     var content = jQuery('<div/>', {
-      "class": "cdot_contentText col-xs-12",
-      html: "<h3>This is a title</h3><p>And some text</p>"
+      "class": "cdot_contentText col-xs-12"
     }).appendTo(this.container);
 
+    this.buildTitle( content, slideContent[activeIndex].title, setupInnerContent);
+
+       
   },
 
   // build controls that go immediately after the slide (play/pause buttons)
   buildSlideControls: function(){
     var slideControlsRow = jQuery('<div/>', {
       "class": "row",
-    }).appendTo(this.container);
+    }).appendTo( $(this.container).parent() );
 
     this.insertLineBreak(slideControlsRow);
 
@@ -174,33 +250,67 @@ AVIATION.common.Slide.prototype = {
     this.insertLineBreak(slideControlsRow);
   },
 
-  insertLineBreak: function( element ){
+  insertLineBreak: function( parent ){
     try {
       var lineBreak = jQuery('<div/>', {
         "class": "col-xs-12",
         html: "<!----><br/>"
-      }).appendTo(element);
+      }).appendTo(parent);
     } catch(error) {
       console.log("error: " + error);
-      console.log("no element provided, line break not added");
+      console.log("no parent provided, line break not added");
     }
   },
 
-  insertSlideAudios: function(){
+  buildSlideAudios: function(){
+    var slideObject = this;
 
+    this.audioFiles.forEach( function(audio, a){
+      // lets make sure that the filename provided is without the extension
+      var split = audio.split("."), filename = "", tempArray = [], 
+          extensions = ["mp3", "wav", "ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"];
+
+      if(split.length === 2){
+        // take only the first argument
+        filename = split[0]
+      } else if(split.length > 2){
+        // lets join everything except for the extension
+        for(var i; i<split.length-1; i++){
+          tempArray.push(split[i]);
+        }
+        filename = tempArray.join("");
+      } else {
+        // its probably the actual filename alone
+        filename = audio;
+      }
+
+      var addedSlideAudio = jQuery('<audio/>',{
+        id: audio + "_" + a,
+        html: "Your browser doesn't support audio"
+      }).appendTo(slideObject.container);
+
+      for(var i; i<extensions.length; i++){
+        jQuery('<source/>', {
+          src: filename + extensions[i],
+          type: types[i]
+        }).appendTo(addedSlideAudio);
+      }
+
+      slideObject.slideAudios.push(addedSlideAudio);
+    })
   },
 
   // builds controls that go at the very bottom of the slide (back/continue) and status bar
   buildCourseControls: function(){
     var courseControlsRow = jQuery('<div/>', {
       "class": "row",
-    }).appendTo(this.container);
+    }).appendTo( $(this.container).parent() );
 
     var statusBar = jQuery('<div/>', {
       "class": "col-xs-12",
       html: '<a href="#" id="cancelRedirect"' + 
             'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
-            'role="button">Slide Loaded</a>'
+            'role="button">Slide Loading...</a>'
     }).appendTo(courseControlsRow);
 
     this.insertLineBreak(courseControlsRow);
@@ -212,6 +322,7 @@ AVIATION.common.Slide.prototype = {
             '<a href="#" id="btnC" class="btn btn-default col-xs-6 col-sm-offset-4 col-sm-4" role="button">Continue &gt;</a>'
     }).appendTo(courseControlsRow);
   },
+
   /*
   buildHighlights: function(){
 
