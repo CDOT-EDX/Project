@@ -249,6 +249,15 @@ AVIATION.common.Slide.prototype = {
       html: '<a href="#" id="btnN" class="btn btn-default cdotBtn2" disabled role="button"></a>'
     }).appendTo(slideControlsContainer);
 
+    // add buttons to slide object to be able to show/hide easily
+    this.slideElements.slideControls = {
+      previous: $("btnP"),
+      play: $("btnPlay"),
+      pause: $("btnPause"),
+      replay: $("btnR"),
+      next: $("btnN")
+    }
+
     this.insertLineBreak(slideControlsRow);
   },
 
@@ -339,6 +348,11 @@ AVIATION.common.Slide.prototype = {
       html: '<a href="#" id="btnB" class="btn btn-default col-xs-6 col-sm-4" role="button">&lt; Back</a>' + 
             '<a href="#" id="btnC" class="btn btn-default col-xs-6 col-sm-offset-4 col-sm-4" role="button">Continue &gt;</a>'
     }).appendTo(courseControlsRow);
+
+    this.slideElements.courseControls = {
+      back: $("btnB"),
+      "continue": $("btnC")
+    }
   },
 
   /*
@@ -407,37 +421,58 @@ AVIATION.common.Slide.prototype = {
   },
 
   playCurrent: function(e){
-    var active = activeIndex, players = this.slideAudios;
+    var active = this.activeIndex, players = this.slideAudios;
 
     this.checkSlideControlButtons("play");
 
     players[active].play();
-
-
   },
   
   pauseCurrent: function(e){
+    var active = this.activeIndex, players = this.slideAudios;
     
+    this.checkSlideControlButtons("play");
+
+    players[active].pause();
   },
 
   playPrevious: function(e){
+    var active = this.activeIndex;
 
+    active++;
+
+    this.playCurrent();
   },
 
   playNext: function(e){
+    var active = this.activeIndex;
 
+    active++;
+
+    this.playCurrent();
   },
 
   replayAll: function(e){
+    var active = this.activeIndex;
 
+    active = 0;
+
+    this.checkSlideControlButtons("replay");
+
+    this.playCurrent();
   },
 
   replayCurrent: function(e){
+    this.checkSlideControlButtons("replay");
 
+    this.playCurrent();
   },
 
   buttonOnClicks: function(){
+    // check if there is a timer and reset if we click on a control button
     this.resetTimer();
+
+    
   },
 
   initAudioEvents: function(){
@@ -456,7 +491,7 @@ AVIATION.common.Slide.prototype = {
       case "replay":
 
         break;
-      case "end"
+      case "end":
 
         break;
 
@@ -470,13 +505,5 @@ AVIATION.common.Slide.prototype = {
   },
 
 };
-/**
-  var newSlide = new Slide();
-  newSlide.constructor();
-**/
-/*
-var testSlide = new Slide();
-console.log("this is a test slide...");
-console.log(testSlide);
-*/
+
 console.log("testing this class execution");
