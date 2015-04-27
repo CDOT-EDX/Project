@@ -69,8 +69,10 @@ AVIATION.common.Slide = function( options, slideContent, audioFiles ){
   this.slideContent = slideContent || [{ title: "No Content Provided", html: "Check your slideContent object"}];
 
   this.audioFiles = audioFiles || [];
-  this.slideAudios = []; // init an empty array to store audio elements in
+  this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
   this.slideHasListened = []; // store which audios have been listened to
+
+  this.slideElements = {}; // will have status bar / control buttons / title / content and so on
 
   console.log("this inside Slide:");
   console.log(this);
@@ -187,16 +189,16 @@ AVIATION.common.Slide.prototype = {
         activeIndex = this.activeIndex;
     
     var setupInnerContent = function(){
-      var closingTag = "", src="", classes, html;
+      var closingTag = "", src = "", classes = slideContent[activeIndex].classes.join(" ") || "",
+          html;
 
       if (slideContent[activeIndex].html){
-        classes = "";
         closingTag = '<div/>';
-        html = slideContent[activeIndex].html;
+        html = slideContent[activeIndex].html || "";
       } else {
-        classes = "";
+        
         closingTag = '<image/>';
-        src = slideContent[activeIndex].image;
+        src = slideContent[activeIndex].image || "";
         html = "";
       }
 
@@ -324,7 +326,7 @@ AVIATION.common.Slide.prototype = {
 
     var statusBar = jQuery('<div/>', {
       "class": "col-xs-12",
-      html: '<a href="#" id="cancelRedirect"' + 
+      html: '<a href="#" id="statusBar"' + 
             'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
             'role="button">Slide Loading...</a>'
     }).appendTo(courseControlsRow);
@@ -350,40 +352,121 @@ AVIATION.common.Slide.prototype = {
   */
 
   // start playback control methods
-  activateTimer = function(e){
+  activateTimer: function(seconds, isAuto){
+    var timer = this.timer,
+        counter = seconds, // duration of the timer (each 1 point is about a second)
+        statusBar = this.slideElements.statusBar;
 
+    if (!counter){
+      counter = 5;
+    }
+
+    if (!timer){
+      this.timer = "";
+      timer = this.timer;
+    }
+
+    //statusBar.text("");
+    
+    var resetTimerOnClick = function(e){
+      e.preventDefault();
+      this.resetTimer(true);
+      $(this).on('click', function(){
+        redirectToPage(continueId); // any URL
+      });
+    };
+
+    statusBar.on('click', resetTimerOnClick);
+  
+    if(isAuto) {
+      statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
+    
+      this.timer = setInterval( function(){
+          counter--;
+          if(counter < 0) {
+            statusBar.text("Redirecting...");
+            redirectToPage(continueId);
+            clearInterval(timer);
+          } else {
+            statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
+          }
+      }, 1000);
+    } else {
+      this.timer = null;
+    }
   },
 
-  resetTimer = function(e){
+  resetTimer: function( manual ){
+    if(this.timer){
+      if(manual){
+        statusBar.text("Continue when ready");
+      }
 
+      clearInterval(this.timer);  
+    }
   },
 
-  playCurrent = function(e){
+  playCurrent: function(e){
+    var active = activeIndex, players = this.slideAudios;
+
+    this.checkSlideControlButtons("play");
+
+    players[active].play();
+
 
   },
   
-  pauseCurrent = function(e){
+  pauseCurrent: function(e){
     
   },
 
-  playPrevious = function(e){
+  playPrevious: function(e){
 
   },
 
-  playNext = function(e){
+  playNext: function(e){
 
   },
 
-  replayAll = function(e){
+  replayAll: function(e){
 
   },
 
-  replayCurrent = function(e){
+  replayCurrent: function(e){
 
   },
 
-  buttonOnClicks = function(){
+  buttonOnClicks: function(){
+    this.resetTimer();
+  },
 
+  initAudioEvents: function(){
+
+  },
+
+  checkSlideControlButtons: function( action ){
+    switch(action) {
+      // hide/show buttons based on action
+      case "play":
+
+        break;
+      case "pause":
+
+        break;
+      case "replay":
+
+        break;
+      case "end"
+
+        break;
+
+      default:
+
+        break;
+
+      // disable/enable btns
+
+    }
   },
 
 };
