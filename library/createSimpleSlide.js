@@ -5,9 +5,9 @@ var slideContent = [
     title: "This is some title",
     html: "This is some text",
     //image: "",
-    //custom: ""
+    callback: function(){}
     audio: 0 // starting index at 0
-    second: 1
+    second: 1,
   },
   {
     title: "Title number two",
@@ -43,9 +43,9 @@ var options = {
 
 var AVIATION = AVIATION || {};
 
-// begin a javascript class "Slide"
 AVIATION.common = {};
 
+// begin a javascript class "Slide"
 AVIATION.common.Slide = function( options, slideContent, audioFiles ){
   var md = new MobileDetect(window.navigator.userAgent);
 
@@ -222,43 +222,46 @@ AVIATION.common.Slide.prototype = {
 
   // build controls that go immediately after the slide (play/pause buttons)
   buildSlideControls: function(){
-    var slideControlsRow = jQuery('<div/>', {
-      "class": "row",
-    }).appendTo( $(this.container).parent() );
 
-    this.insertLineBreak(slideControlsRow);
+    if(this.showSlideControls){
+      var slideControlsRow = jQuery('<div/>', {
+        "class": "row",
+      }).appendTo( $(this.container).parent() );
 
-    var slideControlsContainer = jQuery('<div/>', {
-      "id": "playerControls",
-    }).appendTo(slideControlsRow);
+      this.insertLineBreak(slideControlsRow);
 
-    var slideControlsPrevious = jQuery('<div/>', {
-      "id": "btnPDiv",
-      html: '<a href="#" id="btnP" class="btn btn-default cdotBtn2" disabled role="button"></a>'
-    }).appendTo(slideControlsContainer);
+      var slideControlsContainer = jQuery('<div/>', {
+        "id": "playerControls",
+      }).appendTo(slideControlsRow);
 
-    var slideControlsPlay = jQuery('<div/>', {
-      "id": "btnPlayDiv",
-      html: '<a id="btnPlay" class="btn btn-default cdotBtn2" role="button"></a>' +
-            '<a id="btnPause" class="btn btn-default cdotBtn2" role="button"></a>' +
-            '<a id="btnR" class="btn btn-default cdotBtn2" role="button"></a>'
-    }).appendTo(slideControlsContainer);
+      var slideControlsPrevious = jQuery('<div/>', {
+        "id": "btnPDiv",
+        html: '<a href="#" id="btnP" class="btn btn-default cdotBtn2" disabled role="button"></a>'
+      }).appendTo(slideControlsContainer);
 
-    var slideControlsNext = jQuery('<div/>', {
-      "id": "btnNDiv",
-      html: '<a href="#" id="btnN" class="btn btn-default cdotBtn2" disabled role="button"></a>'
-    }).appendTo(slideControlsContainer);
+      var slideControlsPlay = jQuery('<div/>', {
+        "id": "btnPlayDiv",
+        html: '<a id="btnPlay" class="btn btn-default cdotBtn2" role="button"></a>' +
+              '<a id="btnPause" class="btn btn-default cdotBtn2" role="button"></a>' +
+              '<a id="btnR" class="btn btn-default cdotBtn2" role="button"></a>'
+      }).appendTo(slideControlsContainer);
 
-    // add buttons to slide object to be able to show/hide easily
-    this.slideElements.slideControls = {
-      previous: $("btnP"),
-      play: $("btnPlay"),
-      pause: $("btnPause"),
-      replay: $("btnR"),
-      next: $("btnN")
+      var slideControlsNext = jQuery('<div/>', {
+        "id": "btnNDiv",
+        html: '<a href="#" id="btnN" class="btn btn-default cdotBtn2" disabled role="button"></a>'
+      }).appendTo(slideControlsContainer);
+
+      // add buttons to slide object to be able to show/hide easily
+      this.slideElements.slideControls = {
+        previous: $("btnP"),
+        play: $("btnPlay"),
+        pause: $("btnPause"),
+        replay: $("btnR"),
+        next: $("btnN")
+      }
+
+      this.insertLineBreak(slideControlsRow);
     }
-
-    this.insertLineBreak(slideControlsRow);
   },
 
   insertLineBreak: function( parent ){
@@ -283,18 +286,24 @@ AVIATION.common.Slide.prototype = {
       var split = audio.split("."), filename = "", tempArray = [], 
           extensions = ["mp3", "wav", "ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"];
 
-      if(split.length === 2){
-        // take only the first argument
-        filename = split[0]
-      } else if(split.length > 2){
-        // lets join everything except for the extension
-        for(var i; i<split.length-1; i++){
-          tempArray.push(split[i]);
+      try{
+        // checking to make sure that the filename given is without an extension
+        if(split.length === 2){
+          // take only the first argument
+          filename = split[0]
+        } else if(split.length > 2){
+          // lets join everything except for the extension
+          for(var i; i<split.length-1; i++){
+            tempArray.push(split[i]);
+          }
+          filename = tempArray.join("");
+        } else {
+          // its probably the actual filename alone
+          filename = audio;
         }
-        filename = tempArray.join("");
-      } else {
-        // its probably the actual filename alone
-        filename = audio;
+      } catch(error){
+        console.log("error: " + error);
+        console.log("error while trying to parse audio filename");
       }
 
       var addedSlideAudio = jQuery('<audio/>',{
@@ -327,31 +336,41 @@ AVIATION.common.Slide.prototype = {
     })
   },
 
+  buildStatusBar: function(parent){
+    if(this.showStatus){
+      var statusBar = jQuery('<div/>', {
+        "class": "col-xs-12",
+        html: '<a href="#" id="statusBar"' + 
+              'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
+              'role="button">Slide Loading...</a>'
+      }).appendTo(parent);
+
+      this.slideElements.statusBar = $("#statusBar");  
+    }
+  },
+
   // builds controls that go at the very bottom of the slide (back/continue) and status bar
   buildCourseControls: function(){
-    var courseControlsRow = jQuery('<div/>', {
-      "class": "row",
-    }).appendTo( $(this.container).parent() );
+    if(this.showControls){
+      var courseControlsRow = jQuery('<div/>', {
+        "class": "row",
+      }).appendTo( $(this.container).parent() );
 
-    var statusBar = jQuery('<div/>', {
-      "class": "col-xs-12",
-      html: '<a href="#" id="statusBar"' + 
-            'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
-            'role="button">Slide Loading...</a>'
-    }).appendTo(courseControlsRow);
+      this.buildStatusBar(courseControlsRow);
 
-    this.insertLineBreak(courseControlsRow);
+      this.insertLineBreak(courseControlsRow);
 
-    // TODO: make titles of buttons editable by allowing them to be a property inside options
-    var courseControlsContainer = jQuery('<div/>', {
-      "class": "col-xs-12",
-      html: '<a href="#" id="btnB" class="btn btn-default col-xs-6 col-sm-4" role="button">&lt; Back</a>' + 
-            '<a href="#" id="btnC" class="btn btn-default col-xs-6 col-sm-offset-4 col-sm-4" role="button">Continue &gt;</a>'
-    }).appendTo(courseControlsRow);
+      // TODO: make titles of buttons editable by allowing them to be a property inside options
+      var courseControlsContainer = jQuery('<div/>', {
+        "class": "col-xs-12",
+        html: '<a href="#" id="btnB" class="btn btn-default col-xs-6 col-sm-4" role="button">&lt; Back</a>' + 
+              '<a href="#" id="btnC" class="btn btn-default col-xs-6 col-sm-offset-4 col-sm-4" role="button">Continue &gt;</a>'
+      }).appendTo(courseControlsRow);
 
-    this.slideElements.courseControls = {
-      back: $("btnB"),
-      "continue": $("btnC")
+      this.slideElements.courseControls = {
+        back: $("btnB"),
+        "continue": $("btnC")
+      }
     }
   },
 
@@ -367,7 +386,7 @@ AVIATION.common.Slide.prototype = {
 
   // start playback control methods
   activateTimer: function(seconds, isAuto){
-    var timer = this.timer,
+    var timer = this._timer,
         counter = seconds, // duration of the timer (each 1 point is about a second)
         statusBar = this.slideElements.statusBar;
 
@@ -376,8 +395,8 @@ AVIATION.common.Slide.prototype = {
     }
 
     if (!timer){
-      this.timer = "";
-      timer = this.timer;
+      this._timer = "";
+      timer = this._timer;
     }
 
     //statusBar.text("");
@@ -395,7 +414,7 @@ AVIATION.common.Slide.prototype = {
     if(isAuto) {
       statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
     
-      this.timer = setInterval( function(){
+      this._timer = setInterval( function(){
           counter--;
           if(counter < 0) {
             statusBar.text("Redirecting...");
@@ -406,7 +425,7 @@ AVIATION.common.Slide.prototype = {
           }
       }, 1000);
     } else {
-      this.timer = null;
+      this._timer = null;
     }
   },
 
@@ -416,7 +435,7 @@ AVIATION.common.Slide.prototype = {
         statusBar.text("Continue when ready");
       }
 
-      clearInterval(this.timer);  
+      clearInterval(this._timer);  
     }
   },
 
@@ -472,11 +491,49 @@ AVIATION.common.Slide.prototype = {
     // check if there is a timer and reset if we click on a control button
     this.resetTimer();
 
-    
+
   },
 
   initAudioEvents: function(){
+    var players = this.slideAudios;
+    // let's set the generic "onPlay/onEnd" events
 
+    for(var a = 0; a < players.length; a++){
+      players[a].on("playing", function(){
+        console.log("audio has started: " + a);
+        // make sure the state of the slide is correct at for this audio/second
+
+        // disable whatever buttons / highlights / elements need to be disabled
+      });
+
+      players[a].on("ended", function(){
+        console.log("audio has ended: " + a);
+        // perform callbacks/actions if any needed at the end of the audio
+        // check buttons (disable/enable elements/highlights)
+
+        // if last audio and autoplay is on, invoke the timer
+
+        // if we need highlight control , call the function here
+
+        // set listened to true
+      });
+    }
+  },
+
+  initAudioContentEvents: function(){
+    var players = this.slideAudios, content = this.slideContent;
+
+    for(var c = 0; c < content.length && content[c].second; c++){
+      players[content[c].audio].cue(content[c].second, function(){
+        // show the title+html required
+
+
+        // run the callback if it is given
+        if(content[c].callback){
+          content[c].callback();
+        }
+      });
+    }
   },
 
   checkSlideControlButtons: function( action ){
