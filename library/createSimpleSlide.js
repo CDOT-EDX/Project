@@ -102,7 +102,8 @@ AVIATION.common.Slide.prototype = {
       showSlideControls: true,
       showStatus: true,
       showControls: true,
-      showBorder: true
+      showBorder: true,
+      autoplay: true,
     };
 
     console.log("this initSimple:");
@@ -203,6 +204,7 @@ AVIATION.common.Slide.prototype = {
       }
 
       var innerContent = jQuery(closingTag, {
+        id: "slideInner",
         "class": classes,
         src: src,
         html: html
@@ -481,37 +483,102 @@ AVIATION.common.Slide.prototype = {
     this.playCurrent();
   },
 
+  // do I need this? is it the same as playPrevious?
   replayCurrent: function(e){
     this.checkSlideControlButtons("replay");
 
     this.playCurrent();
   },
 
-  buttonOnClicks: function(){
+  buttonOnClickEvents: function(){
     // check if there is a timer and reset if we click on a control button
     this.resetTimer();
 
+  },
+
+  initSlideButtonEvents: function(){
+    // attach events to each button
+    var buttons = this.slideElements.slideControls, slide = this;
+
+    for(button in buttons){
+      buttons[button].on("click", function(e){
+
+        switch(button){
+
+          case "previous":
+            console.log("clicked previous");
+            slide.playPrevious();
+            break;
+
+          case "play":
+            console.log("clicked play");
+            slide.playCurrent();
+            break;
+
+          case "pause":
+            console.log("clicked pause");
+            slide.pauseCurrent();
+            break;
+
+          case "replay":
+            console.log("clicked replay");
+            slide.replayAll();
+            break;
+
+          case "next":
+            console.log("clicked next");
+            slide.playNext();
+            break;
+
+          default: 
+            console.log("not sure what this button is!");
+            console.log(button);
+            console.log(buttons[button]);
+            break;
+        }
+      });
+
+      
+    }
+  },
+
+  initCourseButtonEvents: function(){
 
   },
 
   initAudioEvents: function(){
-    var players = this.slideAudios;
+    var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened;
     // let's set the generic "onPlay/onEnd" events
 
     for(var a = 0; a < players.length; a++){
-      players[a].on("playing", function(){
+      players[a].on("playing", function(e){
         console.log("audio has started: " + a);
+
+        for(c = 0; c < content.length && content[c].audio <= a; c++ ){
+          console.log("looking for audio #: " + c + " and " + a);
+        }
         // make sure the state of the slide is correct at for this audio/second
 
         // disable whatever buttons / highlights / elements need to be disabled
       });
 
-      players[a].on("ended", function(){
+      players[a].on("ended", function(e){
         console.log("audio has ended: " + a);
+        
+        // start the next audio if it exists and autoplay is true
+        if(players[a+1] && this.autoplay){
+          players[a+1].play
+        }
+
+        hasListened[a] = true;
+
+        // if it is last audio and no need for reverseAudio
+        if(!players[a+1] && !reverseAudio){
+          this.activateTimer();
+        }
+        
         // perform callbacks/actions if any needed at the end of the audio
         // check buttons (disable/enable elements/highlights)
-
-        // if last audio and autoplay is on, invoke the timer
 
         // if we need highlight control , call the function here
 
