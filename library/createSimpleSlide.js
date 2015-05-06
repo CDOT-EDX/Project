@@ -61,18 +61,26 @@ AVIATION.common.Slide = function( options, slideContent, audioFiles ){
 
 	this["type"] = options["type"] || "simple"; // check which options are given and then assign a default
 												                      // type maybe in constructor?
-	this["options"] = options["options"];
+	this.options = options;
 	this.avatars = options.avatars;
 
   this.activeIndex = options.activeIndex || 0;
 
-  this.slideContent = slideContent || [{ title: "No Content Provided", html: "Check your slideContent object"}];
+  this.slideContent = slideContent || [
+                                        { 
+                                          title: "No Content Provided",
+                                          html: "Check your slideContent object", 
+                                          audio: 0
+                                        }
+                                      ];
 
-  this.audioFiles = audioFiles || [];
+  this.audioFiles = audioFiles || ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3"];
   this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
   this.slideHasListened = []; // store which audios have been listened to
 
   this.slideElements = {}; // will have status bar / control buttons / title / content and so on
+
+  this.slideTimer = -1;
 
   console.log("this inside Slide:");
   console.log(this);
@@ -86,6 +94,7 @@ AVIATION.common.Slide.prototype = {
   	// check type of slide and run the proper initFunc
     if (this["type"] === "simple"){
       console.log("simple type");
+      console.log(this.options);
       this._initSimple( this["options"] );
     } else {
       console.log("not simple slide");
@@ -120,6 +129,9 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
+    console.log("the options: ");
+    console.log(options);
+
     this["options"] = options;
 
     console.log("run simple");
@@ -131,10 +143,9 @@ AVIATION.common.Slide.prototype = {
     } catch(error){
       console.log("error: ");
       console.debug(error);
-    } finally {
       console.log("using a default id instead");
       // do something to continue running
-      this.container = "#slideContainer";
+      this.container = "#slideContainer"
     }
 
     // let's add some elements to our base div inside the slide
@@ -146,10 +157,15 @@ AVIATION.common.Slide.prototype = {
 
     this.buildContent();
 
+    this.buildSlideAudios();
+    console.log("launching build controls");
     this.buildSlideControls();
+    console.log("launching build course controls");
     this.buildCourseControls();
 
     // create events for audio/video interactions and a way to track them
+    console.log("now reset slide");
+    this.resetSlide();
   },
 
   // build titles on the slide
@@ -167,6 +183,7 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(parent);
     } else {
       // check if title exists and remove it or make it blank
+      // based on the json from the server?
     }
 
     if(callback){
@@ -190,8 +207,12 @@ AVIATION.common.Slide.prototype = {
         activeIndex = this.activeIndex;
     
     var setupInnerContent = function(){
-      var closingTag = "", src = "", classes = slideContent[activeIndex].classes.join(" ") || "",
+      var closingTag = "", src = "", classes = slideContent[activeIndex].classes || "",
           html;
+
+      if(classes != ""){
+        classes = classes.join(" ");
+      }
 
       if (slideContent[activeIndex].html){
         closingTag = '<div/>';
@@ -217,6 +238,11 @@ AVIATION.common.Slide.prototype = {
       "class": "cdot_contentText col-xs-12"
     }).appendTo(this.container);
 
+    console.log("title now");
+    console.log(slideContent);
+
+    console.log("active index: " + activeIndex);
+
     this.buildTitle( content, slideContent[activeIndex].title, setupInnerContent);
 
        
@@ -225,7 +251,7 @@ AVIATION.common.Slide.prototype = {
   // build controls that go immediately after the slide (play/pause buttons)
   buildSlideControls: function(){
 
-    if(this.showSlideControls){
+    if(this.options.showSlideControls){
       var slideControlsRow = jQuery('<div/>', {
         "class": "row",
       }).appendTo( $(this.container).parent() );
@@ -253,16 +279,17 @@ AVIATION.common.Slide.prototype = {
         html: '<a href="#" id="btnN" class="btn btn-default cdotBtn2" disabled role="button"></a>'
       }).appendTo(slideControlsContainer);
 
-      // add buttons to slide object to be able to show/hide easily
       this.slideElements.slideControls = {
-        previous: $("btnP"),
-        play: $("btnPlay"),
-        pause: $("btnPause"),
-        replay: $("btnR"),
-        next: $("btnN")
+        previous: $("#btnP").data("action", "previous"),
+        play: $("#btnPlay").data("action", "play"),
+        pause: $("#btnPause").data("action", "pause"),
+        replay: $("#btnR").data("action", "replay"),
+        next: $("#btnN").data("action", "next")
       }
 
       this.insertLineBreak(slideControlsRow);
+
+      this.initSlideButtonEvents();
     }
   },
 
@@ -280,13 +307,17 @@ AVIATION.common.Slide.prototype = {
 
   buildSlideAudios: function(){
     var slideObject = this;
+ 
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
 
     this.audioFiles.forEach( function(audio, a){
       // lets make sure that the filename provided is without the extension
       var split = audio.split("."), filename = "", tempArray = [], 
-          extensions = ["mp3", "wav", "ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"];
+          extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"];
+
+          console.log("audio files here: " + audio); 
+          console.log(split);
 
       try{
         // checking to make sure that the filename given is without an extension
@@ -295,10 +326,21 @@ AVIATION.common.Slide.prototype = {
           filename = split[0]
         } else if(split.length > 2){
           // lets join everything except for the extension
-          for(var i; i<split.length-1; i++){
+          for(var i=0; i<split.length-1; i++){
+            // TODO: remove this in production!!!
+            console.log("run check here: ");
+            console.log(slideObject);
+
             tempArray.push(split[i]);
           }
-          filename = tempArray.join("");
+
+          if(slideObject.options.development){
+            filename = "https:" + tempArray.join(".");
+            console.log("filename: ");
+            console.log(filename);
+          } else {
+            filename = tempArray.join(".");
+          }
         } else {
           // its probably the actual filename alone
           filename = audio;
@@ -309,26 +351,27 @@ AVIATION.common.Slide.prototype = {
       }
 
       var addedSlideAudio = jQuery('<audio/>',{
-        id: audio + "_" + a,
+        id: "audio_" + a,
         html: "Your browser doesn't support audio"
       }).appendTo(slideObject.container);
 
-      for(var i; i<extensions.length; i++){
-        jQuery('<source/>', {
+      for(var i=0; i<extensions.length; i++){
+        var source = jQuery('<source/>', {
           src: filename + extensions[i],
           type: types[i]
         }).appendTo(addedSlideAudio);
       }
 
       try {
-        slideObject.slideAudios.push(Popcorn("#" + audio + "_" + a));
+        slideObject.slideAudios.push(Popcorn("#audio_" + a));
+
+        console.log("trying to play from here");
+        slideObject.slideAudios[0].play();
+
       } catch(error) {
         // was popcorn initialized ok?
         console.log("slide audio init error: ");
         console.log(error);
-      } finally {
-        // just added the added audio to the slideObject
-        slideObject.slideAudios.push(addedSlideAudio);
       }
 
       // check var from the outside function to see if it is true
@@ -339,7 +382,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   buildStatusBar: function(parent){
-    if(this.showStatus){
+    if(this.options.showStatus){
       var statusBar = jQuery('<div/>', {
         "class": "col-xs-12",
         html: '<a href="#" id="statusBar"' + 
@@ -353,7 +396,7 @@ AVIATION.common.Slide.prototype = {
 
   // builds controls that go at the very bottom of the slide (back/continue) and status bar
   buildCourseControls: function(){
-    if(this.showControls){
+    if(this.options.showControls){
       var courseControlsRow = jQuery('<div/>', {
         "class": "row",
       }).appendTo( $(this.container).parent() );
@@ -370,8 +413,8 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(courseControlsRow);
 
       this.slideElements.courseControls = {
-        back: $("btnB"),
-        "continue": $("btnC")
+        back: $("#btnB"),
+        "continue": $("#btnC")
       }
     }
   },
@@ -444,15 +487,20 @@ AVIATION.common.Slide.prototype = {
   playCurrent: function(e){
     var active = this.activeIndex, players = this.slideAudios;
 
-    this.checkSlideControlButtons("play");
-
+    this.checkSlideControlPlayButtons("play");
+    console.log("players: ");
+    console.log(players);
+    console.log("active: ");
+    console.log(active);
+    console.log(players[active]);
     players[active].play();
+    console.log("trying to play...");
   },
   
   pauseCurrent: function(e){
     var active = this.activeIndex, players = this.slideAudios;
     
-    this.checkSlideControlButtons("play");
+    this.checkSlideControlPlayButtons("pause");
 
     players[active].pause();
   },
@@ -460,13 +508,17 @@ AVIATION.common.Slide.prototype = {
   playPrevious: function(e){
     var active = this.activeIndex;
 
-    active++;
+    this.pauseCurrent();
+
+    active--;
 
     this.playCurrent();
   },
 
   playNext: function(e){
     var active = this.activeIndex;
+
+    this.pauseCurrent()
 
     active++;
 
@@ -478,17 +530,21 @@ AVIATION.common.Slide.prototype = {
 
     active = 0;
 
-    this.checkSlideControlButtons("replay");
+    this.checkSlideControlPlayButtons("play");
 
     this.playCurrent();
+
+    // reset slide?
   },
 
   // do I need this? is it the same as playPrevious?
+  /*
   replayCurrent: function(e){
-    this.checkSlideControlButtons("replay");
+    this.checkSlideControlPlayButtons("replay");
 
     this.playCurrent();
   },
+  */
 
   buttonOnClickEvents: function(){
     // check if there is a timer and reset if we click on a control button
@@ -500,45 +556,48 @@ AVIATION.common.Slide.prototype = {
     // attach events to each button
     var buttons = this.slideElements.slideControls, slide = this;
 
+    console.log("slidebutton events slide: ");
+    console.log(slide);
+
     for(button in buttons){
-      buttons[button].on("click", function(e){
+      if(buttons.hasOwnProperty(button)){
+        buttons[button].on("click", function(e, button){
+          var action = $(this).data("action");
+          switch(action){
 
-        switch(button){
+            case "previous":
+              console.log("clicked previous");
+              slide.playPrevious();
+              break;
 
-          case "previous":
-            console.log("clicked previous");
-            slide.playPrevious();
-            break;
+            case "play":
+              console.log("clicked play");
+              slide.playCurrent();
+              break;
 
-          case "play":
-            console.log("clicked play");
-            slide.playCurrent();
-            break;
+            case "pause":
+              console.log("clicked pause");
+              slide.pauseCurrent();
+              break;
 
-          case "pause":
-            console.log("clicked pause");
-            slide.pauseCurrent();
-            break;
+            case "replay":
+              console.log("clicked replay");
+              slide.replayAll();
+              break;
 
-          case "replay":
-            console.log("clicked replay");
-            slide.replayAll();
-            break;
+            case "next":
+              console.log("clicked next");
+              slide.playNext();
+              break;
 
-          case "next":
-            console.log("clicked next");
-            slide.playNext();
-            break;
-
-          default: 
-            console.log("not sure what this button is!");
-            console.log(button);
-            console.log(buttons[button]);
-            break;
-        }
-      });
-
-      
+            default: 
+              console.log("not sure what this button is!");
+              console.log(button);
+              console.log(buttons[button]);
+              break;
+          }
+        });
+      }
     }
   },
 
@@ -567,13 +626,13 @@ AVIATION.common.Slide.prototype = {
         
         // start the next audio if it exists and autoplay is true
         if(players[a+1] && this.autoplay){
-          players[a+1].play
+          players[a+1].play();
         }
 
         hasListened[a] = true;
 
-        // if it is last audio and no need for reverseAudio
-        if(!players[a+1] && !reverseAudio){
+        // if it is last audio and no need for audioFirst
+        if(!players[a+1] && !audioFirst){
           this.activateTimer();
         }
         
@@ -603,30 +662,80 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  checkSlideControlButtons: function( action ){
+  checkSlideControlPlayButtons: function( action ){
+    var controls = this.slideElements.slideControls;
+
     switch(action) {
       // hide/show buttons based on action
       case "play":
-
+        controls.play.hide();
+        controls.replay.hide();
+        controls.pause.show();
         break;
       case "pause":
-
+        controls.play.show();
+        controls.replay.hide();
+        controls.pause.hide();
         break;
       case "replay":
-
+        controls.play.hide();
+        controls.replay.hide();
+        controls.pause.show();
         break;
       case "end":
-
+        controls.play.hide();
+        controls.replay.show();
+        controls.pause.hide(); 
         break;
-
       default:
-
+        this.slideElements.slideControls.pause.hide();
+        this.slideElements.slideControls.replay.hide();
         break;
 
       // disable/enable btns
 
+
+    }
+    this.setStatus(action);
+  },
+
+  checkSlideControlNavButtons: function( action ){
+
+  },
+
+  setStatus: function(action){
+    var status = this.slideElements.statusBar;
+
+    switch(action){
+      case "play":
+        status.text("Playing...");
+        break;
+      case "pause":
+        status.text("Paused");
+        break;
+      default:
+        status.text('Please press "Play"');
+        break;      
     }
   },
+
+  resetSlide: function(){
+
+    this.activeIndex = 0;
+    console.log(this.slideElements.slideControls);
+    this.checkSlideControlPlayButtons();    
+  },
+
+  redirectToPage: function( pageId ){
+    var current = window.location.href, newUrl, tempSplit, splitter;
+
+    splitter = "courseware";
+
+    tempSplit = current.split(splitter);
+          
+    newUrl = tempSplit[0];
+    window.location.assign(newUrl + "jump_to_id/" + pageId);
+  }
 
 };
 
