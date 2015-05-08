@@ -3,7 +3,7 @@
 var slideContent = [
   { 
     title: "This is some title",
-    html: "This is some text",
+    content: "This is some text",
     //image: "",
     callback: function(){}
     audio: 0 // starting index at 0
@@ -11,13 +11,13 @@ var slideContent = [
   },
   {
     title: "Title number two",
-    html: "We probably hit the 10th second of the first audio",
+    content: "We probably hit the 10th second of the first audio",
     second: 10,
     audio: 0
   },
   {
     title: "Starting audio two",
-    html: "This is the text for the second audio followed by a picture",
+    content: "This is the text for the second audio followed by a picture",
     second: 0,
     audio: 1
   },
@@ -59,17 +59,17 @@ AVIATION.common.Slide = function( options, slideContent, audioFiles ){
     options = {};
   }
 
-	this["type"] = options["type"] || "simple"; // check which options are given and then assign a default
-												                      // type maybe in constructor?
-	this.options = options;
-	this.avatars = options.avatars;
+  this["type"] = options["type"] || "simple"; // check which options are given and then assign a default
+                                              // type maybe in constructor?
+  this.options = options;
+  this.avatars = options.avatars;
 
   this.activeIndex = options.activeIndex || 0;
 
   this.slideContent = slideContent || [
                                         { 
                                           title: "No Content Provided",
-                                          html: "Check your slideContent object", 
+                                          content: "Check your slideContent object", 
                                           audio: 0
                                         }
                                       ];
@@ -91,7 +91,7 @@ AVIATION.common.Slide.prototype = {
 
   // constructor which initiates the building process
   constructor: function(){
-  	// check type of slide and run the proper initFunc
+    // check type of slide and run the proper initFunc
     if (this["type"] === "simple"){
       console.log("simple type");
       console.log(this.options);
@@ -104,15 +104,16 @@ AVIATION.common.Slide.prototype = {
 
   // method that initializes building of simple slides
   _initSimple: function(options){
-	  var avatars, content = [], audio = [];
+    var avatars, content = [], audio = [];
 
-  	var defaults = {
+    var defaults = {
       showAvatars: false,
       showSlideControls: true,
       showStatus: true,
       showControls: true,
       showBorder: true,
       autoplay: true,
+      continueId: "1970850cff004914997ec29c65850443",
     };
 
     console.log("this initSimple:");
@@ -163,27 +164,51 @@ AVIATION.common.Slide.prototype = {
     console.log("launching build course controls");
     this.buildCourseControls();
 
+    this.initAudioEvents();
+
     // create events for audio/video interactions and a way to track them
     console.log("now reset slide");
     this.resetSlide();
+
+
+
+    // finished thus activate the slide
+    this.activateSlide();
   },
 
   // build titles on the slide
-  buildTitle: function(parent, title, callback){
+  buildTitle: function(parent, content, callback){
+    var titleElement = $("#slideTitle");
     console.log("building titles");
     console.log("title: ")
-    console.log(title);
+    console.log(content);
     console.log(parent);
     console.log("inserting title...");
-    if(title){
-      var titleElement = jQuery('<h3/>',{
+    if(content.title && content.title.html){
+      var classes = "";
+
+      if(content.title.classes){
+        classes = content.title.classes.join(" ");
+      }
+      var newTitle = jQuery('<h3/>',{
         "id": "slideTitle",
-        "class": "text-center",
-        html: title
-      }).appendTo(parent);
-    } else {
-      // check if title exists and remove it or make it blank
-      // based on the json from the server?
+        "class": "text-center " + classes,
+        html: content.title.html || ""
+      })
+
+      if(titleElement && titleElement.length > 0){
+        titleElement.replaceWith(newTitle);
+      } else {
+        newTitle.appendTo(parent);
+      }
+    }
+
+    if(content.title && content.title.action && titleElement){
+      switch(content.title.action){
+        case "remove":
+          titleElement.remove();
+          break;
+      }
     }
 
     if(callback){
@@ -196,55 +221,103 @@ AVIATION.common.Slide.prototype = {
     console.log("buidling avatars");
     var avatarLeft, avatarRight;
 
-
   },
 
   // method for building the content of the slide
-  buildContent: function(){
-    console.log("building content");
-    console.log(this);
-    var slideContent = this.slideContent,
-        activeIndex = this.activeIndex;
+  buildContent: function(correctAudio, index, outerIndex){
+    var outerSlideContent = this.slideContent
+        activeIndex = index || this.activeIndex,
+        outerIndex = this.activeIndex || 0, content = $(".cdot_contentText.col-xs-12");
+
+    console.log("*** was there content already? ");
+    console.log(content);
+    console.log("*** and the container is: ");
+    console.log(this.container);
+
+    if(!content || content.length === 0){
+      content = jQuery('<div/>', {
+        "class": "cdot_contentText col-xs-12"
+      }).appendTo(this.container);
+    }
     
     var setupInnerContent = function(){
-      var closingTag = "", src = "", classes = slideContent[activeIndex].classes || "",
-          html;
+      var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(".slideInner"), 
+          action, contentClasses = "", imageClasses = "";
 
-      if(classes != ""){
-        classes = classes.join(" ");
+      if(slideContent.content){
+        action = slideContent.content.action || "replace";
       }
 
-      if (slideContent[activeIndex].html){
-        closingTag = '<div/>';
-        html = slideContent[activeIndex].html || "";
-      } else {
-        
-        closingTag = '<image/>';
-        src = slideContent[activeIndex].image || "";
-        html = "";
+      console.log("*** and the action is? " + action);
+      console.log("setting up inner content!");
+      console.log("slide content: ");
+      console.log(slideContent);
+      console.log("activeIndex: " + activeIndex + " outerIndex: " + outerIndex);
+
+      var newSlideInner = jQuery('<div/>', {
+        id: "slideInner_" + outerIndex,
+        "class": "slideInner",
+        //src: src,
+        //html: html + image
+      });
+
+      if (slideContent.content && slideContent.content.html){
+        if(slideContent.content.classes){
+          contentClasses = slideContent.content.classes.join(" ");
+        }
+
+        var innerContent = jQuery('<div/>',{
+          id: "innerContent_" + outerIndex + "_" + activeIndex,
+          "class": contentClasses,
+          html: slideContent.content.html || ""
+        });
+        //closingTag = '<div/>';
+        //html = slideContent[activeIndex].content || "";
+      } 
+
+      if (slideContent.image && slideContent.image.src) {
+        if(slideContent.image.classes){
+          imageClasses = slideContent.image.classes.join(" ");
+        }
+
+        var innerImage = jQuery('<image/>',{
+          id: "innerImage_" + outerIndex + "_" + activeIndex,
+          "class": imageClasses,
+          src: slideContent.image.src || ""
+        });
+
+        //closingTag = '<image/>';
+        //src = slideContent[activeIndex].image || "";
+        //html = "";
       }
 
-      var innerContent = jQuery(closingTag, {
-        id: "slideInner",
-        "class": classes,
-        src: src,
-        html: html
-      }).appendTo(content);
+      if(action === "remove" || action === "replace"){
+        console.log("removing")
+        $(".slideInner").children().remove();
+      }
 
+      if(action === "append" || action === "replace"){
+        console.log("appending");
+        if(innerContent){
+          innerContent.appendTo(newSlideInner);
+        }
+        if(innerImage){
+          innerImage.appendTo(newSlideInner);
+        }
+        newSlideInner.appendTo(content);
+      }
 
     };
 
-    var content = jQuery('<div/>', {
-      "class": "cdot_contentText col-xs-12"
-    }).appendTo(this.container);
+    if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
 
-    console.log("title now");
-    console.log(slideContent);
+      console.log("title now");
+      console.log(this.slideContent);
 
-    console.log("active index: " + activeIndex);
+      console.log("active index: " + activeIndex);
 
-    this.buildTitle( content, slideContent[activeIndex].title, setupInnerContent);
-
+      this.buildTitle( content, this.slideContent[activeIndex], setupInnerContent);
+    }
        
   },
 
@@ -327,10 +400,6 @@ AVIATION.common.Slide.prototype = {
         } else if(split.length > 2){
           // lets join everything except for the extension
           for(var i=0; i<split.length-1; i++){
-            // TODO: remove this in production!!!
-            console.log("run check here: ");
-            console.log(slideObject);
-
             tempArray.push(split[i]);
           }
 
@@ -364,10 +433,6 @@ AVIATION.common.Slide.prototype = {
 
       try {
         slideObject.slideAudios.push(Popcorn("#audio_" + a));
-
-        console.log("trying to play from here");
-        slideObject.slideAudios[0].play();
-
       } catch(error) {
         // was popcorn initialized ok?
         console.log("slide audio init error: ");
@@ -431,8 +496,8 @@ AVIATION.common.Slide.prototype = {
 
   // start playback control methods
   activateTimer: function(seconds, isAuto){
-    var timer = this._timer,
-        counter = seconds, // duration of the timer (each 1 point is about a second)
+    var timer = this._timer, slideObject = this, continueId = this.options.continueId,
+        counter = seconds || 10, // duration of the timer (each 1 point is about a second)
         statusBar = this.slideElements.statusBar;
 
     if (!counter){
@@ -448,7 +513,7 @@ AVIATION.common.Slide.prototype = {
     
     var resetTimerOnClick = function(e){
       e.preventDefault();
-      this.resetTimer(true);
+      slideObject.resetTimer(true);
       $(this).on('click', function(){
         redirectToPage(continueId); // any URL
       });
@@ -463,7 +528,7 @@ AVIATION.common.Slide.prototype = {
           counter--;
           if(counter < 0) {
             statusBar.text("Redirecting...");
-            redirectToPage(continueId);
+            slideObject.redirectToPage(continueId);
             clearInterval(timer);
           } else {
             statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
@@ -488,11 +553,7 @@ AVIATION.common.Slide.prototype = {
     var active = this.activeIndex, players = this.slideAudios;
 
     this.checkSlideControlPlayButtons("play");
-    console.log("players: ");
-    console.log(players);
-    console.log("active: ");
-    console.log(active);
-    console.log(players[active]);
+    console.log("playCurrent active: " + active);
     players[active].play();
     console.log("trying to play...");
   },
@@ -506,22 +567,18 @@ AVIATION.common.Slide.prototype = {
   },
 
   playPrevious: function(e){
-    var active = this.activeIndex;
-
     this.pauseCurrent();
 
-    active--;
+    this.activeIndex--;
 
     this.playCurrent();
   },
 
   playNext: function(e){
-    var active = this.activeIndex;
-
     this.pauseCurrent()
 
-    active++;
-
+    this.activeIndex++;
+    console.log("playing next, whats the activeIndex now? " + this.activeIndex);
     this.playCurrent();
   },
 
@@ -534,17 +591,17 @@ AVIATION.common.Slide.prototype = {
 
     this.playCurrent();
 
+    this.resetSlide();
     // reset slide?
   },
 
   // do I need this? is it the same as playPrevious?
-  /*
-  replayCurrent: function(e){
-    this.checkSlideControlPlayButtons("replay");
-
-    this.playCurrent();
-  },
-  */
+  //
+  //replayCurrent: function(e){
+  //  this.checkSlideControlPlayButtons("replay");
+  //
+  //  this.playCurrent();
+  //},
 
   buttonOnClickEvents: function(){
     // check if there is a timer and reset if we click on a control button
@@ -604,17 +661,138 @@ AVIATION.common.Slide.prototype = {
   initCourseButtonEvents: function(){
 
   },
-
+  
   initAudioEvents: function(){
-    var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened;
+    var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened,
+        slideObject = this;
+    // let's set the generic "onPlay/onEnd" events
+
+
+    players.forEach(function(player, p){
+      var contentAtStart = "", callbackAtEnd = "";
+
+      content.forEach(function(cont, c){
+        
+        console.log("audio and content *** audio: " + p + " *** content: " + c);
+        
+        if(content[c].audio === p){
+        // audio matches the audio inside content
+
+        console.log("audio and content match....");
+
+        console.log(content[c].second);
+          if(content[c].second){
+            players[p].cue(content[c].second, function(){
+              
+              console.log("trying to cue this audio: " + p + " at this second: " + content[c].second);
+
+              slideObject.buildContent(true, c);
+              
+
+              if(content[c].callback){
+                // run the callback that should be cued
+                content[c].callback();
+              }
+            });
+          } else {
+            contentAtStart = c;
+            callbackAtEnd = content[c].callback || "";
+          }
+        }
+      });
+      
+      players[p].on("playing", function(e){
+        console.log("audio has started: " + p);
+
+        /*
+        for(c = 0; c < content.length && content[c].audio <= a; c++ ){
+          console.log("looking for audio #: " + c + " and " + a);
+        }
+        */
+
+        if (contentAtStart != ""){
+          slideObject.buildContent(true, contentAtStart);
+        }
+        // make sure the state of the slide is correct at for this audio/second
+
+        // disable whatever buttons / highlights / elements need to be disabled
+      });
+
+      players[p].on("ended", function(e){
+        console.log("audio has ended: " + p);
+        
+        if (callbackAtEnd != ""){
+          console.log("calling the callback at the end of audio");
+          callbackAtEnd();
+        }
+
+        // start the next audio if it exists and autoplay is true
+        if(players[p+1] && this.autoplay){
+          console.log("starting next audio... from end...");
+          slideObject.playNext();
+        }
+
+        hasListened[p] = true;
+
+        // if it is last audio and no need for audioFirst
+        if(!players[p+1] && !slideObject.options.audioFirst){
+          //slideObject.playNext();
+          slideObject.activateTimer(5, true);
+          console.log("start redirect");
+        }
+        
+        // perform callbacks/actions if any needed at the end of the audio
+        // check buttons (disable/enable elements/highlights)
+
+        // if we need highlight control , call the function here
+
+      });
+
+    });
+  },
+/*
+  initAudioEvents: function(){
+    var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened,
+        slideObject = this, contentAtStart = "";
     // let's set the generic "onPlay/onEnd" events
 
     for(var a = 0; a < players.length; a++){
+
+      for(var c = 0; c < content.length; c++){
+        console.log("audio and content *** audio: " + a + " *** content: " + c);
+        if(content[c].audio === a){
+        // audio matches the audio inside content
+
+        console.log("audio and content match....");
+
+        console.log(content[c].second);
+          if(content[c].second){
+            players[a].cue(content[c].second, function(){
+              
+              console.log("trying to cue this audio: " + a + " at this second: " + content[c].second);
+
+              slideObject.buildContent(true, c);
+              
+              //console.log("setting a cue");
+            });
+          } else {
+            contentAtStart = c;
+          }
+        }
+
+      }
+
       players[a].on("playing", function(e){
         console.log("audio has started: " + a);
 
-        for(c = 0; c < content.length && content[c].audio <= a; c++ ){
-          console.log("looking for audio #: " + c + " and " + a);
+        //
+        //for(c = 0; c < content.length && content[c].audio <= a; c++ ){
+        //  console.log("looking for audio #: " + c + " and " + a);
+        //}
+        //
+
+        if (contentAtStart != ""){
+          slideObject.buildContent(true, contentAtStart);
         }
         // make sure the state of the slide is correct at for this audio/second
 
@@ -633,7 +811,7 @@ AVIATION.common.Slide.prototype = {
 
         // if it is last audio and no need for audioFirst
         if(!players[a+1] && !audioFirst){
-          this.activateTimer();
+          slideObject.playNext();
         }
         
         // perform callbacks/actions if any needed at the end of the audio
@@ -645,14 +823,23 @@ AVIATION.common.Slide.prototype = {
       });
     }
   },
+*/
 
   initAudioContentEvents: function(){
-    var players = this.slideAudios, content = this.slideContent;
+    var players = this.slideAudios, content = this.slideContent, slideObject = this;
 
+    for(var a = 0; a < this.slideAudios; a++){
+
+
+      //this.slideAudios[c].cue()
+    }
+
+
+/*
     for(var c = 0; c < content.length && content[c].second; c++){
       players[content[c].audio].cue(content[c].second, function(){
         // show the title+html required
-
+        slideObject.buildContent(true);
 
         // run the callback if it is given
         if(content[c].callback){
@@ -660,6 +847,9 @@ AVIATION.common.Slide.prototype = {
         }
       });
     }
+*/
+
+
   },
 
   checkSlideControlPlayButtons: function( action ){
@@ -714,9 +904,13 @@ AVIATION.common.Slide.prototype = {
         status.text("Paused");
         break;
       default:
-        status.text('Please press "Play"');
+        status.text(action);
         break;      
     }
+  },
+
+  activateSlide: function(){
+    this.playCurrent();
   },
 
   resetSlide: function(){
