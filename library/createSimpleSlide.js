@@ -246,6 +246,8 @@ AVIATION.common.Slide.prototype = {
 
       if(slideContent.content){
         action = slideContent.content.action || "replace";
+      } else {
+        action = "replace";
       }
 
       console.log("*** and the action is? " + action);
@@ -513,12 +515,15 @@ AVIATION.common.Slide.prototype = {
     
     var resetTimerOnClick = function(e){
       e.preventDefault();
+      console.log("clicked reset on status bar");
       slideObject.resetTimer(true);
       $(this).on('click', function(){
         redirectToPage(continueId); // any URL
       });
     };
 
+    // enable the status bar because we need to accept clicks
+    statusBar.prop("disabled", false);
     statusBar.on('click', resetTimerOnClick);
   
     if(isAuto) {
@@ -540,12 +545,13 @@ AVIATION.common.Slide.prototype = {
   },
 
   resetTimer: function( manual ){
-    if(this.timer){
+    if(this._timer){
       if(manual){
-        statusBar.text("Continue when ready");
+        this.slideElements.statusBar.text("Continue when ready");
       }
 
-      clearInterval(this._timer);  
+      clearInterval(this._timer);
+      console.log("timer: " + this._timer);
     }
   },
 
@@ -587,7 +593,7 @@ AVIATION.common.Slide.prototype = {
 
     active = 0;
 
-    this.checkSlideControlPlayButtons("play");
+    //this.checkSlideControlPlayButtons("play");
 
     this.playCurrent();
 
@@ -738,6 +744,7 @@ AVIATION.common.Slide.prototype = {
         if(!players[p+1] && !slideObject.options.audioFirst){
           //slideObject.playNext();
           slideObject.activateTimer(5, true);
+          slideObject.checkSlideControlPlayButtons("end");
           console.log("start redirect");
         }
         
@@ -898,10 +905,13 @@ AVIATION.common.Slide.prototype = {
 
     switch(action){
       case "play":
+      case "replay":
         status.text("Playing...");
         break;
       case "pause":
         status.text("Paused");
+        break;
+      case "end":
         break;
       default:
         status.text(action);
