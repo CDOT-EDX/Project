@@ -1,3 +1,10 @@
+/***
+  *   
+  *   
+  *   
+  *   
+  **/
+
 // best structure to control slide content
 /*
 var slideContent = [
@@ -220,6 +227,9 @@ AVIATION.common.Slide.prototype = {
     console.log("buidling avatars");
     var avatarLeft, avatarRight;
 
+    if(this.options.showAvatars){
+
+    }
   },
 
   // method for building the content of the slide
@@ -746,9 +756,15 @@ AVIATION.common.Slide.prototype = {
         // if it is last audio and no need for audioFirst
         if(!players[p+1] && !slideObject.options.audioFirst){
           slideObject.activeIndex++;
-          slideObject.activateTimer(5, true);
+
+          if(autoplay){
+            // only activate the timer if the autplay is on
+            slideObject.activateTimer(5, true);  
+          } else {
+            slideObject.statusBar('Click "Continue" when you are ready');
+          }
+          
           slideObject.checkSlideControlPlayButtons("end");
-          console.log("start redirect");
         }
         
         // perform callbacks/actions if any needed at the end of the audio
@@ -798,6 +814,7 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  // constrols the state of the Previous/Next 'player' buttons
   checkSlideControlPlayButtonsState: function(){
     var controls = this.slideElements.slideControls, active = this.activeIndex
         players = this.slideAudios;
@@ -835,6 +852,7 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  // controls the state (enabled/disabled) of the Back/Continue buttons
   checkSlideControlNavButtons: function( action ){
 
   },
