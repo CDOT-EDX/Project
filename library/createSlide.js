@@ -470,7 +470,7 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(courseControlsRow);
 
       this.slideElements.courseControls = {
-        back: $("#btnB").data("action", "back",
+        back: $("#btnB").data("action", "back"),
         "continue": $("#btnC").data("action", "continue")
       }
 
