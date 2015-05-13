@@ -1,8 +1,9 @@
 /***
-  *   
-  *   
-  *   
-  *   
+  *   Custom library/framework to speed up content development
+  *   for the edX Aviation project at CDOT
+  *   created by: Pavlo Kuzhel
+  *   May 12, 2015
+  *
   **/
 
 // best structure to control slide content
@@ -305,12 +306,6 @@ AVIATION.common.Slide.prototype = {
     };
 
     if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
-
-      console.log("title now");
-      console.log(this.slideContent);
-
-      console.log("active index: " + activeIndex);
-
       this.buildTitle( contentContainer, this.slideContent[activeIndex], setupInnerContent);
     } else if ( clearContent ){
       this.buildTitle( contentContainer, { html: "" }, setupInnerContent, clearContent);
@@ -475,9 +470,10 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(courseControlsRow);
 
       this.slideElements.courseControls = {
-        back: $("#btnB"),
-        "continue": $("#btnC")
+        back: $("#btnB").data("action", "back",
+        "continue": $("#btnC").data("action", "continue")
       }
+
     }
   },
 
@@ -610,14 +606,6 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  // do I need this? is it the same as playPrevious?
-  //
-  //replayCurrent: function(e){
-  //  this.checkSlideControlPlayButtons("replay");
-  //
-  //  this.playCurrent();
-  //},
-
   buttonOnClickEvents: function(){
     // check if there is a timer and reset if we click on a control button
     this.resetTimer();
@@ -676,6 +664,30 @@ AVIATION.common.Slide.prototype = {
   },
 
   initCourseButtonEvents: function(){
+   // attach events to each button
+    var buttons = this.slideElements.courseControls, slide = this;
+
+    console.log("coursebutton events slide: ");
+    console.log(slide);
+
+    for(button in buttons){
+      if(buttons.hasOwnProperty(button)){
+        buttons[button].on("click", function(e, button){
+          var action = $(this).data("action");
+          switch(action){
+            case "back":
+              break;
+
+            case "continue":
+              break;
+
+            default:
+              break;
+          }
+        });
+      }
+    }
+
 
   },
   
@@ -846,7 +858,7 @@ AVIATION.common.Slide.prototype = {
         controls.next.attr("disabled", true);
         controls.next.prop("disabled", true);
       } else {
-        console.log("error: active is greater then players length?");
+        console.log("error: active is greater then players length? not doing anything");
       }
     }
 
