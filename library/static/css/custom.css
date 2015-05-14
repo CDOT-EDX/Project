@@ -14,12 +14,14 @@
   }
 
 .cdot_bg {
+  /*
   border: 10px silver;
   border-top-style: inset;
   border-right-style: outset;
   border-bottom-style: inset;
   border-left-style: outset;
   border-radius: 5px; 
+  */
   margin: -5px -5px;
   min-height: 410px;
   overflow: hidden;

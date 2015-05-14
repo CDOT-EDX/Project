@@ -3,51 +3,9 @@
   *   for the edX Aviation project at CDOT
   *   created by: Pavlo Kuzhel
   *   May 12, 2015
-  *
+  *   GitHub wiki: https://github.com/CDOT-EDX/Project/wiki/Slide-Creation-reference
   **/
 
-// best structure to control slide content
-/*
-var slideContent = [
-  { 
-    title: "This is some title",
-    content: "This is some text",
-    //image: "",
-    callback: function(){}
-    audio: 0 // starting index at 0
-    second: 1,
-  },
-  {
-    title: "Title number two",
-    content: "We probably hit the 10th second of the first audio",
-    second: 10,
-    audio: 0
-  },
-  {
-    title: "Starting audio two",
-    content: "This is the text for the second audio followed by a picture",
-    second: 0,
-    audio: 1
-  },
-  {
-    title: "Audio 2 Image",
-    image: "someImage.png",
-    second: 10,
-    audio: 1
-  }
-];
-
-
-// init all audios with mp3/wav/ogg
-
-var audios = [
-  "someAudio", "anotherAudio"
-];
-
-var options = {
-  
-};
-*/
 
 var AVIATION = AVIATION || {};
 
@@ -121,6 +79,14 @@ AVIATION.common.Slide.prototype = {
       showControls: true,
       showBorder: true,
       autoplay: true,
+      avatars: {
+        tom: {
+
+        },
+        jane: {
+
+        }
+      },
       continueId: "1970850cff004914997ec29c65850443",
     };
 
@@ -157,31 +123,8 @@ AVIATION.common.Slide.prototype = {
       this.container = "#slideContainer"
     }
 
-    // let's add some elements to our base div inside the slide
-    //var container = $(this.container);
+    this.buildSlide();
 
-    if(options.showAvatars){
-      this.buildAvatars();
-    }
-
-    this.buildContent();
-
-    this.buildSlideAudios();
-    console.log("launching build controls");
-    this.buildSlideControls();
-    console.log("launching build course controls");
-    this.buildCourseControls();
-
-    this.initAudioEvents();
-
-    // create events for audio/video interactions and a way to track them
-    console.log("now reset slide");
-    this.resetSlide();
-
-
-
-    // finished thus activate the slide
-    this.activateSlide();
   },
 
   // build titles on the slide
@@ -223,13 +166,122 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
+  // method for invoking all build functions in one place and activating the slide
+  buildSlide: function(){
+    this.buildAvatars(true);
+
+    this.buildContent();
+
+    this.buildAvatars(false, true);
+
+    this.buildSlideAudios();
+    console.log("launching build controls");
+    this.buildSlideControls();
+    console.log("launching build course controls");
+    this.buildCourseControls();
+
+    this.initAudioEvents();
+
+    // create events for audio/video interactions and a way to track them
+    console.log("now reset slide");
+    this.resetSlide();
+
+    // finished thus activate the slide
+    this.activateSlide();
+  },
+
   // method for building avatars into the slide
-  buildAvatars: function(){
+  buildAvatars: function(avatar, callback){
+    // callback will generate the title+content
+    var avatarLeft = "", avatarRight = "", ;
+
     console.log("buidling avatars");
-    var avatarLeft, avatarRight;
 
-    if(this.options.showAvatars){
+    if(this.options.showAvatars && avatar.length > 0){
+      for(var i = 0; i < avatar.length; i++){
+        if(avatar[i].position === "left"){
+          avatarLeft = avatar[i]
+        } else if(avatar[i].position === "right"){
+          avatarRight = avatar[i];
+        } else {
+          // what if the avatar is hide?
+        }
+      }
 
+      if(avatarLeft && avatarLeft != ""){
+        // create div with img tag for character name and position
+        // aka <div col-lg-2> and src "tom_open.png"?
+        // and put content after
+
+        var avatarLeftDiv = jQuery('<div/>', {
+          id: "avatarLeftDiv",
+          "class": "avatar col-lg-2 pull-left",
+        }).appendTo(this.container);
+
+        if(this.avatar && this.avatar[avatarLeft.character]){
+          for(avatarElement in this.avatar[avatarLeft.character]){
+            if(this.avatar[avatarLeft.character].hasOwnProperty(avatarElement)){
+              if(avatarElement === avatarLeft.type){
+                // make this one visible
+                var avatarLeftImg = jQuery('<image/>',{
+                  "class": "avatarLeft img-responsive",
+                  src: avatarElement
+                }).appendTo(avatarLeftDiv);
+              } else {
+                // make the rest hidden
+                jQuery('<image/>',{
+                  "class": "avatarLeft img-responsive",
+                  "css" : {
+                    "display" : "none"
+                  }
+                  src: avatarElement
+                }).appendTo(avatarLeftDiv);
+              }
+            }      
+          }
+
+        }
+
+
+
+        // itirate through avail avatars and create their html
+
+      }
+
+      // build the content here and decide on the content class/size
+      // col-lg-8 / 10
+
+      if(avatarRight && avatarRight != ""){
+
+
+
+        var avatarLeftImg = jQuery('<image/>',{
+          id: "avatarLeft",
+          "class": "img-responsive",
+          src: ""
+        }).appendTo(avatarLeftDiv);
+
+        // itirate through avail avatars and create their html
+
+      }
+
+      // build the content here and decide on the content class/size
+      // col-lg-8 / 10
+
+      if(avatarRight && avatarRight != ""){
+        // create div with img tag for character name and position
+        // aka <div col-lg-2> and src "tom_open.png"?
+        // and put after the content is built
+      }
+
+      if(avatar.position === "hide"){
+        // hide all avatar classes 
+      }
+
+    } else {
+      if(callback){
+        callback();
+      }
     }
   },
 
@@ -237,11 +289,11 @@ AVIATION.common.Slide.prototype = {
   buildContent: function(correctAudio, index, outerIndex, clearContent){
     var outerSlideContent = this.slideContent
         activeIndex = index || this.activeIndex,
-        outerIndex = this.activeIndex || 0, contentContainer = $(".cdot_contentText.col-xs-12");
+        outerIndex = this.activeIndex || 0, contentContainer = $(".cdot_contentText");
 
     if(!contentContainer || contentContainer.length === 0){
       contentContainer = jQuery('<div/>', {
-        "class": "cdot_contentText col-xs-12"
+        "class": this.options.showAvatars ? "cdot_contentText col-lg-8" : "cdot_contentText col-xs-12"
       }).appendTo(this.container);
     }
     
@@ -513,9 +565,11 @@ AVIATION.common.Slide.prototype = {
       e.preventDefault();
       console.log("clicked reset on status bar");
       slideObject.resetTimer(true);
-      $(this).on('click', function(){
-        slideObject.redirectToPage(continueId); // any URL
-      });
+      if(continueId && continueId != ""){
+        $(this).on('click', function(){
+          slideObject.redirectToPage(continueId); // any URL
+        });
+      }
     };
 
     // enable the status bar because we need to accept clicks
@@ -530,8 +584,13 @@ AVIATION.common.Slide.prototype = {
           counter--;
           if(counter < 0) {
             clearInterval(slideObject._timer);
-            statusBar.text("Redirecting...");
-            slideObject.redirectToPage(continueId);
+            
+            if(continueId && continueId != ""){
+              slideObject.redirectToPage(continueId);
+              statusBar.text("Redirecting...");
+            } else {
+              statusBar.text("Error: continueId is undefined");
+            }
           } else {
             statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
           }
