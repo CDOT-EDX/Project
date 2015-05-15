@@ -6,13 +6,15 @@
   *   GitHub wiki: https://github.com/CDOT-EDX/Project/wiki/Slide-Creation-reference
   **/
 
-
+/*jslint white: true*/
+/*jslint nomen: true*/
+/*jslint plusplus: true*/
 var AVIATION = AVIATION || {};
 
 AVIATION.common = {};
 
 // begin a javascript class "Slide"
-AVIATION.common.Slide = function( options, slideContent, audioFiles ){
+AVIATION.common.Slide = function (options, slideContent, audioFiles) {
   var md = new MobileDetect(window.navigator.userAgent);
 
   if(md){
@@ -25,10 +27,9 @@ AVIATION.common.Slide = function( options, slideContent, audioFiles ){
     options = {};
   }
 
-  this["type"] = options["type"] || "simple"; // check which options are given and then assign a default
+  this.type = options.type || "simple"; // check which options are given and then assign a default
                                               // type maybe in constructor?
   this.options = options;
-  this.avatars = options.avatars;
 
   this.activeIndex = options.activeIndex || 0;
 
@@ -57,70 +58,79 @@ AVIATION.common.Slide.prototype = {
 
   // constructor which initiates the building process
   constructor: function(){
+    "use strict";
     // check type of slide and run the proper initFunc
-    if (this["type"] === "simple"){
+    if (this.type === "simple"){
       console.log("simple type");
       console.log(this.options);
-      this._initSimple( this["options"] );
+      this._initSimple( this.options );
     } else {
       console.log("not simple slide");
-      this._initPanel( this["options"] );
+      this._initPanel( this.options );
     }
   },
 
   // method that initializes building of simple slides
   _initSimple: function(options){
-    var avatars, content = [], audio = [];
-
-    var defaults = {
-      showAvatars: false,
-      showSlideControls: true,
-      showStatus: true,
-      showControls: true,
-      showBorder: true,
-      autoplay: true,
-      avatars: {
-        tom: {
-
-        },
-        jane: {
-
-        }
-      },
-      continueId: "1970850cff004914997ec29c65850443",
-    };
+    "use strict";
+    var avatars, content = [], audio = [],
+        defaults = {
+          showAvatars: false,
+          showSlideControls: true,
+          showStatus: true,
+          showControls: true,
+          showBorder: true,
+          autoplay: true,
+          avatars: {
+            tom: {
+              open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
+              close: "//online.cdot.senecacollege.ca:25080/aviation/img/tomClose.png"
+            },
+            jane: {
+              open: "//online.cdot.senecacollege.ca:25080/aviation/img/janeOpen.png",
+              close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
+            }
+          },
+          continueId: "1970850cff004914997ec29c65850443",
+        }, option;
 
     console.log("this initSimple:");
     console.log(this);
 
     if(!options){
-      options = this["options"] || {};
+      options = this.options || {};
     }
 
-    for (option in defaults){
-      // if this key doesn't exist, init to default
-      if(!options[option]){
-        options[option] = defaults[option]
+    for(option in defaults){
+      if(defaults.hasOwnProperty(option)){
+        // if this key doesn't exist, init to default
+        if(!options[option]){
+          options[option] = defaults[option];
+        }
       }
     }
 
     console.log("the options: ");
     console.log(options);
 
-    this["options"] = options;
+    this.avatars = options.avatars;
+
+    this.options = options;
 
     console.log("run simple");
     console.log(this);    
 
     try {
       // if smth might cause an error....
-      if(!this.container) throw "a container is required, thus provide an id";
+      if(!this.container){
+        throw "a container is required, thus provide an id";
+      }
     } catch(error){
       console.log("error: ");
       console.debug(error);
       console.log("using a default id instead");
       // do something to continue running
-      this.container = "#slideContainer"
+      this.container = "#slideContainer";
     }
 
     this.buildSlide();
@@ -129,21 +139,22 @@ AVIATION.common.Slide.prototype = {
 
   // build titles on the slide
   buildTitle: function(parent, content, callback, clearTitle){
+    "use strict";
     var titleElement = $("#slideTitle");
 
     this.buildAvatars(parent, content.avatar, function(bsSize){
       if(content.title && content.title.html){
-        var classes = "";
+        var classes = "", newTitle;
 
         if(content.title.classes){
           classes = content.title.classes.join(" ");
         }
 
-        var newTitle = jQuery('<h3/>',{
+        newTitle = jQuery('<h3/>',{
           "id": "slideTitle",
           "class": "text-center " + classes,
           html: content.title.html || ""
-        })
+        });
 
         if(titleElement && titleElement.length > 0){
           titleElement.replaceWith(newTitle);
@@ -171,7 +182,7 @@ AVIATION.common.Slide.prototype = {
 
   // method for invoking all build functions in one place and activating the slide
   buildSlide: function(){
-
+    "use strict";
     this.buildContent();
 
     this.buildSlideAudios();
@@ -192,15 +203,17 @@ AVIATION.common.Slide.prototype = {
 
   // method for building avatars into the slide
   buildAvatars: function(parent, avatar, callback){
+    "use strict";
     // callback will generate the title+content
-    var avatarLeft = "", avatarRight = "", contentClass = 12;
+    var avatarLeft = "", avatarRight = "", contentClass = 12, avatarElement, i, 
+        avatarLeftDiv = $("#avatarLeftDiv"), avatarRightDiv = $("#avatarRightDiv"), tempImg, filename="";
 
     console.log("buidling avatars");
 
-    if(this.options.showAvatars && avatar.length > 0){
-      for(var i = 0; i < avatar.length; i++){
+    if(this.options.showAvatars && avatar && avatar.length > 0){
+      for(i = 0; i < avatar.length; i++){
         if(avatar[i].position === "left"){
-          avatarLeft = avatar[i]
+          avatarLeft = avatar[i];
           contentClass -= 2;
         } else if(avatar[i].position === "right"){
           avatarRight = avatar[i];
@@ -210,38 +223,52 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
-      if(avatarLeft && avatarLeft != ""){
+      if(avatarLeft && avatarLeft !== ""){
         // create div with img tag for character name and position
         // aka <div col-lg-2> and src "tom_open.png"?
         // and put content after
+        if(!avatarLeftDiv || avatarLeftDiv.length < 1){
+          avatarLeftDiv = jQuery('<div/>', {
+            id: "avatarLeftDiv",
+            "class": "avatar col-lg-2 pull-left",
+          }).prependTo(parent.parent());
+        }
+        
+        if(this.avatars && this.avatars[avatarLeft.character]){
+          for(avatarElement in this.avatars[avatarLeft.character]){
+        
+            if(this.avatars[avatarLeft.character].hasOwnProperty(avatarElement)){
+        
+              tempImg = $("#"+avatarLeft.character+"_"+avatarElement);
 
-        var avatarLeftDiv = jQuery('<div/>', {
-          id: "avatarLeftDiv",
-          "class": "avatar col-lg-2 pull-left",
-        }).appendTo(this.container);
+              if(!tempImg || tempImg.length < 1){
 
-        if(this.avatar && this.avatar[avatarLeft.character]){
-        
-        
-          for(avatarElement in this.avatar[avatarLeft.character]){
-        
-            if(this.avatar[avatarLeft.character].hasOwnProperty(avatarElement)){
-        
-              if(avatarElement === avatarLeft.type){
-                // make this one visible
-                var avatarLeftImg = jQuery('<image/>',{
-                  "class": "avatarLeft img-responsive",
-                  src: avatarElement
-                }).appendTo(avatarLeftDiv);
-              } else {
-                // make the rest hidden
-                jQuery('<image/>',{
-                  "class": "avatarLeft img-responsive",
-                  "css" : {
-                    "display" : "none"
-                  },
-                  src: avatarElement
-                }).appendTo(avatarLeftDiv);
+                if(this.options.development){
+                  filename = "https:" + this.avatars[avatarLeft.character][avatarElement];
+                } else {
+                  filename = this.avatars[avatarLeft.character][avatarElement];
+                }
+
+                if(avatarElement === avatarLeft.type){
+                  // make this one visible
+                  
+                  jQuery('<img/>',{
+                    id: avatarLeft.character + "_" + avatarElement,
+                    "class": "avatarLeft img-responsive",
+                    src: filename
+                  }).appendTo(avatarLeftDiv);
+                } else {
+                  // make the rest hidden
+                  jQuery('<img/>',{
+                    id: avatarLeft.character + "_" + avatarElement,
+                    "class": "avatarLeft img-responsive",
+                    "css" : {
+                      "display" : "none"
+                    },
+                    src: filename
+                    //src: avatarElement
+                  }).appendTo(avatarLeftDiv);
+                }
               }
             }
           }
@@ -254,34 +281,49 @@ AVIATION.common.Slide.prototype = {
         callback(contentClass);
       }
 
-      if(avatarRight && avatarRight != ""){
+      if(avatarRight && avatarRight !== ""){
 
-        var avatarRightDiv = jQuery('<div/>', {
-          id: "avatarRightDiv",
-          "class": "avatar col-lg-2 pull-right",
-        }).appendTo(this.container);
-
-        if(this.avatar && this.avatar[avatarRight.character]){
+        if(!avatarRightDiv || avatarRightDiv.length < 1){
+          avatarRightDiv = jQuery('<div/>', {
+            id: "avatarRightDiv",
+            "class": "avatar col-lg-2 pull-right",
+          }).appendTo(parent.parent());
+        }
+        
+        if(this.avatars && this.avatars[avatarRight.character]){
                 
-          for(avatarElement in this.avatar[avatarRight.character]){
+          for(avatarElement in this.avatars[avatarRight.character]){
         
-            if(this.avatar[avatarRight.character].hasOwnProperty(avatarElement)){
-        
-              if(avatarElement === avatarLeft.type){
-                // make this one visible
-                var avatarRightImg = jQuery('<image/>',{
-                  "class": "avatarRight img-responsive",
-                  src: avatarElement
-                }).appendTo(avatarRightDiv);
-              } else {
-                // make the rest hidden
-                jQuery('<image/>',{
-                  "class": "avatarRight img-responsive",
-                  "css" : {
-                    "display" : "none"
-                  },
-                  src: avatarElement
-                }).appendTo(avatarRightDiv);
+            if(this.avatars[avatarRight.character].hasOwnProperty(avatarElement)){
+
+              tempImg = $("#"+avatarRight.character+"_"+avatarElement);
+
+              if(!tempImg || tempImg.length < 1){
+
+                if(this.options.development){
+                  filename = "https:" + this.avatars[avatarRight.character][avatarElement];
+                } else {
+                  filename = this.avatars[avatarRight.character][avatarElement];
+                }
+
+                if(avatarElement === avatarLeft.type){
+                  // make this one visible
+                  jQuery('<img/>',{
+                    id: avatarRight.character + "_" + avatarElement,
+                    "class": "avatarRight img-responsive",
+                    src: filename
+                  }).appendTo(avatarRightDiv);
+                } else {
+                  // make the rest hidden
+                  jQuery('<img/>',{
+                    id: avatarRight.character + "_" + avatarElement,
+                    "class": "avatarRight img-responsive",
+                    "css" : {
+                      "display" : "none"
+                    },
+                    src: filename
+                  }).appendTo(avatarRightDiv);
+                }
               }
             }
           }
@@ -301,9 +343,11 @@ AVIATION.common.Slide.prototype = {
 
   // method for building the content of the slide
   buildContent: function(correctAudio, index, outerIndex, clearContent){
-    var outerSlideContent = this.slideContent
-        activeIndex = index || this.activeIndex,
-        outerIndex = this.activeIndex || 0, contentContainer = $(".cdot_contentText");
+    "use strict";
+    var outerSlideContent = this.slideContent,
+        activeIndex = index || this.activeIndex, contentContainer = $(".cdot_contentText"), setupInnerContent;
+
+    outerIndex = this.activeIndex || 0;
 
     if(!contentContainer || contentContainer.length === 0){
       contentContainer = jQuery('<div/>', {
@@ -311,9 +355,10 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(this.container);
     }
     
-    var setupInnerContent = function(classSize){
+    setupInnerContent = function(classSize){
       var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(".slideInner"), 
-          action, contentClasses = "", imageClasses = "", bsClass = classSize || 12;
+          action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
+          newSlideInner;
 
       if(!clearContent){
         if(slideContent.content){
@@ -322,7 +367,7 @@ AVIATION.common.Slide.prototype = {
           action = "replace";
         }
 
-        var newSlideInner = jQuery('<div/>', {
+        newSlideInner = jQuery('<div/>', {
           id: "slideInner_" + outerIndex,
           "class": "slideInner col-lg-" + classSize,
         });
@@ -332,7 +377,7 @@ AVIATION.common.Slide.prototype = {
             contentClasses = slideContent.content.classes.join(" ");
           }
 
-          var innerContent = jQuery('<div/>',{
+          innerContent = jQuery('<div/>',{
             id: "innerContent_" + outerIndex + "_" + activeIndex,
             "class": contentClasses,
             html: slideContent.content.html || ""
@@ -344,7 +389,7 @@ AVIATION.common.Slide.prototype = {
             imageClasses = slideContent.image.classes.join(" ");
           }
 
-          var innerImage = jQuery('<image/>',{
+          innerImage = jQuery('<image/>',{
             id: "innerImage_" + outerIndex + "_" + activeIndex,
             "class": imageClasses,
             src: slideContent.image.src || ""
@@ -352,7 +397,7 @@ AVIATION.common.Slide.prototype = {
         }
 
         if(action === "remove" || action === "replace"){
-          console.log("removing")
+          console.log("removing");
           $(".slideInner").children().remove();
         }
 
@@ -381,7 +426,7 @@ AVIATION.common.Slide.prototype = {
 
   // build controls that go immediately after the slide (play/pause buttons)
   buildSlideControls: function(){
-
+    "use strict";
     if(this.options.showSlideControls){
       var slideControlsRow = jQuery('<div/>', {
         "class": "row",
@@ -416,7 +461,7 @@ AVIATION.common.Slide.prototype = {
         pause: $("#btnPause").data("action", "pause"),
         replay: $("#btnR").data("action", "replay"),
         next: $("#btnN").data("action", "next")
-      }
+      };
 
       this.insertLineBreak(slideControlsRow);
 
@@ -425,8 +470,9 @@ AVIATION.common.Slide.prototype = {
   },
 
   insertLineBreak: function( parent ){
+    "use strict";
     try {
-      var lineBreak = jQuery('<div/>', {
+      jQuery('<div/>', {
         "class": "col-xs-12",
         html: "<!----><br/>"
       }).appendTo(parent);
@@ -437,6 +483,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   buildSlideAudios: function(){
+    "use strict";
     var slideObject = this;
  
     // check hasPlayer parameter if has been loaded/listend to previously
@@ -444,8 +491,8 @@ AVIATION.common.Slide.prototype = {
 
     this.audioFiles.forEach( function(audio, a){
       // lets make sure that the filename provided is without the extension
-      var split = audio.split("."), filename = "", tempArray = [], 
-          extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"];
+      var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source,
+          extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
           console.log("audio files here: " + audio); 
           console.log(split);
@@ -454,10 +501,10 @@ AVIATION.common.Slide.prototype = {
         // checking to make sure that the filename given is without an extension
         if(split.length === 2){
           // take only the first argument
-          filename = split[0]
+          filename = split[0];
         } else if(split.length > 2){
           // lets join everything except for the extension
-          for(var i=0; i<split.length-1; i++){
+          for(i=0; i<split.length-1; i++){
             tempArray.push(split[i]);
           }
 
@@ -477,13 +524,13 @@ AVIATION.common.Slide.prototype = {
         console.log("error while trying to parse audio filename");
       }
 
-      var addedSlideAudio = jQuery('<audio/>',{
+      addedSlideAudio = jQuery('<audio/>',{
         id: "audio_" + a,
         html: "Your browser doesn't support audio"
       }).appendTo(slideObject.container);
 
-      for(var i=0; i<extensions.length; i++){
-        var source = jQuery('<source/>', {
+      for(i=0; i<extensions.length; i++){
+        source = jQuery('<source/>', {
           src: filename + extensions[i],
           type: types[i]
         }).appendTo(addedSlideAudio);
@@ -501,7 +548,7 @@ AVIATION.common.Slide.prototype = {
       // if so, we probably assigned the slideHasListened to the slideObject
       // already and thus do not need to push again
       slideObject.slideHasListened.push(false);
-    })
+    });
   },
 
   buildStatusBar: function(parent){
@@ -538,7 +585,7 @@ AVIATION.common.Slide.prototype = {
       this.slideElements.courseControls = {
         back: $("#btnB").data("action", "back"),
         "continue": $("#btnC").data("action", "continue")
-      }
+      };
 
     }
   },
@@ -579,7 +626,7 @@ AVIATION.common.Slide.prototype = {
       e.preventDefault();
       console.log("clicked reset on status bar");
       slideObject.resetTimer(true);
-      if(continueId && continueId != ""){
+      if(continueId && continueId !== ""){
         $(this).on('click', function(){
           slideObject.redirectToPage(continueId); // any URL
         });
@@ -599,7 +646,7 @@ AVIATION.common.Slide.prototype = {
           if(counter < 0) {
             clearInterval(slideObject._timer);
             
-            if(continueId && continueId != ""){
+            if(continueId && continueId !== ""){
               slideObject.redirectToPage(continueId);
               statusBar.text("Redirecting...");
             } else {
@@ -692,9 +739,7 @@ AVIATION.common.Slide.prototype = {
     console.log("slidebutton events slide: ");
     console.log(slide);
 
-    for(button in buttons){
-      if(buttons.hasOwnProperty(button)){
-        buttons[button].on("click", function(e, button){
+    function initSlideBtn(e, button){
           var action = $(this).data("action");
           switch(action){
 
@@ -731,7 +776,11 @@ AVIATION.common.Slide.prototype = {
               console.log(buttons[button]);
               break;
           }
-        });
+        }
+
+    for(var button in buttons){
+      if(buttons.hasOwnProperty(button)){
+        buttons[button].on("click", initSlideBtn);
       }
     }
   },
@@ -743,21 +792,23 @@ AVIATION.common.Slide.prototype = {
     console.log("coursebutton events slide: ");
     console.log(slide);
 
-    for(button in buttons){
+    function assignBtnAction(e, button){
+      var action = $(this).data("action");
+      switch(action){
+        case "back":
+          break;
+
+        case "continue":
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    for( var button in buttons){
       if(buttons.hasOwnProperty(button)){
-        buttons[button].on("click", function(e, button){
-          var action = $(this).data("action");
-          switch(action){
-            case "back":
-              break;
-
-            case "continue":
-              break;
-
-            default:
-              break;
-          }
-        });
+        buttons[button].on("click", assignBtnAction);
       }
     }
 
@@ -812,7 +863,7 @@ AVIATION.common.Slide.prototype = {
         }
         */
 
-        if (contentAtStart != ""){
+        if (contentAtStart !== ""){
           slideObject.buildContent(true, contentAtStart);
         }
         // make sure the state of the slide is correct at for this audio/second
@@ -825,7 +876,7 @@ AVIATION.common.Slide.prototype = {
 
         slideObject.checkSlideControlPlayButtonsState();
 
-        if (callbackAtEnd != ""){
+        if (callbackAtEnd !== ""){
           console.log("calling the callback at the end of audio");
           callbackAtEnd();
         }
@@ -901,7 +952,7 @@ AVIATION.common.Slide.prototype = {
 
   // constrols the state of the Previous/Next 'player' buttons
   checkSlideControlPlayButtonsState: function(){
-    var controls = this.slideElements.slideControls, active = this.activeIndex
+    var controls = this.slideElements.slideControls, active = this.activeIndex,
         players = this.slideAudios;
 
     if(active < 1){
@@ -914,7 +965,7 @@ AVIATION.common.Slide.prototype = {
       }
     } else {
       if (active < players.length - 1){
-        console.log("active is before the last player")
+        console.log("active is before the last player");
         controls.previous.prop("disabled", false);
         controls.previous.removeAttr("disabled");
         if(this.slideHasListened[active]){
@@ -986,5 +1037,4 @@ AVIATION.common.Slide.prototype = {
   }
 
 };
-
 console.log("testing this class execution");
