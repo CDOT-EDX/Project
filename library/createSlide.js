@@ -205,10 +205,85 @@ AVIATION.common.Slide.prototype = {
   buildAvatars: function(parent, avatar, callback){
     "use strict";
     // callback will generate the title+content
-    var avatarLeft = "", avatarRight = "", contentClass = 12, avatarElement, i, 
-        avatarLeftDiv = $("#avatarLeftDiv"), avatarRightDiv = $("#avatarRightDiv"), tempImg, filename="";
+    var avatarLeft = "", avatarRight = "", contentClass = 12, avatarElement, i, slide = this, 
+        avatarLeftDiv = $("#avatarLeftDiv"), avatarRightDiv = $("#avatarRightDiv"), avatarArray = [];
 
     console.log("buidling avatars");
+
+    function createAvatars( avatars ){
+      var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg, filename = "";
+
+      for(i = 0; i < avatars.length; i++){
+
+        if(i === 0){
+          avatarSide = "Left";
+          avatarClass = "pull-left";
+          
+        }
+
+        if(i === 1){
+          avatarSide = "Right";
+          avatarClass = "pull-right";
+
+        }
+
+        avatarDiv = $("#avatar" + avatarSide + "Div");
+        
+        if(!avatarDiv || avatarDiv.length < 1){
+          avatarDiv = jQuery('<div/>', {
+            id: "avatar" + avatarSide + "Div",
+            "class": "avatar col-lg-2 " + avatarClass + " " + avatarLeft.character,
+          });
+          
+          i === 0 ? avatarDiv.prependTo(parent.parent()) : avatarDiv.appendTo(parent.parent()) ; 
+        }
+
+        if(slide.avatars && slide.avatars[avatars[i].character]){
+          for(avatarElement in slide.avatars[avatars[i].character]){
+            if(slide.avatars[avatars[i].character].hasOwnProperty(avatarElement)){
+              tempImg = $("#" + avatars[i].character + "_" + avatarElement);
+
+              if(!tempImg || tempImg.length < 1){
+                if(slide.options.development){
+                  filename = "https:" + slide.avatars[avatars[i].character][avatarElement];
+                } else {
+                  filename = slide.avatars[avatars[i].character][avatarElement];
+                }
+                  if(avatarElement === avatars[i].type){
+                    // make this one visible
+                    
+                    jQuery('<img/>',{
+                      id: avatars[i].character + "_" + avatarElement,
+                      "class": "img-responsive avatar" + avatarSide,
+                      src: filename
+                    }).appendTo(avatarDiv);
+                  } else {
+                    // make the rest hidden
+                    jQuery('<img/>',{
+                      id: avatars[i].character + "_" + avatarElement,
+                      "class": "img-responsive avatar" + avatarSide,
+                      "css" : {
+                        "display" : "none"
+                      },
+                      src: filename
+                    }).appendTo(avatarDiv);
+                  }
+              } else {
+                // switch between hiding/showing
+                console.log("what should i be checking here?");
+                
+                if(avatarElement === avatars[i].type){
+                  $("#" + avatars[i].character + "_" + avatarElement).show();
+                } else {
+                  $("#" + avatars[i].character + "_" + avatarElement).hide();
+                }
+              }
+            }
+          }
+        }
+
+      }
+    }
 
     if(this.options.showAvatars && avatar && avatar.length > 0){
       for(i = 0; i < avatar.length; i++){
@@ -218,126 +293,25 @@ AVIATION.common.Slide.prototype = {
         } else if(avatar[i].position === "right"){
           avatarRight = avatar[i];
           contentClass -= 2;
-        } else {
-          // what if the avatar is 'hide'?
-        }
+        } 
+        
       }
 
       if(avatarLeft && avatarLeft !== ""){
-        // create div with img tag for character name and position
-        // aka <div col-lg-2> and src "tom_open.png"?
-        // and put content after
-        if(!avatarLeftDiv || avatarLeftDiv.length < 1){
-          avatarLeftDiv = jQuery('<div/>', {
-            id: "avatarLeftDiv",
-            "class": "avatar col-lg-2 pull-left " + avatarLeft.character,
-          }).prependTo(parent.parent());
-        }
-        
-        if(this.avatars && this.avatars[avatarLeft.character]){
-          for(avatarElement in this.avatars[avatarLeft.character]){
-        
-            if(this.avatars[avatarLeft.character].hasOwnProperty(avatarElement)){
-        
-              tempImg = $("#"+avatarLeft.character+"_"+avatarElement);
-
-              if(!tempImg || tempImg.length < 1){
-
-                if(this.options.development){
-                  filename = "https:" + this.avatars[avatarLeft.character][avatarElement];
-                } else {
-                  filename = this.avatars[avatarLeft.character][avatarElement];
-                }
-
-                if(avatarElement === avatarLeft.type){
-                  // make this one visible
-                  
-                  jQuery('<img/>',{
-                    id: avatarLeft.character + "_" + avatarElement,
-                    "class": "avatarLeft img-responsive",
-                    src: filename
-                  }).appendTo(avatarLeftDiv);
-                } else {
-                  // make the rest hidden
-                  jQuery('<img/>',{
-                    id: avatarLeft.character + "_" + avatarElement,
-                    "class": "avatarLeft img-responsive",
-                    "css" : {
-                      "display" : "none"
-                    },
-                    src: filename
-                    //src: avatarElement
-                  }).appendTo(avatarLeftDiv);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // build the content here and decide on the content class/size
-      // col-lg-8 / 10
-      if(callback && typeof callback === "function" ){
-        callback(contentClass);
+        avatarArray.push(avatarLeft);
       }
 
       if(avatarRight && avatarRight !== ""){
-
-        if(!avatarRightDiv || avatarRightDiv.length < 1){
-          avatarRightDiv = jQuery('<div/>', {
-            id: "avatarRightDiv",
-            "class": "avatar col-lg-2 pull-right " + avatarRight.character,
-          }).appendTo(parent.parent());
-        }
-        
-        if(this.avatars && this.avatars[avatarRight.character]){
-                
-          for(avatarElement in this.avatars[avatarRight.character]){
-        
-            if(this.avatars[avatarRight.character].hasOwnProperty(avatarElement)){
-
-              tempImg = $("#"+avatarRight.character+"_"+avatarElement);
-
-              if(!tempImg || tempImg.length < 1){
-
-                if(this.options.development){
-                  filename = "https:" + this.avatars[avatarRight.character][avatarElement];
-                } else {
-                  filename = this.avatars[avatarRight.character][avatarElement];
-                }
-
-                if(avatarElement === avatarRight.type){
-                  // make this one visible
-                  jQuery('<img/>',{
-                    id: avatarRight.character + "_" + avatarElement,
-                    "class": "avatarRight img-responsive",
-                    src: filename
-                  }).appendTo(avatarRightDiv);
-                } else {
-                  // make the rest hidden
-                  jQuery('<img/>',{
-                    id: avatarRight.character + "_" + avatarElement,
-                    "class": "avatarRight img-responsive",
-                    "css" : {
-                      "display" : "none"
-                    },
-                    src: filename
-                  }).appendTo(avatarRightDiv);
-                }
-              }
-            }
-          }
-        }
+        avatarArray.push(avatarRight);
       }
 
-      if(avatar.position === "hide"){
-        // hide all avatar classes 
-      }
+      createAvatars( avatarArray );
 
-    } else {
-      if(callback && typeof callback === "function" ){
-        callback(contentClass);
-      }
+
+    }
+
+    if(callback && typeof callback === "function" ){
+      callback(contentClass);
     }
   },
 
@@ -369,7 +343,7 @@ AVIATION.common.Slide.prototype = {
 
         newSlideInner = jQuery('<div/>', {
           id: "slideInner_" + outerIndex,
-          "class": "slideInner col-lg-" + classSize,
+          "class": "slideInner col-xs-12",
         });
 
         if (slideContent.content && slideContent.content.html){
@@ -399,6 +373,7 @@ AVIATION.common.Slide.prototype = {
         if(action === "remove" || action === "replace"){
           console.log("removing");
           $(".slideInner").children().remove();
+          $(".slideInner").remove();
         }
 
         if(action === "append" || action === "replace"){
@@ -796,9 +771,11 @@ AVIATION.common.Slide.prototype = {
       var action = $(this).data("action");
       switch(action){
         case "back":
+          redirectToPage(slide.options.backId);
           break;
 
         case "continue":
+          redirectToPage(slide.options.continueId);
           break;
 
         default:
