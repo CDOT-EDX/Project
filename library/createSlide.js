@@ -81,6 +81,7 @@ AVIATION.common.Slide.prototype = {
           showControls: true,
           showBorder: true,
           autoplay: true,
+          noAudio: false,
           avatars: {
             tom: {
               open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
@@ -232,7 +233,7 @@ AVIATION.common.Slide.prototype = {
         if(!avatarDiv || avatarDiv.length < 1){
           avatarDiv = jQuery('<div/>', {
             id: "avatar" + avatarSide + "Div",
-            "class": "avatar col-lg-2 " + avatarClass + " " + avatarLeft.character,
+            "class": "avatar col-lg-2 " + avatarClass + " " + avatars[i].character,
           });
           
           i === 0 ? avatarDiv.prependTo(parent.parent()) : avatarDiv.appendTo(parent.parent()) ; 
@@ -251,7 +252,6 @@ AVIATION.common.Slide.prototype = {
                 }
                   if(avatarElement === avatars[i].type){
                     // make this one visible
-                    
                     jQuery('<img/>',{
                       id: avatars[i].character + "_" + avatarElement,
                       "class": "img-responsive avatar" + avatarSide,
@@ -269,9 +269,7 @@ AVIATION.common.Slide.prototype = {
                     }).appendTo(avatarDiv);
                   }
               } else {
-                // switch between hiding/showing
-                console.log("what should i be checking here?");
-                
+                // switch between hiding/showing the proper avatar type
                 if(avatarElement === avatars[i].type){
                   $("#" + avatars[i].character + "_" + avatarElement).show();
                 } else {
@@ -294,7 +292,6 @@ AVIATION.common.Slide.prototype = {
           avatarRight = avatar[i];
           contentClass -= 2;
         } 
-        
       }
 
       if(avatarLeft && avatarLeft !== ""){
@@ -306,8 +303,6 @@ AVIATION.common.Slide.prototype = {
       }
 
       createAvatars( avatarArray );
-
-
     }
 
     if(callback && typeof callback === "function" ){
