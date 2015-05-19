@@ -230,7 +230,7 @@ AVIATION.common.Slide.prototype = {
         if(!avatarLeftDiv || avatarLeftDiv.length < 1){
           avatarLeftDiv = jQuery('<div/>', {
             id: "avatarLeftDiv",
-            "class": "avatar col-lg-2 pull-left",
+            "class": "avatar col-lg-2 pull-left " + avatarLeft.character,
           }).prependTo(parent.parent());
         }
         
@@ -286,7 +286,7 @@ AVIATION.common.Slide.prototype = {
         if(!avatarRightDiv || avatarRightDiv.length < 1){
           avatarRightDiv = jQuery('<div/>', {
             id: "avatarRightDiv",
-            "class": "avatar col-lg-2 pull-right",
+            "class": "avatar col-lg-2 pull-right " + avatarRight.character,
           }).appendTo(parent.parent());
         }
         
@@ -306,7 +306,7 @@ AVIATION.common.Slide.prototype = {
                   filename = this.avatars[avatarRight.character][avatarElement];
                 }
 
-                if(avatarElement === avatarLeft.type){
+                if(avatarElement === avatarRight.type){
                   // make this one visible
                   jQuery('<img/>',{
                     id: avatarRight.character + "_" + avatarElement,
@@ -389,7 +389,7 @@ AVIATION.common.Slide.prototype = {
             imageClasses = slideContent.image.classes.join(" ");
           }
 
-          innerImage = jQuery('<image/>',{
+          innerImage = jQuery('<img/>',{
             id: "innerImage_" + outerIndex + "_" + activeIndex,
             "class": imageClasses,
             src: slideContent.image.src || ""
