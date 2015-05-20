@@ -105,7 +105,7 @@ AVIATION.common.Slide.prototype = {
     for(option in defaults){
       if(defaults.hasOwnProperty(option)){
         // if this key doesn't exist, init to default
-        if(typeof option === 'undefined'){
+        if(typeof options[option] === 'undefined'){
              options[option] = defaults[option];
         }
       }
@@ -225,72 +225,77 @@ AVIATION.common.Slide.prototype = {
     function createAvatars( avatars ){
       var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg, filename = "";
 
+      console.log("AVATARS *** ");
+      console.log(avatars);
+
       for(i = 0; i < avatars.length; i++){
 
-        if(i === 0){
-          avatarSide = "Left";
-          avatarClass = "pull-left";
+        if(avatars[i] !== ""){
+
+          if(i === 0){
+            avatarSide = "Left";
+            avatarClass = "pull-left";
+            
+          }
+
+          if(i === 1){
+            avatarSide = "Right";
+            avatarClass = "pull-right";
+
+          }
+
+          avatarDiv = $("#avatar" + avatarSide + "Div");
           
-        }
+          if(!avatarDiv || avatarDiv.length < 1){
+            avatarDiv = jQuery('<div/>', {
+              id: "avatar" + avatarSide + "Div",
+              "class": "avatar col-lg-2 " + avatarClass + " " + avatars[i].character,
+            });
+            
+            i === 0 ? avatarDiv.prependTo(parent.parent()) : avatarDiv.appendTo(parent.parent()) ; 
+          }
 
-        if(i === 1){
-          avatarSide = "Right";
-          avatarClass = "pull-right";
+          if(slide.avatars && slide.avatars[avatars[i].character]){
+            for(avatarElement in slide.avatars[avatars[i].character]){
+              if(slide.avatars[avatars[i].character].hasOwnProperty(avatarElement)){
+                tempImg = $("#" + avatars[i].character + "_" + avatarElement);
 
-        }
-
-        avatarDiv = $("#avatar" + avatarSide + "Div");
-        
-        if(!avatarDiv || avatarDiv.length < 1){
-          avatarDiv = jQuery('<div/>', {
-            id: "avatar" + avatarSide + "Div",
-            "class": "avatar col-lg-2 " + avatarClass + " " + avatars[i].character,
-          });
-          
-          i === 0 ? avatarDiv.prependTo(parent.parent()) : avatarDiv.appendTo(parent.parent()) ; 
-        }
-
-        if(slide.avatars && slide.avatars[avatars[i].character]){
-          for(avatarElement in slide.avatars[avatars[i].character]){
-            if(slide.avatars[avatars[i].character].hasOwnProperty(avatarElement)){
-              tempImg = $("#" + avatars[i].character + "_" + avatarElement);
-
-              if(!tempImg || tempImg.length < 1){
-                if(slide.options.development){
-                  filename = "https:" + slide.avatars[avatars[i].character][avatarElement];
-                } else {
-                  filename = slide.avatars[avatars[i].character][avatarElement];
-                }
-                  if(avatarElement === avatars[i].type){
-                    // make this one visible
-                    jQuery('<img/>',{
-                      id: avatars[i].character + "_" + avatarElement,
-                      "class": "img-responsive avatar" + avatarSide,
-                      src: filename
-                    }).appendTo(avatarDiv);
+                if(!tempImg || tempImg.length < 1){
+                  if(slide.options.development){
+                    filename = "https:" + slide.avatars[avatars[i].character][avatarElement];
                   } else {
-                    // make the rest hidden
-                    jQuery('<img/>',{
-                      id: avatars[i].character + "_" + avatarElement,
-                      "class": "img-responsive avatar" + avatarSide,
-                      "css" : {
-                        "display" : "none"
-                      },
-                      src: filename
-                    }).appendTo(avatarDiv);
+                    filename = slide.avatars[avatars[i].character][avatarElement];
                   }
-              } else {
-                // switch between hiding/showing the proper avatar type
-                if(avatarElement === avatars[i].type){
-                  $("#" + avatars[i].character + "_" + avatarElement).show();
+                    if(avatarElement === avatars[i].type){
+                      // make this one visible
+                      jQuery('<img/>',{
+                        id: avatars[i].character + "_" + avatarElement,
+                        "class": "img-responsive avatar" + avatarSide,
+                        src: filename
+                      }).appendTo(avatarDiv);
+                    } else {
+                      // make the rest hidden
+                      jQuery('<img/>',{
+                        id: avatars[i].character + "_" + avatarElement,
+                        "class": "img-responsive avatar" + avatarSide,
+                        "css" : {
+                          "display" : "none"
+                        },
+                        src: filename
+                      }).appendTo(avatarDiv);
+                    }
                 } else {
-                  $("#" + avatars[i].character + "_" + avatarElement).hide();
+                  // switch between hiding/showing the proper avatar type
+                  if(avatarElement === avatars[i].type){
+                    $("#" + avatars[i].character + "_" + avatarElement).show();
+                  } else {
+                    $("#" + avatars[i].character + "_" + avatarElement).hide();
+                  }
                 }
               }
             }
           }
         }
-
       }
     }
 
@@ -305,6 +310,7 @@ AVIATION.common.Slide.prototype = {
         } 
       }
 
+      /*
       if(avatarLeft && avatarLeft !== ""){
         avatarArray.push(avatarLeft);
       }
@@ -312,8 +318,8 @@ AVIATION.common.Slide.prototype = {
       if(avatarRight && avatarRight !== ""){
         avatarArray.push(avatarRight);
       }
-
-      createAvatars( avatarArray );
+      */
+      createAvatars( [ avatarLeft, avatarRight] );
     }
 
     if(callback && typeof callback === "function" ){
