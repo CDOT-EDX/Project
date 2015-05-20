@@ -41,7 +41,7 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
                                         }
                                       ];
 
-  this.audioFiles = audioFiles || ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3"];
+  this.audioFiles = audioFiles; //["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3"];
   this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
   this.slideHasListened = []; // store which audios have been listened to
 
@@ -105,8 +105,8 @@ AVIATION.common.Slide.prototype = {
     for(option in defaults){
       if(defaults.hasOwnProperty(option)){
         // if this key doesn't exist, init to default
-        if(!options[option]){
-          options[option] = defaults[option];
+        if(typeof option === 'undefined'){
+             options[option] = defaults[option];
         }
       }
     }
@@ -186,18 +186,29 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     this.buildContent();
 
-    this.buildSlideAudios();
+    if(!this.options.noAudio){
+      this.buildSlideAudios();
+    } else {
+      this.buildContent(true, this.activeIndex, this.activeIndex);
+    }
+    
     console.log("launching build controls");
+    
     this.buildSlideControls();
+    
     console.log("launching build course controls");
+    
     this.buildCourseControls();
 
     this.initAudioEvents();
 
     // create events for audio/video interactions and a way to track them
     console.log("now reset slide");
-    this.resetSlide();
 
+    if(!this.options.noAudio){
+      this.resetSlide();  
+    }
+    
     // finished thus activate the slide
     this.activateSlide();
   },
@@ -436,6 +447,8 @@ AVIATION.common.Slide.prototype = {
       this.insertLineBreak(slideControlsRow);
 
       this.initSlideButtonEvents();
+    } else {
+      this.insertLineBreak( $(this.container).parent() );
     }
   },
 
@@ -459,66 +472,68 @@ AVIATION.common.Slide.prototype = {
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
 
-    this.audioFiles.forEach( function(audio, a){
-      // lets make sure that the filename provided is without the extension
-      var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source,
-          extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
+    if(this.audioFiles){
+      this.audioFiles.forEach( function(audio, a){
+        // lets make sure that the filename provided is without the extension
+        var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source,
+            extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
-          console.log("audio files here: " + audio); 
-          console.log(split);
+            console.log("audio files here: " + audio); 
+            console.log(split);
 
-      try{
-        // checking to make sure that the filename given is without an extension
-        if(split.length === 2){
-          // take only the first argument
-          filename = split[0];
-        } else if(split.length > 2){
-          // lets join everything except for the extension
-          for(i=0; i<split.length-1; i++){
-            tempArray.push(split[i]);
-          }
+        try{
+          // checking to make sure that the filename given is without an extension
+          if(split.length === 2){
+            // take only the first argument
+            filename = split[0];
+          } else if(split.length > 2){
+            // lets join everything except for the extension
+            for(i=0; i<split.length-1; i++){
+              tempArray.push(split[i]);
+            }
 
-          if(slideObject.options.development){
-            filename = "https:" + tempArray.join(".");
-            console.log("filename: ");
-            console.log(filename);
+            if(slideObject.options.development){
+              filename = "https:" + tempArray.join(".");
+              console.log("filename: ");
+              console.log(filename);
+            } else {
+              filename = tempArray.join(".");
+            }
           } else {
-            filename = tempArray.join(".");
+            // its probably the actual filename alone
+            filename = audio;
           }
-        } else {
-          // its probably the actual filename alone
-          filename = audio;
+        } catch(error){
+          console.log("error: " + error);
+          console.log("error while trying to parse audio filename");
         }
-      } catch(error){
-        console.log("error: " + error);
-        console.log("error while trying to parse audio filename");
-      }
 
-      addedSlideAudio = jQuery('<audio/>',{
-        id: "audio_" + a,
-        html: "Your browser doesn't support audio"
-      }).appendTo(slideObject.container);
+        addedSlideAudio = jQuery('<audio/>',{
+          id: "audio_" + a,
+          html: "Your browser doesn't support audio"
+        }).appendTo(slideObject.container);
 
-      for(i=0; i<extensions.length; i++){
-        source = jQuery('<source/>', {
-          src: filename + extensions[i],
-          type: types[i]
-        }).appendTo(addedSlideAudio);
-      }
+        for(i=0; i<extensions.length; i++){
+          source = jQuery('<source/>', {
+            src: filename + extensions[i],
+            type: types[i]
+          }).appendTo(addedSlideAudio);
+        }
 
-      try {
-        slideObject.slideAudios.push(Popcorn("#audio_" + a));
-      } catch(error) {
-        // was popcorn initialized ok?
-        console.log("slide audio init error: ");
-        console.log(error);
-      }
+        try {
+          slideObject.slideAudios.push(Popcorn("#audio_" + a));
+        } catch(error) {
+          // was popcorn initialized ok?
+          console.log("slide audio init error: ");
+          console.log(error);
+        }
 
-      // check var from the outside function to see if it is true
-      // if so, we probably assigned the slideHasListened to the slideObject
-      // already and thus do not need to push again
-      slideObject.slideHasListened.push(false);
-    });
+        // check var from the outside function to see if it is true
+        // if so, we probably assigned the slideHasListened to the slideObject
+        // already and thus do not need to push again
+        slideObject.slideHasListened.push(false);
+      });
+    }
   },
 
   buildStatusBar: function(parent){
@@ -798,22 +813,11 @@ AVIATION.common.Slide.prototype = {
 
       content.forEach(function(cont, c){
         
-        console.log("audio and content *** audio: " + p + " *** content: " + c);
-        
         if(content[c].audio === p){
         // audio matches the audio inside content
-
-        console.log("audio and content match....");
-
-        console.log(content[c].second);
           if(content[c].second){
             players[p].cue(content[c].second, function(){
-              
-              console.log("trying to cue this audio: " + p + " at this second: " + content[c].second);
-
               slideObject.buildContent(true, c);
-              
-
               if(content[c].callback){
                 // run the callback that should be cued
                 content[c].callback();
@@ -827,20 +831,9 @@ AVIATION.common.Slide.prototype = {
       });
       
       players[p].on("playing", function(e){
-        console.log("audio has started: " + p);
-
-        /*
-        for(c = 0; c < content.length && content[c].audio <= a; c++ ){
-          console.log("looking for audio #: " + c + " and " + a);
-        }
-        */
-
         if (contentAtStart !== ""){
           slideObject.buildContent(true, contentAtStart);
         }
-        // make sure the state of the slide is correct at for this audio/second
-
-        // disable whatever buttons / highlights / elements need to be disabled
       });
 
       players[p].on("ended", function(e){
@@ -849,13 +842,11 @@ AVIATION.common.Slide.prototype = {
         slideObject.checkSlideControlPlayButtonsState();
 
         if (callbackAtEnd !== ""){
-          console.log("calling the callback at the end of audio");
           callbackAtEnd();
         }
 
         // start the next audio if it exists and autoplay is true
         if(players[p+1] && this.autoplay){
-          console.log("starting next audio... from end...");
           slideObject.playNext();
         }
 
@@ -875,14 +866,14 @@ AVIATION.common.Slide.prototype = {
           slideObject.checkSlideControlPlayButtons("end");
         }
         
-        // perform callbacks/actions if any needed at the end of the audio
-        // check buttons (disable/enable elements/highlights)
-
         // if we need highlight control , call the function here
 
       });
 
     });
+
+    //this.buildContent(true, this.activeIndex);
+    // if no audio?
   },
 
   checkSlideControlPlayButtons: function( action ){
@@ -985,7 +976,9 @@ AVIATION.common.Slide.prototype = {
   },
 
   activateSlide: function(){
-    this.playCurrent();
+    if(!this.options.noAudio){
+      this.playCurrent();  
+    }
   },
 
   resetSlide: function(){
@@ -993,6 +986,10 @@ AVIATION.common.Slide.prototype = {
     this.activeIndex = 0;
     console.log(this.slideElements.slideControls);
     this.checkSlideControlPlayButtons();
+
+    if(this.options.noAudio){
+      this.setStatus('Press "Continue" when ready');
+    }
 
     this.buildContent(null, null, null, true);
   },
