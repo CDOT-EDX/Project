@@ -471,7 +471,7 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  buildSlideAudios: function(modalAudios, parent){
+  buildSlideAudios: function(modalAudios, parent, modalIndex){
     "use strict";
     var slideObject = this, localAudios, parentContainer;
  
@@ -488,10 +488,9 @@ AVIATION.common.Slide.prototype = {
         var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
             extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
-            console.log("audio files here: " + audio); 
-            console.log(split);
+        console.log("audio files here: " + audio); 
 
-      // make into a function ?
+        // make into a function ?
         try{
           // checking to make sure that the filename given is without an extension
           if(split.length === 2){
@@ -499,14 +498,12 @@ AVIATION.common.Slide.prototype = {
             filename = split[0];
           } else if(split.length > 2){
             // lets join everything except for the extension
-            for(i=0; i<split.length-1; i++){
+            for(i = 0; i < split.length-1; i++){
               tempArray.push(split[i]);
             }
 
             if(slideObject.options.development){
               filename = "https:" + tempArray.join(".");
-              console.log("filename: ");
-              console.log(filename);
             } else {
               filename = tempArray.join(".");
             }
@@ -530,30 +527,27 @@ AVIATION.common.Slide.prototype = {
             type: types[i]
           }).appendTo(addedSlideAudio);
         }
-/*
+
         if(modalAudios && parent){
           try {
-            slideObject.modal.push(Popcorn("#audio_" + a));
+            slideObject.modalData[modalIndex].modalAudios.push(Popcorn("#audio_" + a));
+            slideObject.modalData[modalIndex].modalHasListened.push(false);
+          } catch(error) {
+            // was popcorn initialized ok?
+            console.log("modal audio init error: ");
+            console.log(error);
+          }
+        } else {
+          try {
+            slideObject.slideAudios.push(Popcorn("#audio_" + a));
+            slideObject.slideHasListened.push(false);
           } catch(error) {
             // was popcorn initialized ok?
             console.log("slide audio init error: ");
             console.log(error);
           }
-        } else if (this.audioFiles){
-          typeOfAudio = "slideAudios";
         }
-*/
-
-
-        // check var from the outside function to see if it is true
-        // if so, we probably assigned the slideHasListened to the slideObject
-        // already and thus do not need to push again
-        slideObject.slideHasListened.push(false);
-        // if modals, push to modalHasListened...
       });
-    } else if (modalAudios && modalAudios.length > 0){
-      // insert audio for modals?
-      // better way to handle inside the if above?
     }
   },
 
