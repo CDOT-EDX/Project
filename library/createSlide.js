@@ -591,9 +591,22 @@ AVIATION.common.Slide.prototype = {
   },
   
   buildHighlights: function(){
+    var slide = this;
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
-      higlights.forEach(function(highlight, h){
-        // foreach or for ?
+      this.highlights.forEach(function(highlight, h){
+        // foreach or for ? 
+        var modalInvoker = jQuery('<div/>', {
+            id: highlight.id + "_highlight",
+            href : "#" + highlight.id,
+            role : "button",
+            "class" : "clearClickable",
+            style: "top:" + highlight.top + 
+                   ";left:" + highlight.left +
+                   ";width:" + highlight.width +
+                   ";height:" + highlight.height +
+                   (hideInvokerBorder ? "" : (";border:" + highlight.border) ) + 
+                   ";position:absolute"
+        }).appendTo(this.container);          
       });
       // build the highlights
 
@@ -604,7 +617,8 @@ AVIATION.common.Slide.prototype = {
   },
 
   buildModals: function(){
-
+    // for each modal build the audios!
+    //this.buildSlideAudios(modalAudios, parent, modalIndex);
   },
   
   resetStatusBar: function(){
@@ -615,20 +629,14 @@ AVIATION.common.Slide.prototype = {
 
   activateTimer: function(seconds, isAuto){
     var timer = this._timer, slideObject = this, continueId = this.options.continueId,
-        counter = seconds || 10, // duration of the timer (each 1 point is about a second)
+        counter = seconds || 5, // duration of the timer (each 1 point is about a second)
         statusBar = this.slideElements.statusBar;
-
-    if (!counter){
-      counter = 5;
-    }
 
     if (!timer){
       this._timer = "";
       timer = this._timer;
     }
 
-    //statusBar.text("");
-    
     var resetTimerOnClick = function(e){
       e.preventDefault();
       console.log("clicked reset on status bar");
