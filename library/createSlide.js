@@ -73,66 +73,8 @@ AVIATION.common.Slide.prototype = {
   // method that initializes building of simple slides
   _initSimple: function(options){
     "use strict";
-    var avatars, content = [], audio = [],
-        defaults = {
-          showAvatars: false,
-          showSlideControls: true,
-          showStatus: true,
-          showControls: true,
-          showBorder: true,
-          autoplay: true,
-          noAudio: false,
-          avatars: {
-            tom: {
-              open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
-              close: "//online.cdot.senecacollege.ca:25080/aviation/img/tomClose.png"
-            },
-            jane: {
-              open: "//online.cdot.senecacollege.ca:25080/aviation/img/janeOpen.png",
-              close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
-            }
-          },
-          continueId: "1970850cff004914997ec29c65850443",
-        }, option;
 
-    console.log("this initSimple:");
-    console.log(this);
-
-    if(!options){
-      options = this.options || {};
-    }
-
-    for(option in defaults){
-      if(defaults.hasOwnProperty(option)){
-        // if this key doesn't exist, init to default
-        if(typeof options[option] === 'undefined'){
-             options[option] = defaults[option];
-        }
-      }
-    }
-
-    console.log("the options: ");
-    console.log(options);
-
-    this.avatars = options.avatars;
-
-    this.options = options;
-
-    console.log("run simple");
-    console.log(this);    
-
-    try {
-      // if smth might cause an error....
-      if(!this.container){
-        throw "a container is required, thus provide an id";
-      }
-    } catch(error){
-      console.log("error: ");
-      console.debug(error);
-      console.log("using a default id instead");
-      // do something to continue running
-      this.container = "#slideContainer";
-    }
+    this.initDefaults(options);
 
     this.buildSlide();
 
@@ -330,7 +272,7 @@ AVIATION.common.Slide.prototype = {
   // method for building the content of the slide
   buildContent: function(correctAudio, index, outerIndex, clearContent){
     "use strict";
-    var outerSlideContent = this.slideContent,
+    var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
         activeIndex = index || this.activeIndex, contentContainer = $(".cdot_contentText"), setupInnerContent;
 
     outerIndex = this.activeIndex || 0;
@@ -341,6 +283,8 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(this.container);
     }
     
+    this.buildHighlights();
+
     setupInnerContent = function(classSize){
       var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(".slideInner"), 
           action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
@@ -352,6 +296,9 @@ AVIATION.common.Slide.prototype = {
         } else {
           action = "replace";
         }
+
+        // lets take care of our highlights
+        checkSlideHighlights(slideContent.highlights, slide);
 
         newSlideInner = jQuery('<div/>', {
           id: "slideInner_" + outerIndex,
@@ -408,7 +355,7 @@ AVIATION.common.Slide.prototype = {
     } else if ( clearContent ){
       this.buildTitle( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent);
     }
-       
+    
   },
 
   // build controls that go immediately after the slide (play/pause buttons)
@@ -593,22 +540,34 @@ AVIATION.common.Slide.prototype = {
   buildHighlights: function(modalHighlight){
     var slide = this;
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
+      console.log("lets build highlights");
       this.highlights.forEach(function(highlight, h){
-        // foreach or for ? 
-        var modalInvoker = jQuery('<div/>', {
-            id: highlight.id + "_highlight",
-            href : "#" + highlight.id,
-            role : "button",
-            "class" : "clearClickable",
-            style: "top:" + highlight.top + 
-                   ";left:" + highlight.left +
-                   ";width:" + highlight.width +
-                   ";height:" + highlight.height +
-                   (hideInvokerBorder ? "" : (";border:" + highlight.border) ) + 
-                   ";position:absolute"
-        }).appendTo(this.container);          
+        var $highlight = $("#" + highlight.id + "_highlight"), modalInvoker;
+        if( !$highlight || $highlight.length < 1 ){
+          modalInvoker = jQuery('<div/>', {
+              id: highlight.id + "_highlight",
+              href : "#" + highlight.id,
+              role : "button",
+              "class" : "clearClickable",
+              style: "top:" + highlight.top + 
+                     ";left:" + highlight.left +
+                     ";width:" + highlight.width +
+                     ";height:" + highlight.height +
+                     (slide.hiddenHighlights ? "" : (";border:" + highlight.border) ) + 
+                     ";position:absolute" + 
+                     ";display:none;"
+          }).appendTo(slide.container);            
 
-        slide.slideElements.highlightElements.push(modalInvoker);
+          if(highlight.onclick && typeof highlight.onclick === "function" ){
+            modalInvoker.on("click", highlight.onclick);
+          } else {
+            modalInvoker.off();
+
+          }
+
+          slide.slideElements.highlightElements.push(modalInvoker);
+        }
+
       });
       // build the highlights
 
@@ -1037,7 +996,186 @@ AVIATION.common.Slide.prototype = {
           
     newUrl = tempSplit[0];
     window.location.assign(newUrl + "jump_to_id/" + pageId);
-  }
+  },
 
+  initDefaults: function(options){
+    "use strict";
+    var avatars, content = [], audio = [],
+        defaults = {
+          showAvatars: false,
+          showSlideControls: true,
+          showStatus: true,
+          showControls: true,
+          showBorder: true,
+          autoplay: true,
+          noAudio: false,
+          avatars: {
+            tom: {
+              open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
+              close: "//online.cdot.senecacollege.ca:25080/aviation/img/tomClose.png"
+            },
+            jane: {
+              open: "//online.cdot.senecacollege.ca:25080/aviation/img/janeOpen.png",
+              close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
+            }
+          },
+          continueId: "1970850cff004914997ec29c65850443",
+          highlights: 
+          [
+            { // #1
+              id: "ai",
+              orderNumber: 0,
+              name: "Attitude Indicator (AI)",
+              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
+              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
+              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
+              top : "9%",
+              left : "36.2%",
+              width : "26%",
+              height: "30%",
+              border : "7px ridge yellow",
+            }, 
+            { // #2
+              id: "alt",
+              orderNumber: 1,
+              name: "Altimeter (ALT)",
+              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
+              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
+              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
+              top : "9%",
+              left : "62%",
+              width : "26%",
+              height: "30%",
+              border : "7px ridge yellow",                            
+            },
+            { // #3
+              id: "hi",
+              orderNumber: 2,
+              name: "Heading Indicator (HI)",
+              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
+              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
+              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
+              top : "39%",
+              left : "36.2%",
+              width : "26%",
+              height: "31%",
+              border : "7px ridge yellow",                            
+            },
+            { // #4
+              id: "asi",
+              orderNumber: 3,
+              name: "Airspeed Indicator (ASI)",
+              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
+              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
+              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
+              top : "9%",
+              left : "10.5%",
+              width : "26%",
+              height: "30%",
+              border : "7px ridge yellow",                            
+            },
+            { // #5
+              id: "vsi",
+              orderNumber: 4,
+              name: "Vertical Speed Indicator (VSI)",
+              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
+              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
+              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
+              top: "39%",
+              left: "62%",
+              width: "26%",
+              height: "31%",
+              border : "7px ridge yellow",
+            },
+            { // #6
+              id: "tc",
+              orderNumber: 5,
+              name: "Turn Coordinator (TC)",
+              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
+              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
+              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
+              top : "39%",
+              left : "10.5%",
+              width : "26%",
+              height: "31%",
+              border : "7px ridge yellow",                            
+              },
+          ]}, option;
+
+    console.log("this initSimple:");
+    console.log(this);
+
+    if(!options){
+      options = this.options || {};
+    }
+
+    for(option in defaults){
+      if(defaults.hasOwnProperty(option)){
+        // if this key doesn't exist, init to default
+        if(typeof options[option] === 'undefined'){
+             options[option] = defaults[option];
+        }
+      }
+    }
+
+    // TODO: move this when neccessary, for testing and development only
+    this.slideElements.highlightElements = [];
+
+    console.log("the options: ");
+    console.log(options);
+
+    this.avatars = options.avatars;
+    this.highlights = options.highlights;
+    this.options = options;
+
+    console.log("run simple");
+    console.log(this);    
+
+    try {
+      // if smth might cause an error....
+      if(!this.container){
+        throw "a container is required, thus provide an id";
+      }
+    } catch(error){
+      console.log("error: ");
+      console.debug(error);
+      console.log("using a default id instead");
+      // do something to continue running
+      this.container = "#slideContainer";
+    }
+  },
+
+  checkSlideHighlights: function( showHighlights, slide ){
+    "use strict";
+    var i, j, toShow = [];
+    // check the index/indices of highlights to show from the bank
+    // and hide/show accordingly
+    console.log("lets manage some highlights!");
+    for(i=0; slide.highlights && i < slide.highlights.length; i++){
+      toShow.push(false);
+    }
+
+    for(j=0; showHighlights && j < showHighlights.length; j++){
+      if(typeof showHighlights[j] === "object"){
+        toShow[showHighlights[j].index] = true;
+      } else {
+        toShow[showHighlights[j]] = true;  
+      }
+    }
+
+    for(i=0; i < toShow.length; i++){
+      if(toShow[i]){
+        slide.slideElements.highlightElements[i].show();
+      } else {
+        slide.slideElements.highlightElements[i].hide();
+      }
+    }
+
+    console.log("toshow: ");
+    console.log(toShow);
+    console.log("highlight elements: ");
+    console.log(slide.slideElements.highlightElements);
+
+  }
 };
 console.log("testing this class execution");
