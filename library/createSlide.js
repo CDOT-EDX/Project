@@ -590,7 +590,7 @@ AVIATION.common.Slide.prototype = {
     }
   },
   
-  buildHighlights: function(){
+  buildHighlights: function(modalHighlight){
     var slide = this;
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
       this.highlights.forEach(function(highlight, h){
@@ -607,6 +607,8 @@ AVIATION.common.Slide.prototype = {
                    (hideInvokerBorder ? "" : (";border:" + highlight.border) ) + 
                    ";position:absolute"
         }).appendTo(this.container);          
+
+        slide.slideElements.highlightElements.push(modalInvoker);
       });
       // build the highlights
 
@@ -619,6 +621,8 @@ AVIATION.common.Slide.prototype = {
   buildModals: function(){
     // for each modal build the audios!
     //this.buildSlideAudios(modalAudios, parent, modalIndex);
+    // and build the highlights (the modal becomes a mini slide instance)
+    //this.buildHighlights(true);
   },
   
   resetStatusBar: function(){
@@ -867,6 +871,8 @@ AVIATION.common.Slide.prototype = {
       });
 
       players[p].on("ended", function(e){
+        // should we check for highlight callbacks as well?
+
         console.log("audio has ended: " + p);
 
         slideObject.checkSlideControlPlayButtonsState();
@@ -896,8 +902,6 @@ AVIATION.common.Slide.prototype = {
           slideObject.checkSlideControlPlayButtons("end");
         }
         
-        // if we need highlight control , call the function here
-
       });
 
     });
