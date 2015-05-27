@@ -126,7 +126,7 @@ AVIATION.common.Slide.prototype = {
   // method for invoking all build functions in one place and activating the slide
   buildSlide: function(){
     "use strict";
-    this.buildContent();
+    //this.buildContent();
 
     if(!this.options.noAudio){
       this.buildSlideAudios();
@@ -283,7 +283,7 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(this.container);
     }
     
-    this.buildHighlights();
+    this.buildHighlights(activeIndex);
 
     setupInnerContent = function(classSize){
       var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(".slideInner"), 
@@ -537,42 +537,52 @@ AVIATION.common.Slide.prototype = {
     }
   },
   
-  buildHighlights: function(modalHighlight){
-    var slide = this;
+  buildHighlights: function(index, modalHighlight){
+    var slide = this, $highlight, modalInvoker, h, addOnClick = [];
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
       console.log("lets build highlights");
-      this.highlights.forEach(function(highlight, h){
-        var $highlight = $("#" + highlight.id + "_highlight"), modalInvoker;
+      for(h = 0; h < this.highlights.length; h++){
+        $highlight = $("#" + this.highlights[h].id + "_highlight[h]");
         if( !$highlight || $highlight.length < 1 ){
           modalInvoker = jQuery('<div/>', {
-              id: highlight.id + "_highlight",
-              href : "#" + highlight.id,
+              id: this.highlights[h].id + "_highlight[h]",
+              href : "#" + this.highlights[h].id,
               role : "button",
               "class" : "clearClickable",
-              style: "top:" + highlight.top + 
-                     ";left:" + highlight.left +
-                     ";width:" + highlight.width +
-                     ";height:" + highlight.height +
-                     (slide.hiddenHighlights ? "" : (";border:" + highlight.border) ) + 
+              style: "top:" + this.highlights[h].top + 
+                     ";left:" + this.highlights[h].left +
+                     ";width:" + this.highlights[h].width +
+                     ";height:" + this.highlights[h].height +
+                     (slide.hiddenhighlights ? "" : (";border:" + this.highlights[h].border) ) + 
                      ";position:absolute" + 
                      ";display:none;"
           }).appendTo(slide.container);            
 
-          if(highlight.onclick && typeof highlight.onclick === "function" ){
-            modalInvoker.on("click", highlight.onclick);
-          } else {
-            modalInvoker.off();
-
-          }
-
           slide.slideElements.highlightElements.push(modalInvoker);
+          addOnClick.push(false);
         }
+      }
 
-      });
-      // build the highlights
+      // now lets add on clicks on the modals we need them in
+      for(h=0; h<slide.slideContent[index].highlights.length; h++){
+        if(typeof slide.slideContent[index].highlights[h] === "object" && 
+            slide.slideContent[index].highlights[h].onclick &&
+            typeof slide.slideContent[index].highlights[h].onclick === "function"){
+          addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+        }
+      }
 
-      // for audios, attach an extra 'on end / on play' inside here to 
-      // contain highlights functionality?
+      for(h=0; h<addOnClick.length; h++){
+        if(addOnClick[h]){
+          slide.slideElements.highlightElements[h]
+            .off();
+          slide.slideElements.highlightElements[h]
+            .on("click", addOnClick[h]);
+        } else {
+          slide.slideElements.highlightElements[h].off();
+        }
+      }
+
     }
 
   },
@@ -824,6 +834,12 @@ AVIATION.common.Slide.prototype = {
       });
       
       players[p].on("playing", function(e){
+        // something that happens every time we press play (avatar opens mouth?)
+
+      });
+
+      // force it to only happen at the beginning of the audio
+      players[p].cue(0, function(e){
         if (contentAtStart !== ""){
           slideObject.buildContent(true, contentAtStart);
         }
@@ -984,7 +1000,7 @@ AVIATION.common.Slide.prototype = {
       this.setStatus('Press "Continue" when ready');
     }
 
-    this.buildContent(null, null, null, true);
+    //this.buildContent(null, null, null, true);
   },
 
   redirectToPage: function( pageId ){
