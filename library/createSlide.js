@@ -553,7 +553,7 @@ AVIATION.common.Slide.prototype = {
                      ";left:" + this.highlights[h].left +
                      ";width:" + this.highlights[h].width +
                      ";height:" + this.highlights[h].height +
-                     (slide.hiddenhighlights ? "" : (";border:" + this.highlights[h].border) ) + 
+                     (slide.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[h].border) ) + 
                      ";position:absolute" + 
                      ";display:none;"
           }).appendTo(slide.container);            
@@ -588,10 +588,11 @@ AVIATION.common.Slide.prototype = {
   },
 
   buildModals: function(){
-    // for each modal build the audios!
-    //this.buildSlideAudios(modalAudios, parent, modalIndex);
-    // and build the highlights (the modal becomes a mini slide instance)
-    //this.buildHighlights(true);
+    // modals are basically slides with an extra option
+    // build constrained inside a modal window
+    if(this.options.enableModals){
+
+    }
   },
   
   resetStatusBar: function(){
@@ -1025,6 +1026,9 @@ AVIATION.common.Slide.prototype = {
           showBorder: true,
           autoplay: true,
           noAudio: false,
+          enableModals: false,
+          enableHighlights: false,
+          hiddenHighlights: false,
           avatars: {
             tom: {
               open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
@@ -1118,9 +1122,6 @@ AVIATION.common.Slide.prototype = {
               },
           ]}, option;
 
-    console.log("this initSimple:");
-    console.log(this);
-
     if(!options){
       options = this.options || {};
     }
@@ -1137,16 +1138,13 @@ AVIATION.common.Slide.prototype = {
     // TODO: move this when neccessary, for testing and development only
     this.slideElements.highlightElements = [];
 
-    console.log("the options: ");
-    console.log(options);
-
     this.avatars = options.avatars;
     this.highlights = options.highlights;
     this.options = options;
 
-    console.log("run simple");
-    console.log(this);    
+    this.container = "#slideContainer";
 
+    /* error handling example
     try {
       // if smth might cause an error....
       if(!this.container){
@@ -1159,6 +1157,7 @@ AVIATION.common.Slide.prototype = {
       // do something to continue running
       this.container = "#slideContainer";
     }
+    */
   },
 
   checkSlideHighlights: function( showHighlights, slide ){
@@ -1186,11 +1185,6 @@ AVIATION.common.Slide.prototype = {
         slide.slideElements.highlightElements[i].hide();
       }
     }
-
-    console.log("toshow: ");
-    console.log(toShow);
-    console.log("highlight elements: ");
-    console.log(slide.slideElements.highlightElements);
 
   }
 };
