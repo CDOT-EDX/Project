@@ -144,6 +144,8 @@ AVIATION.common.Slide.prototype = {
 
     this.initAudioEvents();
 
+    this.buildModals();
+
     // create events for audio/video interactions and a way to track them
     console.log("now reset slide");
 
@@ -159,8 +161,7 @@ AVIATION.common.Slide.prototype = {
   buildAvatars: function(parent, avatar, callback){
     "use strict";
     // callback will generate the title+content
-    var avatarLeft = "", avatarRight = "", contentClass = 12, avatarElement, i, slide = this, 
-        avatarLeftDiv = $("#avatarLeftDiv"), avatarRightDiv = $("#avatarRightDiv"), avatarArray = [];
+    var avatarLeft = "", avatarRight = "", contentClass = 12, i, slide = this;
 
     console.log("buidling avatars");
 
@@ -507,7 +508,8 @@ AVIATION.common.Slide.prototype = {
               'role="button">Slide Loading...</a>'
       }).appendTo(parent);
 
-      this.slideElements.statusBar = $("#statusBar");  
+      this.slideElements.statusBar = $(this.statusId);
+      //this.slideElements.statusBar = $("#statusBar");
     }
   },
 
@@ -563,23 +565,25 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
-      // now lets add on clicks on the modals we need them in
-      for(h=0; h<slide.slideContent[index].highlights.length; h++){
-        if(typeof slide.slideContent[index].highlights[h] === "object" && 
-            slide.slideContent[index].highlights[h].onclick &&
-            typeof slide.slideContent[index].highlights[h].onclick === "function"){
-          addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+      if(slide.slideContent[index].highlights){
+        // now lets add on clicks on the modals we need them in
+        for(h=0; h<slide.slideContent[index].highlights.length; h++){
+          if(typeof slide.slideContent[index].highlights[h] === "object" && 
+              slide.slideContent[index].highlights[h].onclick &&
+              typeof slide.slideContent[index].highlights[h].onclick === "function"){
+            addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+          }
         }
-      }
 
-      for(h=0; h<addOnClick.length; h++){
-        if(addOnClick[h]){
-          slide.slideElements.highlightElements[h]
-            .off();
-          slide.slideElements.highlightElements[h]
-            .on("click", addOnClick[h]);
-        } else {
-          slide.slideElements.highlightElements[h].off();
+        for(h=0; h<addOnClick.length; h++){
+          if(addOnClick[h]){
+            slide.slideElements.highlightElements[h]
+              .off();
+            slide.slideElements.highlightElements[h]
+              .on("click", addOnClick[h]);
+          } else {
+            slide.slideElements.highlightElements[h].off();
+          }
         }
       }
 
@@ -587,11 +591,44 @@ AVIATION.common.Slide.prototype = {
 
   },
 
-  buildModals: function(){
+  buildModals: function(modalOptions){
+    var newModal;
     // modals are basically slides with an extra option
     // build constrained inside a modal window
     if(this.options.enableModals && this.options.enableHighlights){
-      
+      for(i = 0; i < this.modals.length; i++){
+        newModalElement = jQuery('<div/>', {
+            id: "modal_" + this.modals[i].id,
+            class : "modal fade",
+            "tab-index" : "-1",
+            role: "dialog",
+            "aria-labelledby" : this.modals.id + "_label",
+            "aria-hidden" : true,
+            "data-backdrop": "static",
+            "data-keyboard": false
+        }).appendTo(this.container);
+
+        newModal = new AVIATION.common.Slide({
+               showAvatars: false,
+               showSlideControls: false,
+               showStatus: true,
+               showControls: false,
+               development: true,
+               container: "modal_" + this.modals[i].id
+             },
+             [{
+               title: { html: "This is the first title that appears" },
+               content: { html: "This is the html inside the slide <b>that can be used</b>" },
+             }],
+             [ 
+               "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" // no extension necessary
+               // all of the possible audio extensions will be created automatically
+             ]);
+
+        newModal.constructor();
+
+        this.modalSlides.push(newModal);  
+      }
       // itirate through modals and create each one with a unique id and launch the 
       // build content with the modified this.container id so that content gets appended to the modal
       // how do we handle audio though?
@@ -892,38 +929,40 @@ AVIATION.common.Slide.prototype = {
   checkSlideControlPlayButtons: function( action ){
     var controls = this.slideElements.slideControls;
 
-    switch(action) {
-      // hide/show buttons based on action
-      case "play":
-        controls.play.hide();
-        controls.replay.hide();
-        controls.pause.show();
-        break;
-      case "pause":
-        controls.play.show();
-        controls.replay.hide();
-        controls.pause.hide();
-        break;
-      case "replay":
-        controls.play.hide();
-        controls.replay.hide();
-        controls.pause.show();
-        break;
-      case "end":
-        controls.play.hide();
-        controls.replay.show();
-        controls.pause.hide(); 
-        break;
-      default:
-        this.slideElements.slideControls.pause.hide();
-        this.slideElements.slideControls.replay.hide();
-        break;
+    if(this.options.showSlideControls){
+      switch(action) {
+        // hide/show buttons based on action
+        case "play":
+          controls.play.hide();
+          controls.replay.hide();
+          controls.pause.show();
+          break;
+        case "pause":
+          controls.play.show();
+          controls.replay.hide();
+          controls.pause.hide();
+          break;
+        case "replay":
+          controls.play.hide();
+          controls.replay.hide();
+          controls.pause.show();
+          break;
+        case "end":
+          controls.play.hide();
+          controls.replay.show();
+          controls.pause.hide(); 
+          break;
+        default:
+          this.slideElements.slideControls.pause.hide();
+          this.slideElements.slideControls.replay.hide();
+          break;
+      }
+
     }
 
     this.checkSlideControlPlayButtonsState();
 
     this.setStatus(action);
-
   },
 
   // constrols the state of the Previous/Next 'player' buttons
@@ -931,35 +970,39 @@ AVIATION.common.Slide.prototype = {
     var controls = this.slideElements.slideControls, active = this.activeIndex,
         players = this.slideAudios;
 
-    if(active < 1){
-      console.log("first audio, no way back");
-      controls.previous.prop("disabled", true);
-      controls.previous.attr("disabled", true);
-      if(this.slideHasListened[active]){
-        controls.next.prop("disabled", false);
-        controls.next.removeAttr("disabled");
-      }
-    } else {
-      if (active < players.length - 1){
-        console.log("active is before the last player");
-        controls.previous.prop("disabled", false);
-        controls.previous.removeAttr("disabled");
+    if(this.options.showSlideControls){
+
+      if(active < 1){
+        console.log("first audio, no way back");
+        controls.previous.prop("disabled", true);
+        controls.previous.attr("disabled", true);
         if(this.slideHasListened[active]){
           controls.next.prop("disabled", false);
           controls.next.removeAttr("disabled");
-        } else {
-          controls.next.prop("disabled", true);
-          controls.next.attr("disabled", true);
         }
-      } else if (active === players.length - 1){
-        console.log("active is the last players length");
-        controls.previous.prop("disabled", false);
-        controls.previous.removeAttr("disabled");
-        controls.next.attr("disabled", true);
-        controls.next.prop("disabled", true);
       } else {
-        console.log("error: active is greater then players length? not doing anything");
+        if (active < players.length - 1){
+          console.log("active is before the last player");
+          controls.previous.prop("disabled", false);
+          controls.previous.removeAttr("disabled");
+          if(this.slideHasListened[active]){
+            controls.next.prop("disabled", false);
+            controls.next.removeAttr("disabled");
+          } else {
+            controls.next.prop("disabled", true);
+            controls.next.attr("disabled", true);
+          }
+        } else if (active === players.length - 1){
+          console.log("active is the last players length");
+          controls.previous.prop("disabled", false);
+          controls.previous.removeAttr("disabled");
+          controls.next.attr("disabled", true);
+          controls.next.prop("disabled", true);
+        } else {
+          console.log("error: active is greater then players length? not doing anything");
+        }
       }
+
     }
 
   },
@@ -983,7 +1026,12 @@ AVIATION.common.Slide.prototype = {
       case "end":
         break;
       default:
-        status.text(action);
+        if(action){
+          status.text(action);
+        } else {
+          status.text("Status is undefined!");
+        }
+        
         break;      
     }
   },
@@ -1138,15 +1186,19 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
+    // a way to keep track of the modals on the page
+    this.modalSlides = [];
+
     // TODO: move this when neccessary, for testing and development only
     this.slideElements.highlightElements = [];
 
     this.avatars = options.avatars;
     this.highlights = options.highlights;
+    this.modals = options.modals || [];
     this.options = options;
 
-    this.container = "#slideContainer";
-
+    this.container = options.container || "#slideContainer";
+    this.statusId = options.statusId || "#statusBar";
     /* error handling example
     try {
       // if smth might cause an error....
@@ -1166,26 +1218,28 @@ AVIATION.common.Slide.prototype = {
   checkSlideHighlights: function( showHighlights, slide ){
     "use strict";
     var i, j, toShow = [];
-    // check the index/indices of highlights to show from the bank
-    // and hide/show accordingly
-    console.log("lets manage some highlights!");
-    for(i=0; slide.highlights && i < slide.highlights.length; i++){
-      toShow.push(false);
-    }
-
-    for(j=0; showHighlights && j < showHighlights.length; j++){
-      if(typeof showHighlights[j] === "object"){
-        toShow[showHighlights[j].index] = true;
-      } else {
-        toShow[showHighlights[j]] = true;  
+    if(showHighlights && showHighlights.length > 0){
+      // check the index/indices of highlights to show from the bank
+      // and hide/show accordingly
+      console.log("lets manage some highlights!");
+      for(i=0; slide.highlights && i < slide.highlights.length; i++){
+        toShow.push(false);
       }
-    }
 
-    for(i=0; i < toShow.length; i++){
-      if(toShow[i]){
-        slide.slideElements.highlightElements[i].show();
-      } else {
-        slide.slideElements.highlightElements[i].hide();
+      for(j=0; showHighlights && j < showHighlights.length; j++){
+        if(typeof showHighlights[j] === "object"){
+          toShow[showHighlights[j].index] = true;
+        } else {
+          toShow[showHighlights[j]] = true;  
+        }
+      }
+
+      for(i=0; i < toShow.length; i++){
+        if(toShow[i]){
+          slide.slideElements.highlightElements[i].show();
+        } else {
+          slide.slideElements.highlightElements[i].hide();
+        }
       }
     }
 
