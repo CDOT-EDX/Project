@@ -590,7 +590,8 @@ AVIATION.common.Slide.prototype = {
   buildModals: function(){
     // modals are basically slides with an extra option
     // build constrained inside a modal window
-    if(this.options.enableModals){
+    if(this.options.enableModals && this.options.enableHighlights){
+      
       // itirate through modals and create each one with a unique id and launch the 
       // build content with the modified this.container id so that content gets appended to the modal
       // how do we handle audio though?
