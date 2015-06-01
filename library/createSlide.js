@@ -318,6 +318,8 @@ AVIATION.common.Slide.prototype = {
           });
         } 
 
+
+        console.log("is there an inner image here?");
         if (slideContent.image && slideContent.image.src) {
           if(slideContent.image.classes){
             imageClasses = slideContent.image.classes.join(" ");
@@ -328,6 +330,9 @@ AVIATION.common.Slide.prototype = {
             "class": imageClasses,
             src: slideContent.image.src || ""
           });
+
+          console.log("inner image is: ");
+          console.log(innerImage);
         }
 
         if(action === "remove" || action === "replace"){
@@ -500,10 +505,11 @@ AVIATION.common.Slide.prototype = {
   },
 
   buildStatusBar: function(parent){
+    "use strict";
     if(this.options.showStatus){
       var statusBar = jQuery('<div/>', {
         "class": "col-xs-12",
-        html: '<a href="#" id="statusBar"' + 
+        html: '<a href="#" id="' + this.statusId.split("#")[1] + '"' + 
               'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
               'role="button">Slide Loading...</a>'
       }).appendTo(parent);
@@ -536,6 +542,8 @@ AVIATION.common.Slide.prototype = {
         "continue": $("#btnC").data("action", "continue")
       };
 
+    } else {
+      this.buildStatusBar(this.options.container);    
     }
   },
   
@@ -544,10 +552,10 @@ AVIATION.common.Slide.prototype = {
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
       console.log("lets build highlights");
       for(h = 0; h < this.highlights.length; h++){
-        $highlight = $("#" + this.highlights[h].id + "_highlight[h]");
+        $highlight = $("#" + this.highlights[h].id + "_highlight");
         if( !$highlight || $highlight.length < 1 ){
           modalInvoker = jQuery('<div/>', {
-              id: this.highlights[h].id + "_highlight[h]",
+              id: this.highlights[h].id + "_highlight",
               href : "#" + this.highlights[h].id,
               role : "button",
               "class" : "clearClickable",
@@ -555,7 +563,7 @@ AVIATION.common.Slide.prototype = {
                      ";left:" + this.highlights[h].left +
                      ";width:" + this.highlights[h].width +
                      ";height:" + this.highlights[h].height +
-                     (slide.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[h].border) ) + 
+                     (slide.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[h].border + ";cursor:pointer") ) + 
                      ";position:absolute" + 
                      ";display:none;"
           }).appendTo(slide.container);            
@@ -602,7 +610,7 @@ AVIATION.common.Slide.prototype = {
             class : "modal fade",
             "tab-index" : "-1",
             role: "dialog",
-            "aria-labelledby" : this.modals.id + "_label",
+            "aria-labelledby" : this.modals[i].id + "_label",
             "aria-hidden" : true,
             "data-backdrop": "static",
             "data-keyboard": false
@@ -614,7 +622,9 @@ AVIATION.common.Slide.prototype = {
                showStatus: true,
                showControls: false,
                development: true,
-               container: "modal_" + this.modals[i].id
+               isModal: true,
+               container: "modal_" + this.modals[i].id,
+               statusId: "modal_status_" + this.modals[i].id
              },
              [{
                title: { html: "This is the first title that appears" },
@@ -856,9 +866,7 @@ AVIATION.common.Slide.prototype = {
       var contentAtStart = "", callbackAtEnd = "";
 
       content.forEach(function(cont, c){
-        
         if(content[c].audio === p){
-        // audio matches the audio inside content
           if(content[c].second){
             players[p].cue(content[c].second, function(){
               slideObject.buildContent(true, c);
@@ -869,21 +877,29 @@ AVIATION.common.Slide.prototype = {
             });
           } else {
             contentAtStart = c;
-            callbackAtEnd = content[c].callback || "";
+
+            if(content[c].callback && typeof content[c].callback === "function"){
+              callbackAtEnd = content[c].callback;
+            }
+            // force it to only happen at the beginning of the audio
+            /*
+            players[p].on("playing", function(e){
+              console.log("making the 0 second cue here for p: " + p);
+              console.log("and the contentAtStart: " + c);
+              //if (contentAtStart !== ""){
+              slideObject.buildContent(true, c);
+              //}
+            });
+*/
           }
         }
       });
-      
-      players[p].on("playing", function(e){
-        // something that happens every time we press play (avatar opens mouth?)
-
-      });
-
-      // force it to only happen at the beginning of the audio
-      players[p].cue(0, function(e){
-        if (contentAtStart !== ""){
-          slideObject.buildContent(true, contentAtStart);
-        }
+ 
+      player.cue("0.1", function(){
+//        var contentStarter = c;
+        console.log(this);
+        console.log("cueing at 0 seconds, does this not work?" + contentAtStart + " *** " );
+        slideObject.buildContent(true, contentAtStart);
       });
 
       players[p].on("ended", function(e){
@@ -896,7 +912,7 @@ AVIATION.common.Slide.prototype = {
         if (callbackAtEnd !== ""){
           callbackAtEnd();
         }
-
+        
         // start the next audio if it exists and autoplay is true
         if(players[p+1] && this.autoplay){
           slideObject.playNext();
@@ -919,6 +935,16 @@ AVIATION.common.Slide.prototype = {
         }
         
       });
+
+  //  }
+  //       }
+  //    });
+      /*
+      players[p].on("playing", function(e){
+        // something that happens every time we press play (avatar opens mouth?)
+
+      });
+      */
 
     });
 
