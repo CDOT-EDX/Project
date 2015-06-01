@@ -274,7 +274,7 @@ AVIATION.common.Slide.prototype = {
   buildContent: function(correctAudio, index, outerIndex, clearContent){
     "use strict";
     var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
-        activeIndex = index || this.activeIndex, contentContainer = $(".cdot_contentText"), setupInnerContent;
+        activeIndex = index || this.activeIndex, contentContainer = $(this.container + " .cdot_contentText"), setupInnerContent;
 
     outerIndex = this.activeIndex || 0;
 
@@ -287,7 +287,7 @@ AVIATION.common.Slide.prototype = {
     this.buildHighlights(activeIndex);
 
     setupInnerContent = function(classSize){
-      var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(".slideInner"), 
+      var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " .slideInner"), 
           action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
           newSlideInner;
 
@@ -337,8 +337,10 @@ AVIATION.common.Slide.prototype = {
 
         if(action === "remove" || action === "replace"){
           console.log("removing");
-          $(".slideInner").children().remove();
-          $(".slideInner").remove();
+          //$(".slideInner").children().remove();
+          slideInner.children().remove();
+          slideInner.remove();
+          //$(".slideInner").remove();
         }
 
         if(action === "append" || action === "replace"){
@@ -352,7 +354,8 @@ AVIATION.common.Slide.prototype = {
           newSlideInner.appendTo(contentContainer);
         }
       } else {
-        $(".slideInner").children().remove();
+        slideInner.children().remove();
+        //$(".slideInner").children().remove();
       }
     };
 
@@ -629,11 +632,15 @@ AVIATION.common.Slide.prototype = {
              [{
                title: { html: "This is the first title that appears" },
                content: { html: "This is the html inside the slide <b>that can be used</b>" },
+               audio: 0
              }],
              [ 
                "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" // no extension necessary
                // all of the possible audio extensions will be created automatically
              ]);
+
+        console.log("this is the modal slide: ");
+        console.log(newModal);
 
         newModal.constructor();
 
@@ -881,32 +888,17 @@ AVIATION.common.Slide.prototype = {
             if(content[c].callback && typeof content[c].callback === "function"){
               callbackAtEnd = content[c].callback;
             }
-            // force it to only happen at the beginning of the audio
-            /*
-            players[p].on("playing", function(e){
-              console.log("making the 0 second cue here for p: " + p);
-              console.log("and the contentAtStart: " + c);
-              //if (contentAtStart !== ""){
-              slideObject.buildContent(true, c);
-              //}
-            });
-*/
+
           }
         }
       });
- 
+
+      // force it to only happen at the beginning of the audio
       player.cue("0.1", function(){
-//        var contentStarter = c;
-        console.log(this);
-        console.log("cueing at 0 seconds, does this not work?" + contentAtStart + " *** " );
         slideObject.buildContent(true, contentAtStart);
       });
 
       players[p].on("ended", function(e){
-        // should we check for highlight callbacks as well?
-
-        console.log("audio has ended: " + p);
-
         slideObject.checkSlideControlPlayButtonsState();
 
         if (callbackAtEnd !== ""){
@@ -936,15 +928,10 @@ AVIATION.common.Slide.prototype = {
         
       });
 
-  //  }
-  //       }
-  //    });
-      /*
       players[p].on("playing", function(e){
         // something that happens every time we press play (avatar opens mouth?)
-
+        console.log("starting playing audio");
       });
-      */
 
     });
 
