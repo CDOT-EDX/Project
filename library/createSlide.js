@@ -9,6 +9,7 @@
 /*jslint white: true*/
 /*jslint nomen: true*/
 /*jslint plusplus: true*/
+/*jslint todo: true*/
 var AVIATION = AVIATION || {};
 
 AVIATION.common = {};
@@ -81,39 +82,81 @@ AVIATION.common.Slide.prototype = {
   },
 
   // build titles on the slide
-  buildTitle: function(parent, content, callback, clearTitle){
+  buildHeader: function(parent, content, callback, clearTitle){
     "use strict";
-    var titleElement = $("#slideTitle");
+    var headerElement = $(this.headerId + "_" + content.audio + "_" + (content.second || 0) ), slide = this,
+        xButton, newTitle;
 
     this.buildAvatars(parent, content.avatar, function(bsSize){
       if(content.title && content.title.html){
-        var classes = "", newTitle;
+        var classes = "", newHeader;
 
         if(content.title.classes){
           classes = content.title.classes.join(" ");
         }
 
+        if(!slide.options.isModal){
+          newHeader = jQuery('<h3/>',{
+            //TODO: find automatically generated title id/index
+            "id": slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            "class": "text-center " + classes,
+            html: content.title.html || ""
+          });
+        } else {
+          newHeader = jQuery('<div/>', {
+            id: slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            class : "modal-header",
+          }).appendTo(slide.container); //+ ' > .modal-dialog > .modal-content');
+
+          xButton = jQuery('<button/>', {
+            id: "xbtn_" + slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            class : "close",
+            type : "button",
+            "data-dismiss" : "modal",
+            "aria-hidden" : true,
+            "disabled" : true,
+            html : "x"
+          }).appendTo(newHeader);
+
+          newTitle = jQuery('<h4/>', {
+            id: "title_" + slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            class: "modal-title",
+            //id: element.id + "_label",
+            html: content.name
+          }).appendTo(newHeader);
+
+          xButton.on('click', function(e){
+            //closeModal();
+            console.log("close the modal");
+          });
+
+        }
+        
+
+/*
         newTitle = jQuery('<h3/>',{
+          //TODO: find automatically generated title id/index
           "id": "slideTitle",
           "class": "text-center " + classes,
           html: content.title.html || ""
         });
+*/
 
-        if(titleElement && titleElement.length > 0){
-          titleElement.replaceWith(newTitle);
+        if(headerElement && headerElement.length > 0){
+          headerElement.replaceWith(newHeader);
         } else {
-          newTitle.appendTo(parent);
+          newHeader.appendTo(parent);
         }
       }
 
-      if(content.title && content.title.action && titleElement){
+      if(content.title && content.title.action && headerElement){
         switch(content.title.action){
           case "remove":
-            titleElement.remove();
+            headerElement.remove();
             break;
         }
       } else if(clearTitle){
-        titleElement.remove();
+        headerElement.remove();
       }
 
       if(callback){
@@ -127,6 +170,8 @@ AVIATION.common.Slide.prototype = {
   buildSlide: function(){
     "use strict";
     //this.buildContent();
+
+
 
     if(!this.options.noAudio){
       this.buildSlideAudios();
@@ -274,9 +319,13 @@ AVIATION.common.Slide.prototype = {
   buildContent: function(correctAudio, index, outerIndex, clearContent){
     "use strict";
     var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
-        activeIndex = index || this.activeIndex, contentContainer = $(this.container + " .cdot_contentText"), setupInnerContent;
+        activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > .cdot_contentText"), setupInnerContent;
 
     outerIndex = this.activeIndex || 0;
+
+    console.log("Container inside build: " + this.container);
+    console.log(contentContainer);
+
 
     if(!contentContainer || contentContainer.length === 0){
       contentContainer = jQuery('<div/>', {
@@ -360,9 +409,9 @@ AVIATION.common.Slide.prototype = {
     };
 
     if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
-      this.buildTitle( contentContainer, this.slideContent[activeIndex], setupInnerContent);
+      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent);
     } else if ( clearContent ){
-      this.buildTitle( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent);
+      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent);
     }
     
   },
@@ -627,7 +676,9 @@ AVIATION.common.Slide.prototype = {
                development: true,
                isModal: true,
                container: "modal_" + this.modals[i].id,
-               statusId: "modal_status_" + this.modals[i].id
+               statusId: "modal_status_" + this.modals[i].id,
+               headerId: "modal_header" + this.modals[i].id,
+               footerId: "modal_footer" + this.modals[i].id
              },
              [{
                title: { html: "This is the first title that appears" },
@@ -1212,6 +1263,10 @@ AVIATION.common.Slide.prototype = {
 
     this.container = options.container || "#slideContainer";
     this.statusId = options.statusId || "#statusBar";
+    this.headerId = options.headerId || "#header";
+    this.footerId = options.footerId || "#footer";
+    this.bodyId = options.bodyIf || "#body";
+
     /* error handling example
     try {
       // if smth might cause an error....
