@@ -16,14 +16,15 @@ AVIATION.common = {};
 
 // begin a javascript class "Slide"
 AVIATION.common.Slide = function (options, slideContent, audioFiles) {
-  var md = new MobileDetect(window.navigator.userAgent);
-
+  "use strict";
+  //var md = new MobileDetect(window.navigator.userAgent);
+/*
   if(md){
     this.isMobile = md.mobile();
   } else {
     this.isMobile = false;
   }
-
+*/
   if(!options){
     options = {};
   }
@@ -53,6 +54,10 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
   console.log("this inside Slide:");
   console.log(this);
 
+  // load requirements
+  $.getScript( "https://online.cdot.senecacollege.ca:25080/aviation/js/bootstrap.min.js", function(){
+    console.log("loaded bootstrap js");
+  });
 };
 
 AVIATION.common.Slide.prototype = {
@@ -87,6 +92,11 @@ AVIATION.common.Slide.prototype = {
     var headerElement = $(this.headerId + "_" + content.audio + "_" + (content.second || 0) ), slide = this,
         xButton, newTitle;
 
+    console.log("building the header");
+    console.log(headerElement);
+    console.log("whos the parent?");
+    console.log(parent);
+
     this.buildAvatars(parent, content.avatar, function(bsSize){
       if(content.title && content.title.html){
         var classes = "", newHeader;
@@ -96,6 +106,7 @@ AVIATION.common.Slide.prototype = {
         }
 
         if(!slide.options.isModal){
+          console.log("theres no header and not a modal, create it");
           newHeader = jQuery('<h3/>',{
             //TODO: find automatically generated title id/index
             "id": slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
@@ -103,10 +114,11 @@ AVIATION.common.Slide.prototype = {
             html: content.title.html || ""
           });
         } else {
+          console.log("theres no header but a modal, create it");
           newHeader = jQuery('<div/>', {
             id: slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
             class : "modal-header",
-          }).appendTo(slide.container); //+ ' > .modal-dialog > .modal-content');
+          }); //.appendTo(slide.container); //+ ' > .modal-dialog > .modal-content');
 
           xButton = jQuery('<button/>', {
             id: "xbtn_" + slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
@@ -144,7 +156,11 @@ AVIATION.common.Slide.prototype = {
 
         if(headerElement && headerElement.length > 0){
           headerElement.replaceWith(newHeader);
+          console.log("replace the header");
         } else {
+          console.log("append the header");
+          console.log(newHeader);
+          console.log(parent);
           newHeader.appendTo(parent);
         }
       }
@@ -316,7 +332,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   // method for building the content of the slide
-  buildContent: function(correctAudio, index, outerIndex, clearContent){
+  buildContent: function(correctAudio, index, outerIndex, clearContent, cb){
     "use strict";
     var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
         activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > .cdot_contentText"), setupInnerContent;
@@ -335,10 +351,10 @@ AVIATION.common.Slide.prototype = {
     
     this.buildHighlights(activeIndex);
 
-    setupInnerContent = function(classSize){
+    setupInnerContent = function(classSize, callback){
       var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " .slideInner"), 
           action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
-          newSlideInner;
+          newSlideInner;// callback = c;b
 
       if(!clearContent){
         if(slideContent.content){
@@ -406,8 +422,16 @@ AVIATION.common.Slide.prototype = {
         slideInner.children().remove();
         //$(".slideInner").children().remove();
       }
+/*
+      if(callback && typeof callback === 'function'){
+        callback();
+      }
+      */
     };
 
+
+    console.log("container before building header?");
+    console.log(contentContainer);
     if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
       this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent);
     } else if ( clearContent ){
@@ -608,7 +632,7 @@ AVIATION.common.Slide.prototype = {
         if( !$highlight || $highlight.length < 1 ){
           modalInvoker = jQuery('<div/>', {
               id: this.highlights[h].id + "_highlight",
-              href : "#" + this.highlights[h].id,
+              href : "#modal_" + this.highlights[h].id,
               role : "button",
               "class" : "clearClickable",
               style: "top:" + this.highlights[h].top + 
@@ -675,10 +699,10 @@ AVIATION.common.Slide.prototype = {
                showControls: false,
                development: true,
                isModal: true,
-               container: "modal_" + this.modals[i].id,
-               statusId: "modal_status_" + this.modals[i].id,
-               headerId: "modal_header" + this.modals[i].id,
-               footerId: "modal_footer" + this.modals[i].id
+               container: "#modal_" + this.modals[i].id,
+               statusId: "#modal_status_" + this.modals[i].id,
+               headerId: "#modal_header_" + this.modals[i].id,
+               footerId: "#modal_footer_" + this.modals[i].id
              },
              [{
                title: { html: "This is the first title that appears" },
@@ -938,6 +962,7 @@ AVIATION.common.Slide.prototype = {
 
             if(content[c].callback && typeof content[c].callback === "function"){
               callbackAtEnd = content[c].callback;
+              //callbackAtEnd();
             }
 
           }
@@ -947,13 +972,17 @@ AVIATION.common.Slide.prototype = {
       // force it to only happen at the beginning of the audio
       player.cue("0.1", function(){
         slideObject.buildContent(true, contentAtStart);
+        if(callbackAtEnd){
+          // run the callback that should be cued
+          callbackAtEnd();
+        }
       });
 
       players[p].on("ended", function(e){
         slideObject.checkSlideControlPlayButtonsState();
 
         if (callbackAtEnd !== ""){
-          callbackAtEnd();
+          //callbackAtEnd();
         }
         
         // start the next audio if it exists and autoplay is true
@@ -969,9 +998,10 @@ AVIATION.common.Slide.prototype = {
 
           if(slideObject.options.autoplay){
             // only activate the timer if the autplay is on
+            
             slideObject.activateTimer(5, true);  
           } else {
-            slideObject.statusBar('Click "Continue" when you are ready');
+            slideObject.statusBar.html('Click "Continue" when you are ready');
           }
           
           slideObject.checkSlideControlPlayButtons("end");
