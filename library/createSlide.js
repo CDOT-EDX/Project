@@ -339,16 +339,33 @@ AVIATION.common.Slide.prototype = {
 
     outerIndex = this.activeIndex || 0;
 
-    console.log("Container inside build: " + this.container);
+    console.log("whats the container here?");
     console.log(contentContainer);
+    console.log("and the modal option?");
+    console.log(this.options.isModal);
 
 
-    if(!contentContainer || contentContainer.length === 0){
+    if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
+      console.log("first if");
       contentContainer = jQuery('<div/>', {
         "class": this.options.showAvatars ? "cdot_contentText col-lg-8" : "cdot_contentText col-xs-12"
       }).appendTo(this.container);
+    } else if (this.options.isModal) {
+      var dialogContainer = jQuery('<div/>', {
+        "class": "modal-dialog"
+      }).appendTo(this.container);
+
+      contentContainer = jQuery('<div/>', {
+        class: "modal-content"
+      }).appendTo(dialogContainer);
+      //contentContainer = $(this.container);
+
+
     }
     
+    console.log("and the contentainer after?");
+    console.log(contentContainer);
+
     this.buildHighlights(activeIndex);
 
     setupInnerContent = function(classSize, callback){
@@ -368,7 +385,7 @@ AVIATION.common.Slide.prototype = {
 
         newSlideInner = jQuery('<div/>', {
           id: "slideInner_" + outerIndex,
-          "class": "slideInner col-xs-12",
+          "class": "slideInner col-xs-12" + slide.options.isModal ? " modal-body" : "",
         });
 
         if (slideContent.content && slideContent.content.html){
@@ -429,9 +446,6 @@ AVIATION.common.Slide.prototype = {
       */
     };
 
-
-    console.log("container before building header?");
-    console.log(contentContainer);
     if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
       this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent);
     } else if ( clearContent ){
@@ -597,9 +611,12 @@ AVIATION.common.Slide.prototype = {
 
   // builds controls that go at the very bottom of the slide (back/continue) and status bar
   buildCourseControls: function(){
-    if(this.options.showControls){
+    var controls = $(this.options.footerId + " .controls")
+        footer = $(this.options.footerId);
+
+    if(this.options.showControls){ //&& (!controls || controls.length < 1) ){
       var courseControlsRow = jQuery('<div/>', {
-        "class": "row",
+        "class": "row controls",
       }).appendTo( $(this.container).parent() );
 
       this.buildStatusBar(courseControlsRow);
@@ -1012,6 +1029,10 @@ AVIATION.common.Slide.prototype = {
       players[p].on("playing", function(e){
         // something that happens every time we press play (avatar opens mouth?)
         console.log("starting playing audio");
+      });
+
+      players[p].on("pause", function(e){
+        console.log("has been paused...");
       });
 
     });
