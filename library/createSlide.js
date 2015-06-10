@@ -87,7 +87,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   // build titles on the slide
-  buildHeader: function(parent, content, callback, clearTitle){
+  buildHeader: function(parent, content, setupContent, clearTitle, callback){
     "use strict";
     var headerElement = $(this.headerId + "_" + content.audio + "_" + (content.second || 0) ), slide = this,
         xButton, newTitle;
@@ -175,8 +175,8 @@ AVIATION.common.Slide.prototype = {
         headerElement.remove();
       }
 
-      if(callback){
-        callback(bsSize);
+      if(setupContent && typeof setupContent === 'function'){
+        setupContent(bsSize, callback);
       }
 
     });
@@ -185,37 +185,36 @@ AVIATION.common.Slide.prototype = {
   // method for invoking all build functions in one place and activating the slide
   buildSlide: function(){
     "use strict";
-    //this.buildContent();
 
+    console.log("inside buildSlide");
 
+    var slide = this; //callback = function(){
 
     if(!this.options.noAudio){
-      this.buildSlideAudios();
+      console.log("going to buildSlideAudios");
+      this.buildSlideAudios( );
     } else {
-      this.buildContent(true, this.activeIndex, this.activeIndex);
+      console.log("going to buildContent");
+      this.buildContent(true, this.activeIndex, this.activeIndex, false, callback);
     }
-    
-    console.log("launching build controls");
-    
-    this.buildSlideControls();
-    
-    console.log("launching build course controls");
-    
-    this.buildCourseControls();
+    console.log("callback from buildSlide!");
+    slide.initAudioEvents( );
 
-    this.initAudioEvents();
+    //slide.buildFooter();
 
-    this.buildModals();
+    slide.buildModals();
 
     // create events for audio/video interactions and a way to track them
     console.log("now reset slide");
 
-    if(!this.options.noAudio){
-      this.resetSlide();  
+    if(!slide.options.noAudio){
+      slide.resetSlide();  
     }
-    
+  
     // finished thus activate the slide
-    this.activateSlide();
+    slide.activateSlide();
+    //this.buildFooter();
+
   },
 
   // method for building avatars into the slide
@@ -224,13 +223,13 @@ AVIATION.common.Slide.prototype = {
     // callback will generate the title+content
     var avatarLeft = "", avatarRight = "", contentClass = 12, i, slide = this;
 
-    console.log("buidling avatars");
+//    console.log("buidling avatars");
 
     function createAvatars( avatars ){
       var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg, filename = "";
 
-      console.log("AVATARS *** ");
-      console.log(avatars);
+      //console.log("AVATARS *** ");
+      //console.log(avatars);
 
       for(i = 0; i < avatars.length; i++){
 
@@ -339,20 +338,20 @@ AVIATION.common.Slide.prototype = {
 
     outerIndex = this.activeIndex || 0;
 
-    console.log("whats the container here?");
-    console.log(contentContainer);
-    console.log("and the modal option?");
-    console.log(this.options.isModal);
+    // console.log("whats the container here?");
+    // console.log(contentContainer);
+    // console.log("and the modal option?");
+    // console.log(this.options.isModal);
 
 
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
-      console.log("first if");
+      // console.log("first if");
       contentContainer = jQuery('<div/>', {
         "class": this.options.showAvatars ? "cdot_contentText col-lg-8" : "cdot_contentText col-xs-12"
       }).appendTo(this.container);
     } else if (this.options.isModal) {
       var dialogContainer = jQuery('<div/>', {
-        "class": "modal-dialog"
+        "class": "modal-dialog modal-cdot"
       }).appendTo(this.container);
 
       contentContainer = jQuery('<div/>', {
@@ -363,8 +362,8 @@ AVIATION.common.Slide.prototype = {
 
     }
     
-    console.log("and the contentainer after?");
-    console.log(contentContainer);
+    // console.log("and the contentainer after?");
+    // console.log(contentContainer);
 
     this.buildHighlights(activeIndex);
 
@@ -401,7 +400,7 @@ AVIATION.common.Slide.prototype = {
         } 
 
 
-        console.log("is there an inner image here?");
+        // console.log("is there an inner image here?");
         if (slideContent.image && slideContent.image.src) {
           if(slideContent.image.classes){
             imageClasses = slideContent.image.classes.join(" ");
@@ -413,12 +412,12 @@ AVIATION.common.Slide.prototype = {
             src: slideContent.image.src || ""
           });
 
-          console.log("inner image is: ");
-          console.log(innerImage);
+          // console.log("inner image is: ");
+          // console.log(innerImage);
         }
 
         if(action === "remove" || action === "replace"){
-          console.log("removing");
+          // console.log("removing");
           //$(".slideInner").children().remove();
           slideInner.children().remove();
           slideInner.remove();
@@ -426,7 +425,7 @@ AVIATION.common.Slide.prototype = {
         }
 
         if(action === "append" || action === "replace"){
-          console.log("appending");
+          // console.log("appending");
           if(innerContent){
             innerContent.appendTo(newSlideInner);
           }
@@ -439,28 +438,76 @@ AVIATION.common.Slide.prototype = {
         slideInner.children().remove();
         //$(".slideInner").children().remove();
       }
-/*
+
+      //if(call && typeof cb === 'function'){
+        //cb();
+      //}
+
       if(callback && typeof callback === 'function'){
         callback();
       }
-      */
+      
+      slide.buildFooter();
+
     };
 
     if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
-      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent);
+      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, false, cb);
     } else if ( clearContent ){
-      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent);
+      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent, cb);
     }
     
   },
 
-  // build controls that go immediately after the slide (play/pause buttons)
-  buildSlideControls: function(){
+  buildFooter: function(){
     "use strict";
+
+    var footer = $(this.options.footerId);
+
+    // console.log("inside footer");
+
+
+    if(!footer || footer.length < 1){
+
+      footer = jQuery('<div/>', {
+        id: this.options.footerId.split("#")[1],
+        class: this.options.isModal ? "modal-footer" : "row"
+      });
+
+      if(this.options.isModal){
+         console.log("trying to find container");
+        footer.appendTo( this.container + " > .modal-dialog > .modal-content");
+         console.log( $(this.container + " > .modal-dialog > .modal-content") );
+      } else {
+        footer.appendTo( $(this.container).parent() );  
+      }
+
+      // console.log("trying to append footer to " + this.container);
+      console.log("wheres the footer");
+      console.log(footer);
+      // console.log("launching build controls");
+      
+      this.buildSlideControls(footer);
+      
+      // console.log("launching build course controls");
+      
+      this.buildCourseControls(footer);
+
+    }
+
+
+  },
+
+  // build controls that go immediately after the slide (play/pause buttons)
+  buildSlideControls: function(parentContainer){
+    "use strict";
+
+    var parent = parentContainer || $(this.container).parent();
+
     if(this.options.showSlideControls){
       var slideControlsRow = jQuery('<div/>', {
         "class": "row",
-      }).appendTo( $(this.container).parent() );
+      }).appendTo( parent );
 
       this.insertLineBreak(slideControlsRow);
 
@@ -497,7 +544,7 @@ AVIATION.common.Slide.prototype = {
 
       this.initSlideButtonEvents();
     } else {
-      this.insertLineBreak( $(this.container).parent() );
+      this.insertLineBreak( parent );
     }
   },
 
@@ -514,16 +561,16 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  buildSlideAudios: function(modalAudios, parent, modalIndex){
+  buildSlideAudios: function(){//modalAudios, parent, modalIndex){
     "use strict";
     var slideObject = this, localAudios, parentContainer;
  
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
 
-    if(this.audioFiles || (modalAudios && parent) ){
-      localAudios = modalAudios || this.audioFiles;
-      parentContainer = parent || slideObject.container;
+    if(this.audioFiles){ //|| (modalAudios && parent) ){
+      localAudios = this.audioFiles; // modalAudios
+      parentContainer = slideObject.container;
 
       // if modals, 2d array thus two itterations...
       localAudios.forEach( function(audio, a){
@@ -531,7 +578,7 @@ AVIATION.common.Slide.prototype = {
         var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
             extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
-        console.log("audio files here: " + audio); 
+        // console.log("audio files here: " + audio); 
 
         // make into a function ?
         try{
@@ -570,7 +617,7 @@ AVIATION.common.Slide.prototype = {
             type: types[i]
           }).appendTo(addedSlideAudio);
         }
-
+/*
         if(modalAudios && parent){
           try {
             slideObject.modalData[modalIndex].modalAudios.push(Popcorn("#audio_" + a));
@@ -581,6 +628,7 @@ AVIATION.common.Slide.prototype = {
             console.log(error);
           }
         } else {
+*/
           try {
             slideObject.slideAudios.push(Popcorn("#audio_" + a));
             slideObject.slideHasListened.push(false);
@@ -589,7 +637,7 @@ AVIATION.common.Slide.prototype = {
             console.log("slide audio init error: ");
             console.log(error);
           }
-        }
+//        }
       });
     }
   },
@@ -597,27 +645,42 @@ AVIATION.common.Slide.prototype = {
   buildStatusBar: function(parent){
     "use strict";
     if(this.options.showStatus){
-      var statusBar = jQuery('<div/>', {
+      var closeButton, 
+
+      statusBar = jQuery('<div/>', {
         "class": "col-xs-12",
         html: '<a href="#" id="' + this.statusId.split("#")[1] + '"' + 
               'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
               'role="button">Slide Loading...</a>'
       }).appendTo(parent);
 
-      this.slideElements.statusBar = $(this.statusId);
+      if(this.options.isModal){
+        this.insertLineBreak(parent);
+        
+        closeButton = jQuery('<button/>', {
+          type: "button",
+          class: "btn btn-default",
+          'data-dismiss': "modal",
+          html: "Back to Instruments"
+        }).appendTo(parent);
+        
+      }
+
+      // console.log("trying to see if statusBar exists");
+      this.slideElements.statusBar = statusBar.find(this.statusId);//$(this.statusId);
+      // console.log(this.slideElements.statusBar);
       //this.slideElements.statusBar = $("#statusBar");
     }
   },
 
   // builds controls that go at the very bottom of the slide (back/continue) and status bar
-  buildCourseControls: function(){
-    var controls = $(this.options.footerId + " .controls")
-        footer = $(this.options.footerId);
+  buildCourseControls: function(parentContainer){
+    var controls = $(this.options.footerId + " .controls"), parent = parentContainer || $(this.container).parent();
 
     if(this.options.showControls){ //&& (!controls || controls.length < 1) ){
       var courseControlsRow = jQuery('<div/>', {
         "class": "row controls",
-      }).appendTo( $(this.container).parent() );
+      }).appendTo( parent );
 
       this.buildStatusBar(courseControlsRow);
 
@@ -636,14 +699,17 @@ AVIATION.common.Slide.prototype = {
       };
 
     } else {
-      this.buildStatusBar(this.options.container);    
+      //this.buildStatusBar( this.options.isModal ? parent : this.options.container);    
+      // console.log("building only status bar ! on parent");
+      // console.log(parent);
+      this.buildStatusBar(parent);
     }
   },
   
   buildHighlights: function(index, modalHighlight){
     var slide = this, $highlight, modalInvoker, h, addOnClick = [];
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
-      console.log("lets build highlights");
+      // console.log("lets build highlights");
       for(h = 0; h < this.highlights.length; h++){
         $highlight = $("#" + this.highlights[h].id + "_highlight");
         if( !$highlight || $highlight.length < 1 ){
@@ -745,7 +811,7 @@ AVIATION.common.Slide.prototype = {
   },
   
   resetStatusBar: function(){
-    console.log("resetting status bar");
+    // console.log("resetting status bar");
     this.slideElements.statusBar.off();
     this.slideElements.statusBar.prop("disabled", true);
   },
@@ -762,7 +828,7 @@ AVIATION.common.Slide.prototype = {
 
     var resetTimerOnClick = function(e){
       e.preventDefault();
-      console.log("clicked reset on status bar");
+      // console.log("clicked reset on status bar");
       slideObject.resetTimer(true);
       if(continueId && continueId !== ""){
         $(this).on('click', function(){
@@ -813,9 +879,9 @@ AVIATION.common.Slide.prototype = {
     var active = this.activeIndex, players = this.slideAudios;
 
     this.checkSlideControlPlayButtons("play");
-    console.log("playCurrent active: " + active);
+    // console.log("playCurrent active: " + active);
     players[active].play();
-    console.log("trying to play...");
+    // console.log("trying to play...");
   },
   
   pauseCurrent: function(e){
@@ -846,7 +912,7 @@ AVIATION.common.Slide.prototype = {
     this.resetAudio();
 
     this.activeIndex++;
-    console.log("playing next, whats the activeIndex now? " + this.activeIndex);
+    // console.log("playing next, whats the activeIndex now? " + this.activeIndex);
     this.playCurrent();
   },
 
@@ -874,8 +940,8 @@ AVIATION.common.Slide.prototype = {
     // attach events to each button
     var buttons = this.slideElements.slideControls, slide = this;
 
-    console.log("slidebutton events slide: ");
-    console.log(slide);
+    // console.log("slidebutton events slide: ");
+    // console.log(slide);
 
     function initSlideBtn(e, button){
           var action = $(this).data("action");
@@ -927,8 +993,8 @@ AVIATION.common.Slide.prototype = {
    // attach events to each button
     var buttons = this.slideElements.courseControls, slide = this;
 
-    console.log("coursebutton events slide: ");
-    console.log(slide);
+    // console.log("coursebutton events slide: ");
+    // console.log(slide);
 
     function assignBtnAction(e, button){
       var action = $(this).data("action");
@@ -955,7 +1021,7 @@ AVIATION.common.Slide.prototype = {
 
   },
   
-  initAudioEvents: function(){
+  initAudioEvents: function(callback){
     var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened,
         slideObject = this;
     // let's set the generic "onPlay/onEnd" events
@@ -1037,6 +1103,7 @@ AVIATION.common.Slide.prototype = {
 
     });
 
+    this.buildFooter();
     //this.buildContent(true, this.activeIndex);
     // if no audio?
   },
@@ -1152,7 +1219,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   activateSlide: function(){
-    if(!this.options.noAudio){
+    if(!this.options.noAudio && !this.options.isModal){
       this.playCurrent();  
     }
   },
@@ -1160,7 +1227,7 @@ AVIATION.common.Slide.prototype = {
   resetSlide: function(){
 
     this.activeIndex = 0;
-    console.log(this.slideElements.slideControls);
+    // console.log(this.slideElements.slideControls);
     this.checkSlideControlPlayButtons();
 
     if(this.options.noAudio){
@@ -1195,6 +1262,8 @@ AVIATION.common.Slide.prototype = {
           enableModals: false,
           enableHighlights: false,
           hiddenHighlights: false,
+          headerId: "#slideHeader",
+          footerId: "#slideFooter",
           avatars: {
             tom: {
               open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
@@ -1340,7 +1409,7 @@ AVIATION.common.Slide.prototype = {
     if(showHighlights && showHighlights.length > 0){
       // check the index/indices of highlights to show from the bank
       // and hide/show accordingly
-      console.log("lets manage some highlights!");
+      // console.log("lets manage some highlights!");
       for(i=0; slide.highlights && i < slide.highlights.length; i++){
         toShow.push(false);
       }

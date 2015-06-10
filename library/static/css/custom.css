@@ -133,3 +133,7 @@ a.btn.cdotBtn2[disabled] {
     background-position: center; 
     height: 32px;
 }
+
+div.modal-dialog.modal-cdot{
+  width:auto;
+}
