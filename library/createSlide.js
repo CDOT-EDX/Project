@@ -1404,8 +1404,8 @@ AVIATION.common.Slide.prototype = {
       console.debug(error);
       console.log("using a default id instead");
       // do something to continue running
-      this.container = "#slideContainer";
-    }
+      this.container = "#slideContainer"
+    };
     */
   },
 
