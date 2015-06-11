@@ -1,9 +1,9 @@
 // TODOs:
 /*
-    content is getting duplicated/ check ids and how content is removed/replaced
     destroy method
     and create method vs init to accept one json object only
-    
+    add jQuery.pulse: http://jsoverson.github.io/jquery.pulse.js/ when changing content/title to highlight it for the user
+
 */
 
 /***
@@ -97,7 +97,7 @@ AVIATION.common.Slide.prototype = {
   // build titles on the slide
   buildHeader: function(parent, content, setupContent, clearTitle, callback){
     "use strict";
-    var headerElement = $(this.headerId + "_" + content.audio + "_" + (content.second || 0) ), slide = this,
+    var headerElement = $(this.headerId), slide = this,// + "_" + content.audio + "_" + (content.second || 0) ), slide = this,
         xButton, newTitle;
 
     console.log("building the header");
@@ -117,36 +117,36 @@ AVIATION.common.Slide.prototype = {
           console.log("theres no header and not a modal, create it");
           newHeader = jQuery('<h3/>',{
             //TODO: find automatically generated title id/index
-            "id": slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            "id": slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
             "class": "text-center " + classes,
             html: content.title.html || ""
           });
         } else {
           console.log("theres no header but a modal, create it");
           newHeader = jQuery('<div/>', {
-            id: slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            id: slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
             class : "modal-header",
           }); //.appendTo(slide.container); //+ ' > .modal-dialog > .modal-content');
 
           xButton = jQuery('<button/>', {
-            id: "xbtn_" + slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            id: "xbtn_" + slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
             class : "close",
             type : "button",
             "data-dismiss" : "modal",
             "aria-hidden" : true,
-            "disabled" : true,
+            //"disabled" : true,
             html : "x"
           }).appendTo(newHeader);
 
           newTitle = jQuery('<h4/>', {
-            id: "title_" + slide.headerId.split("#")[1] + "_" + content.audio + "_" + (content.second || 0),
+            id: "title_" + slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
             class: "modal-title",
             //id: element.id + "_label",
             html: content.name
           }).appendTo(newHeader);
 
           xButton.on('click', function(e){
-            closeModal();
+            //closeModal();
             console.log("close the modal");
           });
         }
@@ -192,18 +192,18 @@ AVIATION.common.Slide.prototype = {
   buildSlide: function(){
     "use strict";
 
-    console.log("inside buildSlide");
+    // console.log("inside buildSlide");
 
     var slide = this; //callback = function(){
 
     if(!this.options.noAudio){
-      console.log("going to buildSlideAudios");
+      // console.log("going to buildSlideAudios");
       this.buildSlideAudios( );
     } else {
-      console.log("going to buildContent");
+      // console.log("going to buildContent");
       this.buildContent(true, this.activeIndex, this.activeIndex, false, callback);
     }
-    console.log("callback from buildSlide!");
+    // console.log("callback from buildSlide!");
     slide.initAudioEvents( );
 
     //slide.buildFooter();
@@ -211,7 +211,7 @@ AVIATION.common.Slide.prototype = {
     slide.buildModals();
 
     // create events for audio/video interactions and a way to track them
-    console.log("now reset slide");
+    // console.log("now reset slide");
 
     if(!slide.options.noAudio){
       slide.resetSlide();  
@@ -387,7 +387,7 @@ AVIATION.common.Slide.prototype = {
 
         newSlideInner = jQuery('<div/>', {
           id: "slideInner_" + outerIndex,
-          "class": "slideInner col-xs-12" + slide.options.isModal ? " modal-body" : "",
+          "class": "slideInner col-xs-12" + (slide.options.isModal ? " modal-body" : ""),
         });
 
         if (slideContent.content && slideContent.content.html){
@@ -1391,7 +1391,7 @@ AVIATION.common.Slide.prototype = {
     this.statusId = options.statusId || "#statusBar";
     this.headerId = options.headerId || "#header";
     this.footerId = options.footerId || "#footer";
-    this.bodyId = options.bodyIf || "#body";
+    this.bodyId = options.bodyId || "#body";
 
     /* error handling example
     try {
