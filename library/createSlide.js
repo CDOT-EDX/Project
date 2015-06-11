@@ -1,6 +1,8 @@
 // TODOs:
 /*
     content is getting duplicated/ check ids and how content is removed/replaced
+    destroy method
+    and create method vs init to accept one json object only
     
 */
 
@@ -144,13 +146,11 @@ AVIATION.common.Slide.prototype = {
           }).appendTo(newHeader);
 
           xButton.on('click', function(e){
-            //closeModal();
+            closeModal();
             console.log("close the modal");
           });
-
         }
         
-
 /*
         newTitle = jQuery('<h3/>',{
           //TODO: find automatically generated title id/index
@@ -349,7 +349,6 @@ AVIATION.common.Slide.prototype = {
     // console.log("and the modal option?");
     // console.log(this.options.isModal);
 
-
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
       // console.log("first if");
       contentContainer = jQuery('<div/>', {
@@ -364,8 +363,6 @@ AVIATION.common.Slide.prototype = {
         class: "modal-content"
       }).appendTo(dialogContainer);
       //contentContainer = $(this.container);
-
-
     }
     
     // console.log("and the contentainer after?");
@@ -374,7 +371,7 @@ AVIATION.common.Slide.prototype = {
     this.buildHighlights(activeIndex);
 
     setupInnerContent = function(classSize, callback){
-      var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " .slideInner"), 
+      var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
           action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
           newSlideInner;// callback = c;b
 
@@ -421,6 +418,9 @@ AVIATION.common.Slide.prototype = {
           // console.log("inner image is: ");
           // console.log(innerImage);
         }
+
+        console.log("the inner elemnt is...");
+        console.log(slideInner);
 
         if(action === "remove" || action === "replace"){
           // console.log("removing");
