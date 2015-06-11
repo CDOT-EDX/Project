@@ -1,3 +1,9 @@
+// TODOs:
+/*
+    content is getting duplicated/ check ids and how content is removed/replaced
+    
+*/
+
 /***
   *   Custom library/framework to speed up content development
   *   for the edX Aviation project at CDOT
@@ -656,7 +662,7 @@ AVIATION.common.Slide.prototype = {
 
       if(this.options.isModal){
         this.insertLineBreak(parent);
-        
+
         closeButton = jQuery('<button/>', {
           type: "button",
           class: "btn btn-default",
