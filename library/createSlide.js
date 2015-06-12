@@ -63,9 +63,15 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
   console.log(this);
 
   // load requirements
-  $.getScript( "https://online.cdot.senecacollege.ca:25080/aviation/js/bootstrap.min.js", function(){
-    console.log("loaded bootstrap js");
-  });
+  /*
+  if(typeof($.fn.modal) === 'undefined'){
+    console.log("TYPE OF MODAL: " + typeof $().modal );
+    $.getScript( "https://online.cdot.senecacollege.ca:25080/aviation/js/bootstrap.min.js", function(){
+      console.log("loaded bootstrap js");
+    });
+  }
+  */
+
 };
 
 AVIATION.common.Slide.prototype = {
@@ -714,6 +720,7 @@ AVIATION.common.Slide.prototype = {
   
   buildHighlights: function(index, modalHighlight){
     var slide = this, $highlight, modalInvoker, h, addOnClick = [];
+
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
       // console.log("lets build highlights");
       for(h = 0; h < this.highlights.length; h++){
@@ -724,14 +731,15 @@ AVIATION.common.Slide.prototype = {
               href : "#modal_" + this.highlights[h].id,
               role : "button",
               "class" : "clearClickable",
+              'data-toggle': "modal",
               style: "top:" + this.highlights[h].top + 
                      ";left:" + this.highlights[h].left +
                      ";width:" + this.highlights[h].width +
                      ";height:" + this.highlights[h].height +
                      (slide.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[h].border + ";cursor:pointer") ) + 
                      ";position:absolute" + 
-                     ";display:none;"
-          }).appendTo(slide.container);            
+                     ";display:none;z-index:1;"
+          }).appendTo(slide.container + " > .cdot_contentText");            
 
           slide.slideElements.highlightElements.push(modalInvoker);
           addOnClick.push(false);
@@ -1290,10 +1298,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "9%",
+              top : "5%",
               left : "36.2%",
               width : "26%",
-              height: "30%",
+              height: "41%",
               border : "7px ridge yellow",
             }, 
             { // #2
@@ -1303,10 +1311,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "9%",
+              top : "5%",
               left : "62%",
               width : "26%",
-              height: "30%",
+              height: "41%",
               border : "7px ridge yellow",                            
             },
             { // #3
@@ -1316,10 +1324,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "39%",
+              top : "50%",
               left : "36.2%",
               width : "26%",
-              height: "31%",
+              height: "41%",
               border : "7px ridge yellow",                            
             },
             { // #4
@@ -1329,10 +1337,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "9%",
+              top : "5%",
               left : "10.5%",
               width : "26%",
-              height: "30%",
+              height: "41%",
               border : "7px ridge yellow",                            
             },
             { // #5
@@ -1342,10 +1350,10 @@ AVIATION.common.Slide.prototype = {
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
               //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top: "39%",
+              top: "50%",
               left: "62%",
               width: "26%",
-              height: "31%",
+              height: "41%",
               border : "7px ridge yellow",
             },
             { // #6
@@ -1355,10 +1363,10 @@ AVIATION.common.Slide.prototype = {
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
               //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "39%",
+              top : "50%",
               left : "10.5%",
               width : "26%",
-              height: "31%",
+              height: "41%",
               border : "7px ridge yellow",                            
               },
           ]}, option;
