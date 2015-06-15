@@ -41,6 +41,10 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
                                               // type maybe in constructor?
   this.options = options;
 
+  this.options.slideContent = slideContent;
+
+  this.options.audioFiles = audioFiles;
+
   this.activeIndex = options.activeIndex || 0;
 
   this.slideContent = slideContent || [
@@ -100,6 +104,21 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  create: function(options){
+    "use strict";
+
+    if(options){
+      this.options = options;
+    }
+
+    this.constructor();
+  },
+
+  destroy: function(){
+    $("#slideContainer").remove();
+    $("#slideFooter").remove();
+  },
+
   // build titles on the slide
   buildHeader: function(parent, content, setupContent, clearTitle, callback){
     "use strict";
@@ -112,7 +131,11 @@ AVIATION.common.Slide.prototype = {
     console.log(parent);
 
     this.buildAvatars(parent, content.avatar, function(bsSize){
-      if(content.title && content.title.html){
+
+      console.log("build avatars callback from HEADER");
+      console.log(content);
+
+      if(content.title || (content.title &&content.title.html) ){
         var classes = "", newHeader;
 
         if(content.title.classes){
@@ -125,7 +148,7 @@ AVIATION.common.Slide.prototype = {
             //TODO: find automatically generated title id/index
             "id": slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
             "class": "text-center " + classes,
-            html: content.title.html || ""
+            html: content.title.html || content.title || ""
           });
         } else {
           console.log("theres no header but a modal, create it");
@@ -148,7 +171,7 @@ AVIATION.common.Slide.prototype = {
             id: "title_" + slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
             class: "modal-title",
             //id: element.id + "_label",
-            html: content.name
+            html: content.title.html || content.title || ""
           }).appendTo(newHeader);
 
           xButton.on('click', function(e){
@@ -207,7 +230,7 @@ AVIATION.common.Slide.prototype = {
       this.buildSlideAudios( );
     } else {
       // console.log("going to buildContent");
-      this.buildContent(true, this.activeIndex, this.activeIndex, false, callback);
+      this.buildContent(true, this.activeIndex, this.activeIndex, false);
     }
     // console.log("callback from buildSlide!");
     slide.initAudioEvents( );
@@ -580,67 +603,75 @@ AVIATION.common.Slide.prototype = {
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
 
-    if(this.audioFiles){ //|| (modalAudios && parent) ){
+    if(this.audioFiles && typeof this.audioFiles !== 'undefined' && this.audioFiles.length > 0){ //|| (modalAudios && parent) ){
       localAudios = this.audioFiles; // modalAudios
+
+      if( typeof localAudios === 'string' ) {
+        localAudios = [ localAudios ];
+      }
       parentContainer = slideObject.container;
+
+      console.log("building audios");
+      console.log(this.audioFiles);
 
       // if modals, 2d array thus two itterations...
       localAudios.forEach( function(audio, a){
-        // lets make sure that the filename provided is without the extension
-        var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
-            extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
+        //if(audio && typeof audio !== 'undefined'){
+          // lets make sure that the filename provided is without the extension
+          var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
+              extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
-        // console.log("audio files here: " + audio); 
+          // console.log("audio files here: " + audio); 
 
-        // make into a function ?
-        try{
-          // checking to make sure that the filename given is without an extension
-          if(split.length === 2){
-            // take only the first argument
-            filename = split[0];
-          } else if(split.length > 2){
-            // lets join everything except for the extension
-            for(i = 0; i < split.length-1; i++){
-              tempArray.push(split[i]);
-            }
+          // make into a function ?
+          try{
+            // checking to make sure that the filename given is without an extension
+            if(split.length === 2){
+              // take only the first argument
+              filename = split[0];
+            } else if(split.length > 2){
+              // lets join everything except for the extension
+              for(i = 0; i < split.length-1; i++){
+                tempArray.push(split[i]);
+              }
 
-            if(slideObject.options.development){
-              filename = "https:" + tempArray.join(".");
+              if(slideObject.options.development){
+                filename = "https:" + tempArray.join(".");
+              } else {
+                filename = tempArray.join(".");
+              }
             } else {
-              filename = tempArray.join(".");
+              // its probably the actual filename alone
+              filename = audio;
+            }
+          } catch(error){
+            console.log("error: " + error);
+            console.log("error while trying to parse audio filename");
+          }
+
+          addedSlideAudio = jQuery('<audio/>',{
+            id: "audio_" + a,
+            html: "Your browser doesn't support audio"
+          }).appendTo(parentContainer);
+
+          for(i=0; i<extensions.length; i++){
+            source = jQuery('<source/>', {
+              src: filename + extensions[i],
+              type: types[i]
+            }).appendTo(addedSlideAudio);
+          }
+  /*
+          if(modalAudios && parent){
+            try {
+              slideObject.modalData[modalIndex].modalAudios.push(Popcorn("#audio_" + a));
+              slideObject.modalData[modalIndex].modalHasListened.push(false);
+            } catch(error) {
+              // was popcorn initialized ok?
+              console.log("modal audio init error: ");
+              console.log(error);
             }
           } else {
-            // its probably the actual filename alone
-            filename = audio;
-          }
-        } catch(error){
-          console.log("error: " + error);
-          console.log("error while trying to parse audio filename");
-        }
-
-        addedSlideAudio = jQuery('<audio/>',{
-          id: "audio_" + a,
-          html: "Your browser doesn't support audio"
-        }).appendTo(parentContainer);
-
-        for(i=0; i<extensions.length; i++){
-          source = jQuery('<source/>', {
-            src: filename + extensions[i],
-            type: types[i]
-          }).appendTo(addedSlideAudio);
-        }
-/*
-        if(modalAudios && parent){
-          try {
-            slideObject.modalData[modalIndex].modalAudios.push(Popcorn("#audio_" + a));
-            slideObject.modalData[modalIndex].modalHasListened.push(false);
-          } catch(error) {
-            // was popcorn initialized ok?
-            console.log("modal audio init error: ");
-            console.log(error);
-          }
-        } else {
-*/
+  */
           try {
             slideObject.slideAudios.push(Popcorn("#audio_" + a));
             slideObject.slideHasListened.push(false);
@@ -649,7 +680,8 @@ AVIATION.common.Slide.prototype = {
             console.log("slide audio init error: ");
             console.log(error);
           }
-//        }
+  //        }
+      //  }
       });
     }
   },
@@ -796,20 +828,19 @@ AVIATION.common.Slide.prototype = {
                showControls: false,
                development: true,
                isModal: true,
+               noAudio: this.modals[i].audio && this.modals[i].audio.length  > 0 ? false : true,
                container: "#modal_" + this.modals[i].id,
                statusId: "#modal_status_" + this.modals[i].id,
                headerId: "#modal_header_" + this.modals[i].id,
                footerId: "#modal_footer_" + this.modals[i].id
              },
              [{
-               title: { html: "This is the first title that appears" },
-               content: { html: "This is the html inside the slide <b>that can be used</b>" },
-               audio: 0
+               title: this.modals[i].title,
+               content: this.modals[i].content,
+               image: this.modals[i].image,
              }],
-             [ 
-               "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" // no extension necessary
-               // all of the possible audio extensions will be created automatically
-             ]);
+             this.modals[i].audio
+             );
 
         console.log("this is the modal slide: ");
         console.log(newModal);
@@ -1236,6 +1267,8 @@ AVIATION.common.Slide.prototype = {
     if(!this.options.noAudio && !this.options.isModal){
       this.playCurrent();  
     }
+
+    this.centerModals();
   },
 
   resetSlide: function(){
@@ -1260,6 +1293,32 @@ AVIATION.common.Slide.prototype = {
           
     newUrl = tempSplit[0];
     window.location.assign(newUrl + "jump_to_id/" + pageId);
+  },
+
+  centerModals: function() {
+    function centerModal(){
+      $(this).attr("style", "top: -90px !important");
+      $(this).css('display', 'block');
+      console.log("centering modal");
+      console.log( $(this) );
+      //$(this)[0].style.top = "-290px !important";
+      
+      console.log( $(this)[0].style);
+      //$(this).css('top', '-290px');
+      var $dialog  = $(this).find(".modal-dialog"),
+      offset       = ($(window).height() - $dialog.height()) / 2,
+      bottomMargin = parseInt($dialog.css('marginBottom'), 10);
+
+      // Make sure you don't hide the top part of the modal w/ a negative margin if it's longer than the screen height, and keep the margin equal to the bottom margin of the modal
+      if(offset < bottomMargin) offset = bottomMargin;
+      //$dialog.css("margin-top", offset);
+    }
+
+    $('.modal').on('show.bs.modal', centerModal);
+    $(window).on("resize", function () {
+        $('.modal:visible').each(centerModal);
+    });
+
   },
 
   initDefaults: function(options){
