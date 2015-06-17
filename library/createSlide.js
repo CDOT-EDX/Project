@@ -1,9 +1,8 @@
-// TODOs:
-/*
-    destroy method
-    and create method vs init to accept one json object only
-    add jQuery.pulse: http://jsoverson.github.io/jquery.pulse.js/ when changing content/title to highlight it for the user
-
+/* TO CHECK
+  event libraries: https://github.com/fat/bean
+  https://github.com/alexanderGugel/micro-events
+  http://prototypejs.org/learn/event-delegation
+  https://learn.jquery.com/events/introduction-to-custom-events/
 */
 
 /***
@@ -26,6 +25,7 @@ AVIATION.common = {};
 AVIATION.common.Slide = function (options, slideContent, audioFiles) {
   "use strict";
   //var md = new MobileDetect(window.navigator.userAgent);
+
 /*
   if(md){
     this.isMobile = md.mobile();
@@ -33,12 +33,13 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
     this.isMobile = false;
   }
 */
+
   if(!options){
     options = {};
   }
 
   this.type = options.type || "simple"; // check which options are given and then assign a default
-                                              // type maybe in constructor?
+
   this.options = options;
 
   this.options.slideContent = slideContent;
@@ -247,7 +248,9 @@ AVIATION.common.Slide.prototype = {
     }
     // console.log("callback from buildSlide!");
 
-    //slide.buildFooter();
+    slide.buildQuiz();
+
+    slide.buildFooter();
 
     slide.buildModals();
 
@@ -510,6 +513,24 @@ AVIATION.common.Slide.prototype = {
       this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent, triggerCallback);
     }
     
+  },
+
+  buildQuiz: function(){
+    "use strict";
+
+    var quiz = $(this.options.quizId);
+
+    if(!quiz || quiz.length < 1){
+      quiz = jQuery('<div/>', {
+        id: this.options.quizId.split("#")[1],
+      });
+
+      if(this.options.isModal){
+        quiz.appendTo( this.container + " > .modal-dialog > .modal-content");
+      } else {
+        quiz.appendTo( $(this.container).parent() );  
+      }
+    }
   },
 
   buildFooter: function(){
@@ -1085,91 +1106,120 @@ AVIATION.common.Slide.prototype = {
 
   },
   
+  initHighlightClickEvents: function(){
+    "use strict";
+
+    if(this.options.advanceWith === "click"){
+      if(slide.slideContent[index].highlights){
+        // now lets add on clicks on the modals we need them in
+        for(h=0; h<slide.slideContent[index].highlights.length; h++){
+          if(typeof slide.slideContent[index].highlights[h] === "object" && 
+              slide.slideContent[index].highlights[h].onclick &&
+              typeof slide.slideContent[index].highlights[h].onclick === "function"){
+            addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+          }
+        }
+
+        for(h=0; h<addOnClick.length; h++){
+          if(addOnClick[h]){
+            slide.slideElements.highlightElements[h]
+              .off();
+            slide.slideElements.highlightElements[h]
+              .on("click", addOnClick[h]);
+          } else {
+            slide.slideElements.highlightElements[h].off();
+          }
+        }
+      }
+    }
+
+  },
+
   initAudioEvents: function(callback){
     var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened,
         slideObject = this;
-    // let's set the generic "onPlay/onEnd" events
 
+    if(this.options.advanceWith === "audio"){
+      players.forEach(function(player, p){
+        var contentAtStart = "", callbackAtEnd = "";
 
-    players.forEach(function(player, p){
-      var contentAtStart = "", callbackAtEnd = "";
+        content.forEach(function(cont, c){
+          if(content[c].audio === p){
+            if(content[c].second){
+              players[p].cue(content[c].second, function(){
+                slideObject.buildContent(true, c);
+                if(content[c].callback){
+                  // run the callback that should be cued
+                  content[c].callback();
+                }
+              });
+            } else {
+              contentAtStart = c;
 
-      content.forEach(function(cont, c){
-        if(content[c].audio === p){
-          if(content[c].second){
-            players[p].cue(content[c].second, function(){
-              slideObject.buildContent(true, c);
-              if(content[c].callback){
-                // run the callback that should be cued
-                content[c].callback();
+              if(content[c].callback && typeof content[c].callback === "function"){
+                callbackAtEnd = content[c].callback;
+                //callbackAtEnd();
               }
-            });
-          } else {
-            contentAtStart = c;
 
-            if(content[c].callback && typeof content[c].callback === "function"){
-              callbackAtEnd = content[c].callback;
-              //callbackAtEnd();
             }
-
           }
-        }
-      });
+        });
 
-      // force it to only happen at the beginning of the audio
-      player.cue("0.1", function(){
-        slideObject.buildContent(true, contentAtStart);
-        if(callbackAtEnd){
-          // run the callback that should be cued
-          callbackAtEnd();
-        }
-      });
+        // force it to only happen at the beginning of the audio
+        player.cue("0.1", function(){
+          slideObject.buildContent(true, contentAtStart);
+          if(callbackAtEnd){
+            // run the callback that should be cued
+            callbackAtEnd();
+          }
+        });
 
-      players[p].on("ended", function(e){
-        slideObject.checkSlideControlPlayButtonsState();
+        players[p].on("ended", function(e){
+          slideObject.checkSlideControlPlayButtonsState();
 
-        if (callbackAtEnd !== ""){
-          //callbackAtEnd();
-        }
-        
-        // start the next audio if it exists and autoplay is true
-        if(players[p+1] && this.autoplay){
-          slideObject.playNext();
-        }
-
-        hasListened[p] = true;
-
-        // if it is last audio and no need for audioFirst
-        if(!players[p+1] && !slideObject.options.audioFirst){
-          slideObject.activeIndex++;
-
-          if(slideObject.options.autoplay){
-            // only activate the timer if the autplay is on
-            
-            slideObject.activateTimer(5, true);  
-          } else {
-            slideObject.statusBar.html('Click "Continue" when you are ready');
+          if (callbackAtEnd !== ""){
+            //callbackAtEnd();
           }
           
-          slideObject.checkSlideControlPlayButtons("end");
-        }
-        
+          // start the next audio if it exists and autoplay is true
+          if(players[p+1] && this.autoplay){
+            slideObject.playNext();
+          }
+
+          hasListened[p] = true;
+
+          // if it is last audio and no need for audioFirst
+          if(!players[p+1] && !slideObject.options.audioFirst){
+            slideObject.activeIndex++;
+
+            if(slideObject.options.autoplay){
+              // only activate the timer if the autplay is on
+              
+              slideObject.activateTimer(5, true);  
+            } else {
+              slideObject.statusBar.html('Click "Continue" when you are ready');
+            }
+            
+            slideObject.checkSlideControlPlayButtons("end");
+          }
+          
+        });
+
+        players[p].on("playing", function(e){
+          // something that happens every time we press play (avatar opens mouth?)
+          console.log("starting playing audio");
+        });
+
+        players[p].on("pause", function(e){
+          console.log("has been paused...");
+        });
+
       });
 
-      players[p].on("playing", function(e){
-        // something that happens every time we press play (avatar opens mouth?)
-        console.log("starting playing audio");
-      });
+    }
 
-      players[p].on("pause", function(e){
-        console.log("has been paused...");
-      });
+    //this.buildFooter();
 
-    });
-
-    this.buildFooter();
-    //this.buildContent(true, this.activeIndex);
-    // if no audio?
   },
 
   checkSlideControlPlayButtons: function( action ){
@@ -1300,7 +1350,6 @@ AVIATION.common.Slide.prototype = {
       this.setStatus('Press "Continue" when ready');
     }
 
-    //this.buildContent(null, null, null, true);
   },
 
   redirectToPage: function( pageId ){
@@ -1318,12 +1367,7 @@ AVIATION.common.Slide.prototype = {
     function centerModal(){
       $(this).attr("style", "top: -90px !important");
       $(this).css('display', 'block');
-      //console.log("centering modal");
-      //console.log( $(this) );
-      //$(this)[0].style.top = "-290px !important";
-      
-      //console.log( $(this)[0].style);
-      //$(this).css('top', '-290px');
+
       var $dialog  = $(this).find(".modal-dialog"),
       offset       = ($(window).height() - $dialog.height()) / 2,
       bottomMargin = parseInt($dialog.css('marginBottom'), 10);
@@ -1356,6 +1400,8 @@ AVIATION.common.Slide.prototype = {
           hiddenHighlights: false,
           headerId: "#slideHeader",
           footerId: "#slideFooter",
+          quizId: "#slideQuiz",
+          advanceWith: "audio",
           avatars: {
             tom: {
               open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
@@ -1366,7 +1412,7 @@ AVIATION.common.Slide.prototype = {
               close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
             }
           },
-          continueId: "1970850cff004914997ec29c65850443",
+          continueId: "",
           highlights: 
           [
             { // #1
@@ -1446,7 +1492,7 @@ AVIATION.common.Slide.prototype = {
               width : "26%",
               height: "41%",
               border : "7px ridge yellow",                            
-              },
+            },
           ]}, option;
 
     if(!options){

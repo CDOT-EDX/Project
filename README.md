@@ -28,8 +28,10 @@ Acceptable options and defaults are as follows:
     bodyId:             "#body",
     headerId:           "#slideHeader",
     footerId:           "#slideFooter",
+    quizId:             "#slideQuiz",
     continueId:         "", // string specifying the next id to redirect to
     backId:             "", // string specifying the previous id to redirect to
+    advanceWith:        "audio", // other options -> "click", "timer"
     avatars: 
     {
       tom: {
@@ -48,8 +50,8 @@ Acceptable options and defaults are as follows:
         orderNumber: 0,
         name: "Attitude Indicator (AI)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
-        // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
+        content: {},
         top : "5%",
         left : "36.2%",
         width : "26%",
@@ -61,7 +63,6 @@ Acceptable options and defaults are as follows:
         orderNumber: 1,
         name: "Altimeter (ALT)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
-        // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "5%",
         left : "62%",
@@ -74,7 +75,6 @@ Acceptable options and defaults are as follows:
         orderNumber: 2,
         name: "Heading Indicator (HI)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
-        // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
         top : "50%",
         left : "36.2%",
@@ -87,7 +87,6 @@ Acceptable options and defaults are as follows:
         orderNumber: 3,
         name: "Airspeed Indicator (ASI)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
-        // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "5%",
         left : "10.5%",
@@ -100,7 +99,6 @@ Acceptable options and defaults are as follows:
         orderNumber: 4,
         name: "Vertical Speed Indicator (VSI)",
         //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
-        //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
         //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
         top: "50%",
         left: "62%",
@@ -113,7 +111,6 @@ Acceptable options and defaults are as follows:
         orderNumber: 5,
         name: "Turn Coordinator (TC)",
         //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
-        //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
         //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "50%",
         left : "10.5%",
@@ -121,7 +118,16 @@ Acceptable options and defaults are as follows:
         height: "41%",
         border : "7px ridge yellow",                            
       },
-    ]}
+    ],
+    slideContent: {
+      title: "No content provided",
+      content: "Check your slideContent object",
+      audio: 0
+    },
+    audioFiles: {
+
+    }
+  }
 
 The rest of this README is being edited at this moment
 **More options and capabilities are being added all the time**
