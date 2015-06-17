@@ -216,7 +216,13 @@ AVIATION.common.Slide.prototype = {
 
     });
   },
+/*
+  triggerCallback: function( index ){
+    "use strict";
 
+
+  },
+*/
   // method for invoking all build functions in one place and activating the slide
   buildSlide: function(){
     "use strict";
@@ -227,13 +233,19 @@ AVIATION.common.Slide.prototype = {
 
     if(!this.options.noAudio){
       // console.log("going to buildSlideAudios");
+
       this.buildSlideAudios( );
+      slide.initAudioEvents( );
+
     } else {
       // console.log("going to buildContent");
-      this.buildContent(true, this.activeIndex, this.activeIndex, false);
+      console.log("no audio and building content! *** " + this.activeIndex);
+      console.log(this);
+      this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
+      //this.triggerCallback( this.activeIndex );
+      // trigger callbacks?
     }
     // console.log("callback from buildSlide!");
-    slide.initAudioEvents( );
 
     //slide.buildFooter();
 
@@ -366,7 +378,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   // method for building the content of the slide
-  buildContent: function(correctAudio, index, outerIndex, clearContent, cb){
+  buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback){
     "use strict";
     var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
         activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > .cdot_contentText"), setupInnerContent;
@@ -481,15 +493,21 @@ AVIATION.common.Slide.prototype = {
       if(callback && typeof callback === 'function'){
         callback();
       }
+
+      console.log("trigger callback? ***");
+      if(triggerCallback && slideContent.callback && typeof slideContent.callback === 'function'){
+        console.log("triggering the callback! ****");
+        slideContent.callback();
+      }
       
       slide.buildFooter();
 
     };
 
     if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
-      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, false, cb);
+      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, false, triggerCallback);
     } else if ( clearContent ){
-      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent, cb);
+      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent, triggerCallback);
     }
     
   },
@@ -838,6 +856,7 @@ AVIATION.common.Slide.prototype = {
                title: this.modals[i].title,
                content: this.modals[i].content,
                image: this.modals[i].image,
+               callback: this.modals[i].callback,
              }],
              this.modals[i].audio
              );
@@ -1299,11 +1318,11 @@ AVIATION.common.Slide.prototype = {
     function centerModal(){
       $(this).attr("style", "top: -90px !important");
       $(this).css('display', 'block');
-      console.log("centering modal");
-      console.log( $(this) );
+      //console.log("centering modal");
+      //console.log( $(this) );
       //$(this)[0].style.top = "-290px !important";
       
-      console.log( $(this)[0].style);
+      //console.log( $(this)[0].style);
       //$(this).css('top', '-290px');
       var $dialog  = $(this).find(".modal-dialog"),
       offset       = ($(window).height() - $dialog.height()) / 2,
