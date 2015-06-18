@@ -128,7 +128,25 @@ Acceptable options and defaults are as follows:
     audioFiles: {
 
     }
-  }
+  
+  
+## Global Events available for binding and triggering
+
+    started
+    playing
+    paused
+    stopped
+    ended
+    play
+    pause
+    stop
+    next
+    previous
+    replay
+
+## Global States available for checking
+
+
 
 The rest of this README is being edited at this moment
 **More options and capabilities are being added all the time**

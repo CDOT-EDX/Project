@@ -99,10 +99,53 @@ AVIATION.common.Slide.prototype = {
   attachEvents: function(){
     "use strict";
 
-    var events = {
+    var events = {}, event;
+
+    events = {
       started: function(){
         console.log("!* started event fired");
       },
+      end: function(){
+
+      },
+      play: function(){
+        console.log("!* play event fired");
+      },
+      pause: function(){
+        console.log("!* pause event fired");
+      },
+      stop: function(){
+        console.log("!* stop event fired");
+      },
+      next: function(){
+        console.log("!* playNext event fired");
+      },
+      previous: function(){
+        console.log("!* playPrevious event fired");
+      },
+      replay: function(){
+        console.log("!* replay event fired");
+      }
+    };
+
+    for(event in events){
+      if(events.hasOwnProperty(event)){
+        // bind each event to the current slide object
+        $(this).on(event, events[event]);
+      }
+    }
+
+    this.events = events;
+    this.states = states;
+  },
+
+
+  // can be used by an object like so...
+  // this.attachState.apply(someObject, arrayOfArgs);
+  attachState: function(state){
+    var states;
+
+    states = {
       playing: function(){
         console.log("!* playing event started");
       },
@@ -115,34 +158,13 @@ AVIATION.common.Slide.prototype = {
       ended: function(){
         console.log("!* ended event fired");
       },
-      play: function(){
-        console.log("!* play event fired");
-      },
-      pause: function(){
-        console.log("!* pause event fired");
-      },
-      stop: function(){
-        console.log("!* stop event fired");
-      },
-      playNext: function(){
-        console.log("!* playNext event fired");
-      },
-      playPrevious: function(){
-        console.log("!* playPrevious event fired");
-      },
-      replay: function(){
-        console.log("!* replay event fired");
+      replayed: function(){
+        console.log("!* this has been replayed... times");
       }
     };
 
-    for(event in events){
-      if(events.hasOwnProperty(event)){
-        // bind each event to the current object
-        $(this).on(event, events[event]);
-      }
-    }
+    this.state = states[state];
 
-    this.events = events;
   },
 
   // method that initializes building of simple slides
@@ -1036,7 +1058,7 @@ AVIATION.common.Slide.prototype = {
 
     this.activeIndex--;
 
-    $(this).trigger("playPrevious");
+    $(this).trigger("previous");
     this.playCurrent();
   },
 
@@ -1047,7 +1069,7 @@ AVIATION.common.Slide.prototype = {
 
     this.activeIndex++;
     // console.log("playing next, whats the activeIndex now? " + this.activeIndex);
-    $(this).trigger("playNext");
+    $(this).trigger("next");
     this.playCurrent();
   },
 
