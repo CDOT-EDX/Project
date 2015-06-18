@@ -95,6 +95,56 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
+  // global events which can control the slide object from within other plugins
+  attachEvents: function(){
+    "use strict";
+
+    var events = {
+      started: function(){
+        console.log("!* started event fired");
+      },
+      playing: function(){
+        console.log("!* playing event started");
+      },
+      paused: function(){
+        console.log("!* paused event fired");
+      },
+      stopped: function(){
+        console.log("!* stopped event fired");
+      },
+      ended: function(){
+        console.log("!* ended event fired");
+      },
+      play: function(){
+        console.log("!* play event fired");
+      },
+      pause: function(){
+        console.log("!* pause event fired");
+      },
+      stop: function(){
+        console.log("!* stop event fired");
+      },
+      playNext: function(){
+        console.log("!* playNext event fired");
+      },
+      playPrevious: function(){
+        console.log("!* playPrevious event fired");
+      },
+      replay: function(){
+        console.log("!* replay event fired");
+      }
+    };
+
+    for(event in events){
+      if(events.hasOwnProperty(event)){
+        // bind each event to the current object
+        $(this).on(event, events[event]);
+      }
+    }
+
+    this.events = events;
+  },
+
   // method that initializes building of simple slides
   _initSimple: function(options){
     "use strict";
@@ -123,7 +173,7 @@ AVIATION.common.Slide.prototype = {
   // build titles on the slide
   buildHeader: function(parent, content, setupContent, clearTitle, callback){
     "use strict";
-    var headerElement = $(this.headerId), slide = this,// + "_" + content.audio + "_" + (content.second || 0) ), slide = this,
+    var headerElement = $(this.headerId), slide = this,
         xButton, newTitle;
 
     console.log("building the header");
@@ -147,19 +197,19 @@ AVIATION.common.Slide.prototype = {
           console.log("theres no header and not a modal, create it");
           newHeader = jQuery('<h3/>',{
             //TODO: find automatically generated title id/index
-            "id": slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
+            "id": slide.headerId.split("#")[1],
             "class": "text-center " + classes,
             html: content.title.html || content.title || ""
           });
         } else {
           console.log("theres no header but a modal, create it");
           newHeader = jQuery('<div/>', {
-            id: slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
+            id: slide.headerId.split("#")[1],
             class : "modal-header",
-          }); //.appendTo(slide.container); //+ ' > .modal-dialog > .modal-content');
+          });
 
           xButton = jQuery('<button/>', {
-            id: "xbtn_" + slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
+            id: "xbtn_" + slide.headerId.split("#")[1],
             class : "close",
             type : "button",
             "data-dismiss" : "modal",
@@ -169,7 +219,7 @@ AVIATION.common.Slide.prototype = {
           }).appendTo(newHeader);
 
           newTitle = jQuery('<h4/>', {
-            id: "title_" + slide.headerId.split("#")[1],// + "_" + content.audio + "_" + (content.second || 0),
+            id: "title_" + slide.headerId.split("#")[1],
             class: "modal-title",
             //id: element.id + "_label",
             html: content.title.html || content.title || ""
@@ -181,15 +231,6 @@ AVIATION.common.Slide.prototype = {
           });
         }
         
-/*
-        newTitle = jQuery('<h3/>',{
-          //TODO: find automatically generated title id/index
-          "id": "slideTitle",
-          "class": "text-center " + classes,
-          html: content.title.html || ""
-        });
-*/
-
         if(headerElement && headerElement.length > 0){
           headerElement.replaceWith(newHeader);
           console.log("replace the header");
@@ -231,6 +272,8 @@ AVIATION.common.Slide.prototype = {
     // console.log("inside buildSlide");
 
     var slide = this; //callback = function(){
+
+    this.attachEvents();
 
     if(!this.options.noAudio){
       // console.log("going to buildSlideAudios");
@@ -591,7 +634,7 @@ AVIATION.common.Slide.prototype = {
 
       var slideControlsPrevious = jQuery('<div/>', {
         "id": "btnPDiv",
-        html: '<a href="#" id="btnP" class="btn btn-default cdotBtn2" disabled role="button"></a>'
+        html: '<a id="btnP" class="btn btn-default cdotBtn2" disabled role="button"></a>'
       }).appendTo(slideControlsContainer);
 
       var slideControlsPlay = jQuery('<div/>', {
@@ -603,7 +646,7 @@ AVIATION.common.Slide.prototype = {
 
       var slideControlsNext = jQuery('<div/>', {
         "id": "btnNDiv",
-        html: '<a href="#" id="btnN" class="btn btn-default cdotBtn2" disabled role="button"></a>'
+        html: '<a id="btnN" class="btn btn-default cdotBtn2" disabled role="button"></a>'
       }).appendTo(slideControlsContainer);
 
       this.slideElements.slideControls = {
@@ -965,8 +1008,12 @@ AVIATION.common.Slide.prototype = {
 
     this.checkSlideControlPlayButtons("play");
     // console.log("playCurrent active: " + active);
-    players[active].play();
+    if(players[active]){
+      players[active].play();  
+    }
+
     // console.log("trying to play...");
+    $(this).trigger("play");
   },
   
   pauseCurrent: function(e){
@@ -977,9 +1024,10 @@ AVIATION.common.Slide.prototype = {
     if(players[active]){
       players[active].pause();  
     }
+    $(this).trigger("pause");
   },
 
-  playPrevious: function(e){
+  playPreviousAudio: function(e){
     this.resetStatusBar();
 
     this.pauseCurrent();
@@ -988,16 +1036,18 @@ AVIATION.common.Slide.prototype = {
 
     this.activeIndex--;
 
+    $(this).trigger("playPrevious");
     this.playCurrent();
   },
 
-  playNext: function(e){
+  playNextAudio: function(e){
     this.pauseCurrent();
 
     this.resetAudio();
 
     this.activeIndex++;
     // console.log("playing next, whats the activeIndex now? " + this.activeIndex);
+    $(this).trigger("playNext");
     this.playCurrent();
   },
 
@@ -1006,6 +1056,7 @@ AVIATION.common.Slide.prototype = {
 
     this.resetSlide();
 
+    $(this).trigger("replay")
     this.playCurrent();
   },
 
@@ -1035,7 +1086,7 @@ AVIATION.common.Slide.prototype = {
             case "previous":
               console.log("clicked previous");
               slide.resetTimer();
-              slide.playPrevious();
+              slide.playPreviousAudio();
               break;
 
             case "play":
@@ -1056,7 +1107,7 @@ AVIATION.common.Slide.prototype = {
 
             case "next":
               console.log("clicked next");
-              slide.playNext();
+              slide.playNextAudio();
               break;
 
             default: 
@@ -1136,6 +1187,8 @@ AVIATION.common.Slide.prototype = {
   },
 
   initAudioEvents: function(callback){
+    "use strict";
+
     var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened,
         slideObject = this;
 
@@ -1182,22 +1235,22 @@ AVIATION.common.Slide.prototype = {
           }
           
           // start the next audio if it exists and autoplay is true
-          if(players[p+1] && this.autoplay){
-            slideObject.playNext();
+          if(players[p+1] && slideObject.options.autoplay){
+            slideObject.playNextAudio();
           }
 
           hasListened[p] = true;
 
           // if it is last audio and no need for audioFirst
           if(!players[p+1] && !slideObject.options.audioFirst){
-            slideObject.activeIndex++;
+            //slideObject.activeIndex++;
 
-            if(slideObject.options.autoplay){
+            if(slideObject.options.autoRedirect){
               // only activate the timer if the autplay is on
               
               slideObject.activateTimer(5, true);  
             } else {
-              slideObject.statusBar.html('Click "Continue" when you are ready');
+              slideObject.slideElements.statusBar.html('Click "Continue" when you are ready');
             }
             
             slideObject.checkSlideControlPlayButtons("end");
@@ -1288,7 +1341,7 @@ AVIATION.common.Slide.prototype = {
             controls.next.prop("disabled", true);
             controls.next.attr("disabled", true);
           }
-        } else if (active === players.length - 1){
+        } else if (active >= players.length - 1){
           console.log("active is the last players length");
           controls.previous.prop("disabled", false);
           controls.previous.removeAttr("disabled");
@@ -1394,6 +1447,7 @@ AVIATION.common.Slide.prototype = {
           showControls: true,
           showBorder: true,
           autoplay: true,
+          autoRedirect: false,
           noAudio: false,
           enableModals: false,
           enableHighlights: false,

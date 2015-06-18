@@ -17,6 +17,7 @@ Acceptable options and defaults are as follows:
     showControls:       true,
     showBorder:         true, // this applies to the border around the content
     autoplay:           true,
+    autoRedirect:       false,
     noAudio:            false,
     enableModals:       false,
     enableHighlights:   false,
