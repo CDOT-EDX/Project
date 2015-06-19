@@ -855,24 +855,24 @@ AVIATION.common.Slide.prototype = {
   },
   
   buildHighlights: function(index, modalHighlight){
-    var slide = this, $highlight, modalInvoker, h, addOnClick = [];
+    var slide = this, $highlight, modalInvoker, h, addOnClick = [], highlight;
 
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
       // console.log("lets build highlights");
-      for(h = 0; h < this.highlights.length; h++){
-        $highlight = $("#" + this.highlights[h].id + "_highlight");
+      for(highlight in this.highlights){
+        $highlight = $("#" + highlight + "_highlight");
         if( !$highlight || $highlight.length < 1 ){
           modalInvoker = jQuery('<div/>', {
-              id: this.highlights[h].id + "_highlight",
-              href : "#modal_" + this.highlights[h].id,
+              id: highlight + "_highlight",
+              href : "#modal_" + highlight,
               role : "button",
               "class" : "clearClickable",
               'data-toggle': "modal",
-              style: "top:" + this.highlights[h].top + 
-                     ";left:" + this.highlights[h].left +
-                     ";width:" + this.highlights[h].width +
-                     ";height:" + this.highlights[h].height +
-                     (slide.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[h].border + ";cursor:pointer") ) + 
+              style: "top:" + this.highlights[highlight].top + 
+                     ";left:" + this.highlights[highlight].left +
+                     ";width:" + this.highlights[highlight].width +
+                     ";height:" + this.highlights[highlight].height +
+                     (slide.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
                      ";position:absolute" + 
                      ";display:none;z-index:1;"
           }).appendTo(slide.container + " > .cdot_contentText");            

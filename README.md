@@ -16,8 +16,8 @@ Acceptable options and defaults are as follows:
     showStatus:         true,
     showControls:       true,
     showBorder:         true, // this applies to the border around the content
-    autoplay:           true,
-    autoRedirect:       false,
+    autoplay:           true, // proceeds to the next AUDIO automatically after current is finished
+    autoRedirect:       false, // proceeds to the next SLIDE automatically after current is finished
     noAudio:            false,
     enableModals:       false,
     enableHighlights:   false,
@@ -46,10 +46,8 @@ Acceptable options and defaults are as follows:
     },
     highlights: 
     [
-      { // #1
-        id: "ai",
+      ai: { // #1
         orderNumber: 0,
-        name: "Attitude Indicator (AI)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
         content: {},
@@ -59,10 +57,8 @@ Acceptable options and defaults are as follows:
         height: "41%",
         border : "7px ridge yellow",
       }, 
-      { // #2
-        id: "alt",
+      alt: { // #2
         orderNumber: 1,
-        name: "Altimeter (ALT)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "5%",
@@ -71,10 +67,9 @@ Acceptable options and defaults are as follows:
         height: "41%",
         border : "7px ridge yellow",                            
       },
-      { // #3
+      hi: { // #3
         id: "hi",
         orderNumber: 2,
-        name: "Heading Indicator (HI)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
         top : "50%",
@@ -83,10 +78,8 @@ Acceptable options and defaults are as follows:
         height: "41%",
         border : "7px ridge yellow",                            
       },
-      { // #4
-        id: "asi",
+      asi: { // #4
         orderNumber: 3,
-        name: "Airspeed Indicator (ASI)",
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "5%",
@@ -95,10 +88,8 @@ Acceptable options and defaults are as follows:
         height: "41%",
         border : "7px ridge yellow",                            
       },
-      { // #5
-        id: "vsi",
+      vsi: { // #5
         orderNumber: 4,
-        name: "Vertical Speed Indicator (VSI)",
         //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
         //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
         top: "50%",
@@ -107,10 +98,8 @@ Acceptable options and defaults are as follows:
         height: "41%",
         border : "7px ridge yellow",
       },
-      { // #6
-        id: "tc",
+      tc: { // #6
         orderNumber: 5,
-        name: "Turn Coordinator (TC)",
         //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
         //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "50%",
@@ -120,16 +109,26 @@ Acceptable options and defaults are as follows:
         border : "7px ridge yellow",                            
       },
     ],
+    buttons: [
+        someId: {
+            title: 'some button',
+            action: function(){ console.log("button of someId is executing"); }
+        },
+        anotherId: {
+            title: 'another button',
+            action: function(){}
+        }
+    ]
     slideContent: {
       title: "No content provided",
       content: "Check your slideContent object",
       audio: 0
     },
-    audioFiles: {
+    audioFiles: [
+        
+    ]
+  
 
-    }
-  
-  
 ## Global Events available for binding and triggering
 
     started
@@ -146,6 +145,16 @@ Acceptable options and defaults are as follows:
 
 ## Global States available for checking
 
+
+
+
+## JavaScript and jQuery libraries required by this library
+
+    SlickQuiz: https://github.com/pkuzhel/SlickQuiz
+    TimerJS: https://github.com/pkuzhel/timer.js
+    PopcornJS: http://cdn.popcornjs.org/code/dist/popcorn.min.js || https://github.com/mozilla/popcorn-js
+    jQuery Flight Indicators: https://github.com/echanna/jQuery-Flight-Indicators/tree/cdot_with_turn_coordinator
+    JS CSV Parser (PapaParse): http://papaparse.com/
 
 
 The rest of this README is being edited at this moment
