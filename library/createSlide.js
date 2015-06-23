@@ -1,3 +1,12 @@
+/***
+  *   Custom library/framework to speed up content development
+  *   for the edX Aviation project at CDOT
+  *   created by: Pavlo Kuzhel
+  *   May 12, 2015
+  *   GitHub wiki: https://github.com/CDOT-EDX/Project/wiki/Slide-Creation-reference
+  *   createSlide.js
+  **/
+
 /* TO CHECK
   event libraries: https://github.com/fat/bean
   https://github.com/alexanderGugel/micro-events
@@ -5,18 +14,13 @@
   https://learn.jquery.com/events/introduction-to-custom-events/
 */
 
-/***
-  *   Custom library/framework to speed up content development
-  *   for the edX Aviation project at CDOT
-  *   created by: Pavlo Kuzhel
-  *   May 12, 2015
-  *   GitHub wiki: https://github.com/CDOT-EDX/Project/wiki/Slide-Creation-reference
-  **/
-
 /*jslint white: true*/
 /*jslint nomen: true*/
 /*jslint plusplus: true*/
 /*jslint todo: true*/
+
+// TODO: add a "skip" button to pages
+
 var AVIATION = AVIATION || {};
 
 AVIATION.common = {};
@@ -136,13 +140,14 @@ AVIATION.common.Slide.prototype = {
     }
 
     this.events = events;
-    //this.states = states;
   },
 
 
   // can be used by an object like so...
   // this.attachState.apply(someObject, arrayOfArgs);
   attachState: function(state){
+    "use strict";
+
     var states;
 
     states = {
@@ -164,7 +169,6 @@ AVIATION.common.Slide.prototype = {
     };
 
     this.state = states[state];
-
   },
 
   // method that initializes building of simple slides
@@ -188,6 +192,8 @@ AVIATION.common.Slide.prototype = {
   },
 
   destroy: function(){
+    "use strict";
+
     $("#slideContainer").remove();
     $("#slideFooter").remove();
   },
@@ -453,6 +459,7 @@ AVIATION.common.Slide.prototype = {
   buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback){
     "use strict";
     var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
+        highlightsAddOnClick = [], buttonsAddOnClick = [],
         activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > .cdot_contentText"), setupInnerContent;
 
     outerIndex = this.activeIndex || 0;
@@ -480,8 +487,11 @@ AVIATION.common.Slide.prototype = {
     
     // console.log("and the contentainer after?");
     // console.log(contentContainer);
+    highlightsAddOnClick = this.initHighlights();
+    this.buildHighlights(activeIndex, highlightsAddOnClick);
 
-    this.buildHighlights(activeIndex);
+    buttonsAddOnClick = this.initButtons();
+    this.buildButtons(activeIndex, buttonsAddOnClick);
 
     setupInnerContent = function(classSize, callback){
       var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
@@ -857,29 +867,71 @@ AVIATION.common.Slide.prototype = {
       this.buildStatusBar(parent);
     }
   },
-  
-  buildHighlights: function(index, modalHighlight){
-    var slide = this, $highlight, modalInvoker, h, addOnClick = [], highlight;
 
-    if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
-      // console.log("lets build highlights");
+  checkAdvanceWith: function(event){
+    var callback = event.data.onclick,
+        element = event.data.element,
+        slide = event.data.slide;
 
-      function checkAdvanceWith(event){
-        var callback = event.data;
+    console.log("event.data");
+    console.log(callback);
 
-        console.log("event.data");
-        console.log(callback);
+    if(callback && typeof callback === "function"){
+      callback();
+    }
 
-        if(callback && typeof callback === "function"){
-          callback();
-        }
+    if(slide.options.advanceWith === element){
+      // TODO: check if audio has completed
+      slide.playNextAudio();
+      //slide.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
+    }
+  },
 
-        if(slide.options.advanceWith === "highlight"){
-          // TODO: check if audio has completed
-          slide.playNextAudio();
-          //slide.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
+  initButtons: function(){
+    "use strict";
+
+    var button, $button, actionButton, addOnClick = [];
+
+    if(this.options.enableButtons && this.buttons && this.buttons.length > 0 &&
+        this.slideElements.buttonElements.length !== this.buttons.length){
+      for(button in this.buttons){
+        $button = $("#" + button + "_button");
+        if( !$button || $button.length < 1){
+          actionButton = jQuery('<a/>',{
+            class: "btn btn-default " + button.classes.join(" "),
+            html: button.title,
+          }).appendTo(this.container + " > .cdot_contentText");
+
+          this.slideElements.buttonElements.push(actionButton);
+          addOnClick.push(false);
         }
       }
+    }
+
+    console.log("initing buttons");
+
+    return addOnClick;
+    
+  },
+
+  buildButtons: function(index){
+    "use strict";
+    var slide = this, $button, b;
+
+    console.log("building buttons");
+    if(this.options.enableButtons && this.buttons && this.buttons.length > 0){
+
+    }
+  },
+  
+  initHighlights: function(){
+    "use strict";
+    
+    var highlight, $highlight, modalInvoker, addOnClick = [];
+
+    if(this.options.enableHighlights && this.highlights && this.highlights.length > 0 && 
+        this.slideElements.highlightElements.length !== this.highlights.length){
+      // console.log("lets build highlights");
 
       for(highlight in this.highlights){
         $highlight = $("#" + highlight + "_highlight");
@@ -894,16 +946,25 @@ AVIATION.common.Slide.prototype = {
                      ";left:" + this.highlights[highlight].left +
                      ";width:" + this.highlights[highlight].width +
                      ";height:" + this.highlights[highlight].height +
-                     (slide.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
+                     (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
                      ";position:absolute" + 
                      ";display:none;z-index:1;"
-          }).appendTo(slide.container + " > .cdot_contentText");            
+          }).appendTo(this.container + " > .cdot_contentText");            
 
-          slide.slideElements.highlightElements.push(modalInvoker);
+          this.slideElements.highlightElements.push(modalInvoker);
           addOnClick.push(false);
         }
       }
+    }
 
+    return addOnClick;
+
+  },
+
+  buildHighlights: function(index, addOnClick){
+    var slide = this, h;
+
+    if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
       if(slide.slideContent[index].highlights){
         // now lets add on clicks on the modals we need them in
         for(h=0; h<slide.slideContent[index].highlights.length; h++){
@@ -919,25 +980,17 @@ AVIATION.common.Slide.prototype = {
             slide.slideElements.highlightElements[h]
               .off();
             slide.slideElements.highlightElements[h]
-              .on("click", addOnClick[h], checkAdvanceWith);
+              .on("click", { "onclick": addOnClick[h], "element": "highlight", slide: slide }, slide.checkAdvanceWith);
           } else {
             slide.slideElements.highlightElements[h]
               .off();
             slide.slideElements.highlightElements[h]
-              .on("click", checkAdvanceWith);
+              .on("click", { "element": "highlight", slide: slide }, slide.checkAdvanceWith);
           }
         }
       }
     }
-  },
 
-  buildButtons: function(){
-    "use strict";
-
-    console.log("building buttons");
-    if(this.buttons && this.buttons.length > 0){
-      
-    }
   },
 
   buildModals: function(modalOptions){
@@ -1294,6 +1347,8 @@ AVIATION.common.Slide.prototype = {
           }
           
           // start the next audio if it exists and autoplay is true
+
+          // TODO: use checkAdvance method here instead?
           if(players[p+1] && slideObject.options.autoplay && slideObject.options.advanceWith === "audio"){
             slideObject.playNextAudio();
           } else if (players[p+1] && slideObject.options.advanceWith === "highlight"){

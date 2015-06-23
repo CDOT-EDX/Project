@@ -22,6 +22,8 @@ Acceptable options and defaults are as follows:
     enableModals:       false,
     enableHighlights:   false,
     hiddenHighlights:   false,
+    enableButtons:      true,
+    hiddenButtons:      false, // am I using this yet?
     container:          "#slideContainer",
     statusId:           "#statusBar",
     headerId:           "#header",
@@ -109,7 +111,8 @@ Acceptable options and defaults are as follows:
     ],
     buttons: [
         someId: {
-            title: 'some button',
+            title: 'I am a button',
+            classes: ["btn", "btn-default"],
             action: function(){ console.log("button of someId is executing"); }
         },
         anotherId: {
