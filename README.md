@@ -118,9 +118,22 @@ Acceptable options and defaults are as follows:
         }
     ]
     slideContent: {
-        title: "No content provided",
-        content: "Check your slideContent object",
-        audio: 0
+        title: {html: "No content provided", classes: "col-md-12" }, 
+        content: {html: "Check your slideContent object", classes: "text-center" },
+        image: {src: "/someSource/image.png", classes: "imageClass"},
+        highlights: [ 
+                        0 , 
+                        { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
+                        5 
+        ],
+        buttons: [
+                    0 , 
+                    { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
+                    3 
+        ],
+        audio: 0,
+        second: 10,
+        callback: function(){ console.log("this is a callback function"); }
     },
     audioFiles: [
         "someURL/toAudioFile",

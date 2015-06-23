@@ -106,7 +106,7 @@ AVIATION.common.Slide.prototype = {
         console.log("!* started event fired");
       },
       end: function(){
-
+        console.log("!* end event fired");
       },
       play: function(){
         console.log("!* play event fired");
@@ -934,7 +934,10 @@ AVIATION.common.Slide.prototype = {
   buildButtons: function(){
     "use strict";
 
-
+    console.log("building buttons");
+    if(this.buttons && this.buttons.length > 0){
+      
+    }
   },
 
   buildModals: function(modalOptions){
