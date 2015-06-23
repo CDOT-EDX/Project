@@ -1686,6 +1686,7 @@ AVIATION.common.Slide.prototype = {
     this.avatars = options.avatars;
     this.highlights = options.highlights;
     this.modals = options.modals || [];
+    this.buttons = options.buttons || [];
     this.options = options;
 
     this.container = options.container || "#slideContainer";
