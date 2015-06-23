@@ -136,7 +136,7 @@ AVIATION.common.Slide.prototype = {
     }
 
     this.events = events;
-    this.states = states;
+    //this.states = states;
   },
 
 
@@ -302,8 +302,12 @@ AVIATION.common.Slide.prototype = {
 
       this.buildSlideAudios( );
       slide.initAudioEvents( );
-
+/*
+    } else if (this.options.advanceWith !== "audio"){
+      this.buildSlideAudios();
+      this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
     } else {
+*/
       // console.log("going to buildContent");
       console.log("no audio and building content! *** " + this.activeIndex);
       console.log(this);
@@ -859,6 +863,24 @@ AVIATION.common.Slide.prototype = {
 
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
       // console.log("lets build highlights");
+
+      function checkAdvanceWith(event){
+        var callback = event.data;
+
+        console.log("event.data");
+        console.log(callback);
+
+        if(callback && typeof callback === "function"){
+          callback();
+        }
+
+        if(slide.options.advanceWith === "highlight"){
+          // TODO: check if audio has completed
+          slide.playNextAudio();
+          //slide.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
+        }
+      }
+
       for(highlight in this.highlights){
         $highlight = $("#" + highlight + "_highlight");
         if( !$highlight || $highlight.length < 1 ){
@@ -897,14 +919,21 @@ AVIATION.common.Slide.prototype = {
             slide.slideElements.highlightElements[h]
               .off();
             slide.slideElements.highlightElements[h]
-              .on("click", addOnClick[h]);
+              .on("click", addOnClick[h], checkAdvanceWith);
           } else {
-            slide.slideElements.highlightElements[h].off();
+            slide.slideElements.highlightElements[h]
+              .off();
+            slide.slideElements.highlightElements[h]
+              .on("click", checkAdvanceWith);
           }
         }
       }
-
     }
+  },
+
+  buildButtons: function(){
+    "use strict";
+
 
   },
 
@@ -949,6 +978,8 @@ AVIATION.common.Slide.prototype = {
 
         console.log("this is the modal slide: ");
         console.log(newModal);
+
+        // where do we include highlights?!
 
         newModal.constructor();
 
@@ -1182,26 +1213,30 @@ AVIATION.common.Slide.prototype = {
   initHighlightClickEvents: function(){
     "use strict";
 
-    if(this.options.advanceWith === "click"){
-      if(slide.slideContent[index].highlights){
-        // now lets add on clicks on the modals we need them in
-        for(h=0; h<slide.slideContent[index].highlights.length; h++){
-          if(typeof slide.slideContent[index].highlights[h] === "object" && 
-              slide.slideContent[index].highlights[h].onclick &&
-              typeof slide.slideContent[index].highlights[h].onclick === "function"){
-            addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
-          }
-        }
+    if(this.options.advanceWith === "highlight"){
 
-        for(h=0; h<addOnClick.length; h++){
-          if(addOnClick[h]){
-            slide.slideElements.highlightElements[h]
-              .off();
-            slide.slideElements.highlightElements[h]
-              .on("click", addOnClick[h]);
-          } else {
-            slide.slideElements.highlightElements[h].off();
-          }
+    }
+
+    if(slide.slideContent[index].highlights){
+      // now lets add on clicks on the modals we need them in
+      for(h=0; h<slide.slideContent[index].highlights.length; h++){
+        if(typeof slide.slideContent[index].highlights[h] === "object" && 
+            slide.slideContent[index].highlights[h].onclick &&
+            typeof slide.slideContent[index].highlights[h].onclick === "function"){
+          addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+        }
+      }
+
+      console.log("addOnClick: " + addOnClick);
+
+      for(h=0; h<addOnClick.length; h++){
+        if(addOnClick[h]){
+          slide.slideElements.highlightElements[h]
+            .off();
+          slide.slideElements.highlightElements[h]
+            .on("click", addOnClick[h]);
+        } else {
+          slide.slideElements.highlightElements[h].off();
         }
       }
     }
@@ -1214,7 +1249,6 @@ AVIATION.common.Slide.prototype = {
     var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened,
         slideObject = this;
 
-    if(this.options.advanceWith === "audio"){
       players.forEach(function(player, p){
         var contentAtStart = "", callbackAtEnd = "";
 
@@ -1257,8 +1291,11 @@ AVIATION.common.Slide.prototype = {
           }
           
           // start the next audio if it exists and autoplay is true
-          if(players[p+1] && slideObject.options.autoplay){
+          if(players[p+1] && slideObject.options.autoplay && slideObject.options.advanceWith === "audio"){
             slideObject.playNextAudio();
+          } else if (players[p+1] && slideObject.options.advanceWith === "highlight"){
+            slideObject.slideElements.statusBar.html('Click on the next instrument to Continue');
+            slideObject.pauseCurrent();
           }
 
           hasListened[p] = true;
@@ -1290,8 +1327,6 @@ AVIATION.common.Slide.prototype = {
         });
 
       });
-
-    }
 
     //this.buildFooter();
 

@@ -32,7 +32,7 @@ Acceptable options and defaults are as follows:
     quizId:             "#slideQuiz",
     continueId:         "", // string specifying the next id to redirect to
     backId:             "", // string specifying the previous id to redirect to
-    advanceWith:        "audio", // other options -> "click", "timer"
+    advanceWith:        "audio", // other options -> "highlight", "timer", "button"
     avatars: 
     {
       tom: {
@@ -44,8 +44,7 @@ Acceptable options and defaults are as follows:
         close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
       }
     },
-    highlights: 
-    [
+    highlights: [
       ai: { // #1
         orderNumber: 0,
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
@@ -68,7 +67,6 @@ Acceptable options and defaults are as follows:
         border : "7px ridge yellow",                            
       },
       hi: { // #3
-        id: "hi",
         orderNumber: 2,
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
         // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
@@ -120,22 +118,18 @@ Acceptable options and defaults are as follows:
         }
     ]
     slideContent: {
-      title: "No content provided",
-      content: "Check your slideContent object",
-      audio: 0
+        title: "No content provided",
+        content: "Check your slideContent object",
+        audio: 0
     },
     audioFiles: [
-        
+        "someURL/toAudioFile",
+        "anotherURL/toOtherFile"
     ]
   
 
 ## Global Events available for binding and triggering
 
-    started
-    playing
-    paused
-    stopped
-    ended
     play
     pause
     stop
@@ -143,9 +137,15 @@ Acceptable options and defaults are as follows:
     previous
     replay
 
+
 ## Global States available for checking
 
-
+    started
+    playing
+    ended
+    paused
+    //replayed?
+    //stopped?
 
 
 ## JavaScript and jQuery libraries required by this library
@@ -159,6 +159,7 @@ Acceptable options and defaults are as follows:
 
 The rest of this README is being edited at this moment
 **More options and capabilities are being added all the time**
+**Everything below is just notes of the developer for the developer**
 
     Slide class methods:
         
