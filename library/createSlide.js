@@ -887,19 +887,34 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
+  countObjectLength: function(obj){
+    var counter=0, i;
+
+    for(i in obj){
+      if(obj.hasOwnProperty(i)){
+        counter++;
+      }
+    }
+
+    return counter;
+  },
+
   initButtons: function(){
     "use strict";
 
-    var button, $button, actionButton, addOnClick = [];
+    var button, $button, actionButton, addOnClick = [], objCount = this.countObjectLength(this.buttons);
 
-    if(this.options.enableButtons && this.buttons && this.buttons.length > 0 &&
-        this.slideElements.buttonElements.length !== this.buttons.length){
+    console.log(this.buttons);
+
+    if(this.options.enableButtons && this.buttons && objCount > 0 &&
+        this.slideElements.buttonElements.length !== objCount){
       for(button in this.buttons){
         $button = $("#" + button + "_button");
         if( !$button || $button.length < 1){
           actionButton = jQuery('<a/>',{
-            class: "btn btn-default " + button.classes.join(" "),
-            html: button.title,
+            id: button + "_button",
+            class: "btn btn-default " + (this.buttons[button].classes ? this.buttons[button].classes.join(" ") : ""),
+            html: this.buttons[button].title,
           }).appendTo(this.container + " > .cdot_contentText");
 
           this.slideElements.buttonElements.push(actionButton);
@@ -1682,6 +1697,7 @@ AVIATION.common.Slide.prototype = {
 
     // TODO: move this when neccessary, for testing and development only
     this.slideElements.highlightElements = [];
+    this.slideElements.buttonElements = [];
 
     this.avatars = options.avatars;
     this.highlights = options.highlights;

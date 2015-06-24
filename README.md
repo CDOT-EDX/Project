@@ -46,7 +46,7 @@ Acceptable options and defaults are as follows:
         close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
       }
     },
-    highlights: [
+    highlights: {
       ai: { // #1
         orderNumber: 0,
         // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
@@ -108,8 +108,8 @@ Acceptable options and defaults are as follows:
         height: "41%",
         border : "7px ridge yellow",                            
       },
-    ],
-    buttons: [
+    },
+    buttons: {
         someId: {
             title: 'I am a button',
             classes: ["btn", "btn-default"],
@@ -119,7 +119,7 @@ Acceptable options and defaults are as follows:
             title: 'another button',
             action: function(){}
         }
-    ]
+    },
     slideContent: {
         title: {html: "No content provided", classes: "col-md-12" }, 
         content: {html: "Check your slideContent object", classes: "text-center" },
