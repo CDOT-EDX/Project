@@ -491,6 +491,8 @@ AVIATION.common.Slide.prototype = {
     this.buildHighlights(activeIndex, highlightsAddOnClick);
 
     buttonsAddOnClick = this.initButtons();
+    console.log("buttons ADD ON CLICK!");
+    console.log(buttonsAddOnClick);
     this.buildButtons(activeIndex, buttonsAddOnClick);
 
     setupInnerContent = function(classSize, callback){
@@ -927,14 +929,11 @@ AVIATION.common.Slide.prototype = {
               html: this.buttons[button].title,
             }).appendTo(this.container + " > .cdot_contentText");
 
-            /*
-            if(button.action && typeof button.action === 'function'){
-              actionButton.on("click", button.action);
-            }
-            */
+            console.log(actionButton);
+            console.log(this.slideElements.buttonElements);
 
             this.slideElements.buttonElements.push(actionButton);
-            addOnClick.push(false);
+            addOnClick.push({ id: button, callback: false});
           }
         }
       }
@@ -948,10 +947,10 @@ AVIATION.common.Slide.prototype = {
 
   buildButtons: function(index, addOnClick){
     "use strict";
-    var slide = this, $button, b, button;
+    var slide = this, $button, b, button, objCount = this.countObjectLength(this.buttons);
 
     console.log("building buttons");
-    if(this.options.enableButtons && this.buttons && this.buttons.length > 0){
+    if(this.options.enableButtons && this.buttons && objCount > 0){
       if(slide.slideContent[index].buttonElements){
         // now lets add on clicks on the modals we need them in
         for(button in slide.slideContent[index].buttonElements){
@@ -963,21 +962,26 @@ AVIATION.common.Slide.prototype = {
             }            
           }
         }
+      }
 
-        for(h=0; h<addOnClick.length; h++){
-          if(addOnClick[h]){
-            slide.slideElements.buttonElements[h]
-              .off();
-            slide.slideElements.buttonElements[h]
-              .on("click", { "onclick": [addOnClick[h], this.buttons[h].action], "element": "button", slide: slide }, slide.checkAdvanceWith);
-          } else {
-            slide.slideElements.buttonElements[h]
-              .off();
-            slide.slideElements.buttonElements[h]
-              .on("click", { "onclick": [this.buttons[h].action], "element": "button", slide: slide }, slide.checkAdvanceWith);
-          }
+      for(b=0; b<addOnClick.length; b++){
+        if(addOnClick[b]){
+          console.log("there is an AddOnClick ....");
+          console.log(slide.slideElements.buttonElements[b]);
+          slide.slideElements.buttonElements[b]
+            .off();
+          slide.slideElements.buttonElements[b]
+            .on("click", { "onclick": [addOnClick[b].callback, this.buttons[addOnClick[b].id].action], "element": "button", slide: slide }, slide.checkAdvanceWith);
+        } else {
+          console.log("there no AddOnClick but there is action....");
+          console.log(this.buttons[b]);
+          slide.slideElements.buttonElements[b]
+            .off();
+          slide.slideElements.buttonElements[b]
+            .on("click", { "onclick": [this.buttons[addOnClick[b].id].action], "element": "button", slide: slide }, slide.checkAdvanceWith);
         }
       }
+
     }
   },
   
@@ -987,7 +991,7 @@ AVIATION.common.Slide.prototype = {
     var highlight, $highlight, modalInvoker, addOnClick = [];
 
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0 && 
-        this.slideElements.buttonElements.length !== this.highlights.length){
+        this.slideElements.highlightElements.length !== this.highlights.length){
       // console.log("lets build highlights");
 
       for(highlight in this.highlights){
@@ -1008,8 +1012,8 @@ AVIATION.common.Slide.prototype = {
                      ";display:none;z-index:1;"
           }).appendTo(this.container + " > .cdot_contentText");            
 
-          this.slideElements.buttonElements.push(modalInvoker);
-          addOnClick.push(false);
+          this.slideElements.highlightElements.push(modalInvoker);
+          addOnClick.push({ id: highlight, callback: false});
         }
       }
     }
@@ -1034,14 +1038,14 @@ AVIATION.common.Slide.prototype = {
 
         for(h=0; h<addOnClick.length; h++){
           if(addOnClick[h]){
-            slide.slideElements.buttonElements[h]
+            slide.slideElements.highlightElements[h]
               .off();
-            slide.slideElements.buttonElements[h]
-              .on("click", { "onclick": [addOnClick[h], this.highlights[h].action], "element": "highlight", slide: slide }, slide.checkAdvanceWith);
+            slide.slideElements.highlightElements[h]
+              .on("click", { "onclick": [addOnClick[h].callback, this.highlights[h].action], "element": "highlight", slide: slide }, slide.checkAdvanceWith);
           } else {
-            slide.slideElements.buttonElements[h]
+            slide.slideElements.highlightElements[h]
               .off();
-            slide.slideElements.buttonElements[h]
+            slide.slideElements.highlightElements[h]
               .on("click", { "onclick": [this.highlights[h].action], "element": "highlight", slide: slide }, slide.checkAdvanceWith);
           }
         }
@@ -1344,12 +1348,12 @@ AVIATION.common.Slide.prototype = {
 
       for(h=0; h<addOnClick.length; h++){
         if(addOnClick[h]){
-          slide.slideElements.buttonElements[h]
+          slide.slideElements.highlightElements[h]
             .off();
-          slide.slideElements.buttonElements[h]
+          slide.slideElements.highlightElements[h]
             .on("click", addOnClick[h]);
         } else {
-          slide.slideElements.buttonElements[h].off();
+          slide.slideElements.highlightElements[h].off();
         }
       }
     }
@@ -1738,7 +1742,7 @@ AVIATION.common.Slide.prototype = {
     this.modalSlides = [];
 
     // TODO: move this when neccessary, for testing and development only
-    this.slideElements.buttonElements = [];
+    this.slideElements.highlightElements = [];
     this.slideElements.buttonElements = [];
 
     this.avatars = options.avatars;
@@ -1790,9 +1794,9 @@ AVIATION.common.Slide.prototype = {
 
       for(i=0; i < toShow.length; i++){
         if(toShow[i]){
-          slide.slideElements.buttonElements[i].show();
+          slide.slideElements.highlightElements[i].show();
         } else {
-          slide.slideElements.buttonElements[i].hide();
+          slide.slideElements.highlightElements[i].hide();
         }
       }
     }

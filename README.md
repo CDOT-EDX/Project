@@ -109,6 +109,7 @@ Acceptable options and defaults are as follows:
         border : "7px ridge yellow",                            
       },
     },
+    // This is for default buttons that we will be reusing over and over (if any)
     buttons: {
         someId: {
             title: 'I am a button',
@@ -129,9 +130,10 @@ Acceptable options and defaults are as follows:
                         { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
                         5 
         ],
+        // this is to hide / show buttons just like we do with highlights
         buttons: [
                     0 , 
-                    { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
+                    { index: 2, onclick: function(){ console.log("button onclick");} }, 
                     3 
         ],
         audio: 0,
