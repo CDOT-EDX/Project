@@ -584,7 +584,7 @@ AVIATION.common.Slide.prototype = {
         slideContent.callback();
       }
       
-      slide.buildFooter();
+      //slide.buildFooter();
 
     };
 
@@ -630,9 +630,9 @@ AVIATION.common.Slide.prototype = {
       });
 
       if(this.options.isModal){
-         console.log("trying to find container");
+        console.log("trying to find container");
         footer.appendTo( this.container + " > .modal-dialog > .modal-content");
-         console.log( $(this.container + " > .modal-dialog > .modal-content") );
+        console.log( $(this.container + " > .modal-dialog > .modal-content") );
       } else {
         footer.appendTo( $(this.container).parent() );  
       }
@@ -1773,10 +1773,11 @@ AVIATION.common.Slide.prototype = {
     */
   },
 
+  // TODO: create the same for buttons
   checkSlideHighlights: function( showHighlights, slide ){
     "use strict";
     var i, j, toShow = [];
-    if(showHighlights && showHighlights.length > 0){
+    if(slide.enableHighlights){ //(showHighlights && showHighlights.length > 0){
       // check the index/indices of highlights to show from the bank
       // and hide/show accordingly
       // console.log("lets manage some highlights!");
@@ -1800,7 +1801,7 @@ AVIATION.common.Slide.prototype = {
         }
       }
     }
-
   }
+
 };
 console.log("testing this class execution");
