@@ -488,7 +488,7 @@ AVIATION.common.Slide.prototype = {
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
       // console.log("first if");
       contentContainer = jQuery('<div/>', {
-        "class": this.options.showAvatars ? "cdot_contentText col-lg-8" : "cdot_contentText col-xs-12"
+        "class": this.options.showAvatars ? "cdot_contentText col-lg-8" : "cdot_contentText row"
       }).appendTo(this.container);
     } else if (this.options.isModal) {
       var dialogContainer = jQuery('<div/>', {
@@ -1801,6 +1801,37 @@ AVIATION.common.Slide.prototype = {
     };
     */
   },
+
+  checkSlideButtons: function( showButtons, slide ){
+    "use strict";
+    var i, j, toShow = [];
+    if(slide.enableButtons){ //(showHighlights && showHighlights.length > 0){
+      // check the index/indices of highlights to show from the bank
+      // and hide/show accordingly
+      // console.log("lets manage some highlights!");
+      for(button in this.buttons){
+        if(this.buttons.hasOwnProperty(button)){
+          toShow.push(false);
+        }
+      }
+
+      for(j=0; showButtons && j < showButtons.length; j++){
+        if(typeof showButtons[j] === "object"){
+          toShow[showButtons[j].index] = true;
+        } else {
+          toShow[showButtons[j]] = true;  
+        }
+      }
+
+      for(i=0; i < toShow.length; i++){
+        if(toShow[i]){
+          slide.slideElements.buttonElements[i].show();
+        } else {
+          slide.slideElements.buttonElements[i].hide();
+        }
+      }
+    }
+  }
 
   // TODO: create the same for buttons
   checkSlideHighlights: function( showHighlights, slide ){
