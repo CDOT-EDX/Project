@@ -49,9 +49,6 @@ Acceptable options and defaults are as follows:
     highlights: {
       ai: { // #1
         orderNumber: 0,
-        // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
-        // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-        content: {},
         top : "5%",
         left : "36.2%",
         width : "26%",
@@ -60,8 +57,6 @@ Acceptable options and defaults are as follows:
       }, 
       alt: { // #2
         orderNumber: 1,
-        // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
-        // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "5%",
         left : "62%",
         width : "26%",
@@ -70,8 +65,6 @@ Acceptable options and defaults are as follows:
       },
       hi: { // #3
         orderNumber: 2,
-        // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
-        // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
         top : "50%",
         left : "36.2%",
         width : "26%",
@@ -80,8 +73,6 @@ Acceptable options and defaults are as follows:
       },
       asi: { // #4
         orderNumber: 3,
-        // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
-        // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "5%",
         left : "10.5%",
         width : "26%",
@@ -90,8 +81,6 @@ Acceptable options and defaults are as follows:
       },
       vsi: { // #5
         orderNumber: 4,
-        //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
-        //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
         top: "50%",
         left: "62%",
         width: "26%",
@@ -100,8 +89,6 @@ Acceptable options and defaults are as follows:
       },
       tc: { // #6
         orderNumber: 5,
-        //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
-        //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
         top : "50%",
         left : "10.5%",
         width : "26%",
@@ -140,19 +127,53 @@ Acceptable options and defaults are as follows:
         second: 10,
         callback: function(){ console.log("this is a callback function"); }
     },
-    audioFiles: [
+    modals: [{ 
+              id: "ai", 
+              title: "Attitude Indicator", 
+              content: {html: "This is the MODAL custom HTML" },
+              //audio:  "//online.cdot.senecacollege.ca:25080/aviation/audios/PlaceHolderTomLong.mp3"
+            }, 
+            {
+              id: "alt", 
+              title: "Altimeter", 
+              //audio: "//online.cdot.senecacollege.ca:25080/aviation/audios/PlaceHolderTomLong.mp3"               
+            }
+    ],
+    // these audioFiles are for the slide only
+    audioFiles: [ 
         "someURL/toAudioFile",
         "anotherURL/toOtherFile"
-    ]
-  
+    ],
+    // these audio files are extras (audios for quizzes and interactions)
+    extraAudioFiles: [
+        "someURL/toAudioFile",
+        "anotherURL/toOtherFile"
+    ],
+    // these audio files are for modals
+    <!-- 
+        modalAudioFiles: [
+        "someURL/toAudioFile",
+        "anotherURL/toOtherFile"
+        ],
+     -->  
 
-## Global Events available for binding and triggering
+## Global Events available for triggering
 
-    play
-    pause
-    stop
+    play(playWhat, whichIndex)
+        - with no parameters passed, will start playing slide audios (and stop all other audios)
+        - with "modal" passed, will start playing the modal audio
+        - with "extra" passed, will start playing the extra audio within slides
+
     next
+
     previous
+
+
+
+    pause
+
+    stop
+
     replay
 
 

@@ -25,6 +25,13 @@ var AVIATION = AVIATION || {};
 
 AVIATION.common = {};
 
+// make an abstract class to wrap any 'player' action
+AVIATION.common.Player = function(){
+  "use strict";
+
+
+};
+
 // begin a javascript class "Slide"
 AVIATION.common.Slide = function (options, slideContent, audioFiles) {
   "use strict";
@@ -42,6 +49,8 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
     options = {};
   }
 
+  this.parent = options.parent;
+
   this.type = options.type || "simple"; // check which options are given and then assign a default
 
   this.options = options;
@@ -50,7 +59,13 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
 
   this.options.audioFiles = audioFiles;
 
+  this.slideStates = [];
+
+  this.extraStates = [];
+
   this.activeIndex = options.activeIndex || 0;
+
+  this.extraActiveIndex = options.extraActiveIndex || 0;
 
   this.slideContent = slideContent || [
                                         { 
@@ -142,7 +157,6 @@ AVIATION.common.Slide.prototype = {
     this.events = events;
   },
 
-
   // can be used by an object like so...
   // this.attachState.apply(someObject, arrayOfArgs);
   attachState: function(state){
@@ -170,6 +184,8 @@ AVIATION.common.Slide.prototype = {
 
     this.state = states[state];
   },
+
+
 
   // method that initializes building of simple slides
   _initSimple: function(options){
@@ -913,12 +929,23 @@ AVIATION.common.Slide.prototype = {
   initButtons: function(){
     "use strict";
 
-    var button, $button, actionButton, addOnClick = [], objCount = this.countObjectLength(this.buttons);
+    var button, $button, $parent, actionButton, addOnClick = [], objCount = this.countObjectLength(this.buttons);
 
     console.log(this.buttons);
 
     if(this.options.enableButtons && this.buttons && objCount > 0 &&
         this.slideElements.buttonElements.length !== objCount){
+
+      // create a button container
+      $parent = $(this.buttonContainer);
+
+      if($parent && $parent.length < 1){
+        $parent = jQuery('<div/>',{
+          id: this.buttonContainer.split("#")[1],
+          class: "row",
+        }).appendTo(this.container);
+      }
+
       for(button in this.buttons){
         if(this.buttons.hasOwnProperty(button)){
           $button = $("#" + button + "_button");
@@ -927,7 +954,7 @@ AVIATION.common.Slide.prototype = {
               id: button + "_button",
               class: "btn btn-default " + (this.buttons[button].classes ? this.buttons[button].classes.join(" ") : ""),
               html: this.buttons[button].title,
-            }).appendTo(this.container + " > .cdot_contentText");
+            }).appendTo($parent);
 
             console.log(actionButton);
             console.log(this.slideElements.buttonElements);
@@ -1055,7 +1082,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   buildModals: function(modalOptions){
-    var newModal;
+    var newModal, slide = this;
     // modals are basically slides with an extra option
     // build constrained inside a modal window
     if(this.options.enableModals && this.options.enableHighlights){
@@ -1078,6 +1105,7 @@ AVIATION.common.Slide.prototype = {
                showControls: false,
                development: true,
                isModal: true,
+               parent: slide,
                noAudio: this.modals[i].audio && this.modals[i].audio.length  > 0 ? false : true,
                container: "#modal_" + this.modals[i].id,
                statusId: "#modal_status_" + this.modals[i].id,
@@ -1091,7 +1119,7 @@ AVIATION.common.Slide.prototype = {
                callback: this.modals[i].callback,
              }],
              this.modals[i].audio
-             );
+        );
 
         console.log("this is the modal slide: ");
         console.log(newModal);
@@ -1100,7 +1128,7 @@ AVIATION.common.Slide.prototype = {
 
         newModal.constructor();
 
-        this.modalSlides.push(newModal);  
+        this.modalSlides.push(newModal);
       }
       // itirate through modals and create each one with a unique id and launch the 
       // build content with the modified this.container id so that content gets appended to the modal
@@ -1392,7 +1420,7 @@ AVIATION.common.Slide.prototype = {
         });
 
         // force it to only happen at the beginning of the audio
-        player.cue("0.1", function(){
+        player.cue("0.01", function(){
           slideObject.buildContent(true, contentAtStart);
           if(callbackAtEnd){
             // run the callback that should be cued
@@ -1751,6 +1779,7 @@ AVIATION.common.Slide.prototype = {
     this.buttons = options.buttons || [];
     this.options = options;
 
+    this.buttonContainer = options.buttonContainer || "#buttonContainer";
     this.container = options.container || "#slideContainer";
     this.statusId = options.statusId || "#statusBar";
     this.headerId = options.headerId || "#header";
