@@ -157,6 +157,13 @@ Acceptable options and defaults are as follows:
         ],
      -->  
 
+## Syntax and actions available for content
+    content - can include any custom html if needed
+        html (string/html)
+        classes (string array)
+        action (string) - available actions: remove, replace, append **replace is default**
+
+
 ## Global Events available for triggering
 
     play(playWhat, whichIndex)
