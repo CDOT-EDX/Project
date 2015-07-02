@@ -842,7 +842,7 @@ AVIATION.common.Slide.prototype = {
 
       statusBar = jQuery('<div/>', {
         "class": "col-xs-12",
-        html: '<a href="#" id="' + this.statusId.split("#")[1] + '"' + 
+        html: '<a id="' + this.statusId.split("#")[1] + '"' + 
               'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
               'role="button">Slide Loading...</a>'
       }).appendTo(parent);
@@ -1415,7 +1415,7 @@ AVIATION.common.Slide.prototype = {
             if(content[c].second){
               players[p].cue(content[c].second, function(){
                 slideObject.buildContent(true, c);
-                if(content[c].callback){
+                if(content[c].callback && typeof content[c].callback === 'function'){
                   // run the callback that should be cued
                   content[c].callback();
                 }
