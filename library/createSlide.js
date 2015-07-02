@@ -48,15 +48,32 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
 
   if(!options){
     options = {};
+  } else {
+    if(slideContent && !options.slideContent){
+      options.slideContent = slideContent;
+    }
+
+    if(audioFiles && !options.audioFiles){
+      options.audioFiles = audioFiles;
+    }
+
+    console.log("options before constructor");
+    this.options = options;
+    //this.constructor(options);
   }
 
+  
+
+
+
+/*
   this.parent = options.parent;
 
   this.type = options.type || "simple"; // check which options are given and then assign a default
 
   this.options = options;
 
-  this.options.slideContent = slideContent;
+  //this.options.slideContent = slideContent;
 
   this.options.audioFiles = audioFiles;
 
@@ -68,15 +85,6 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
 
   this.extraActiveIndex = options.extraActiveIndex || 0;
 
-  this.slideContent = slideContent || [
-                                        { 
-                                          title: "No Content Provided",
-                                          content: "Check your slideContent object", 
-                                          audio: 0
-                                        }
-                                      ];
-
-  this.audioFiles = audioFiles; //["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3"];
   this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
   this.slideHasListened = []; // store which audios have been listened to
 
@@ -84,37 +92,42 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
 
   this.slideTimer = -1;
 
-  this.parser = 
+
+  console.log(this.options);
+
+  console.log(this.options.slideContent);
+
+
+  console.log("!!! CONTENT !!!: ");
+  console.log(this.slideContent);
+
+  this.audioFiles = audioFiles; //["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3"];
+
+  //this.parser = 
 
   console.log("this inside Slide:");
   console.log(this);
-
-  // load requirements
-  /*
-  if(typeof($.fn.modal) === 'undefined'){
-    console.log("TYPE OF MODAL: " + typeof $().modal );
-    $.getScript( "https://online.cdot.senecacollege.ca:25080/aviation/js/bootstrap.min.js", function(){
-      console.log("loaded bootstrap js");
-    });
-  }
-  */
-
+*/
 };
 
 AVIATION.common.Slide.prototype = {
 
   // constructor which initiates the building process
-  constructor: function(){
+  constructor: function(options){
     "use strict";
     // check type of slide and run the proper initFunc
-    if (this.type === "simple"){
+    //if (this.type === "simple"){
       console.log("simple type");
-      console.log(this.options);
+      console.log(options);
+      this.options = options || this.options || {};
+
       this._initSimple( this.options );
+  /*
     } else {
       console.log("not simple slide");
       this._initPanel( this.options );
     }
+  */
   },
 
   // global events which can control the slide object from within other plugins
@@ -220,8 +233,10 @@ AVIATION.common.Slide.prototype = {
   destroy: function(){
     "use strict";
 
-    $("#slideContainer").remove();
-    $("#slideFooter").remove();
+    $(this.container).empty();
+    $(this.options.footerId).remove();
+
+    return this.options;
   },
 
   // build titles on the slide
@@ -312,43 +327,24 @@ AVIATION.common.Slide.prototype = {
 
     });
   },
-/*
-  triggerCallback: function( index ){
-    "use strict";
 
-
-  },
-*/
   // method for invoking all build functions in one place and activating the slide
   buildSlide: function(){
     "use strict";
 
-    // console.log("inside buildSlide");
-
-    var slide = this; //callback = function(){
+    var slide = this;
 
     this.attachEvents();
     this.attachStates();
 
-    if(!this.options.noAudio){
-      // console.log("going to buildSlideAudios");
-
+    //if(!this.options.noAudio){
       this.buildSlideAudios( );
       slide.initAudioEvents( );
-/*
-    } else if (this.options.advanceWith !== "audio"){
-      this.buildSlideAudios();
-      this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
-    } else {
-*/
-      // console.log("going to buildContent");
+
       console.log("no audio and building content! *** " + this.activeIndex);
       console.log(this);
       this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
-      //this.triggerCallback( this.activeIndex );
-      // trigger callbacks?
-    }
-    // console.log("callback from buildSlide!");
+    //}
 
     slide.buildQuiz();
 
@@ -357,15 +353,13 @@ AVIATION.common.Slide.prototype = {
     slide.buildModals();
 
     // create events for audio/video interactions and a way to track them
-    // console.log("now reset slide");
 
-    if(!slide.options.noAudio){
+    //if(!slide.options.noAudio){
       slide.resetSlide();  
-    }
+    //}
   
     // finished thus activate the slide
     slide.activateSlide();
-    //this.buildFooter();
 
   },
 
@@ -375,13 +369,8 @@ AVIATION.common.Slide.prototype = {
     // callback will generate the title+content
     var avatarLeft = "", avatarRight = "", contentClass = 12, i, slide = this;
 
-//    console.log("buidling avatars");
-
     function createAvatars( avatars ){
       var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg, filename = "";
-
-      //console.log("AVATARS *** ");
-      //console.log(avatars);
 
       for(i = 0; i < avatars.length; i++){
 
@@ -465,15 +454,6 @@ AVIATION.common.Slide.prototype = {
         } 
       }
 
-      /*
-      if(avatarLeft && avatarLeft !== ""){
-        avatarArray.push(avatarLeft);
-      }
-
-      if(avatarRight && avatarRight !== ""){
-        avatarArray.push(avatarRight);
-      }
-      */
       createAvatars( [ avatarLeft, avatarRight] );
     }
 
@@ -689,6 +669,8 @@ AVIATION.common.Slide.prototype = {
     var parent = parentContainer || $(this.container).parent();
 
     if(this.options.showSlideControls){
+      console.log("!!! BUILDING SLIDE CNTRLS! ***********");
+
       var slideControlsRow = jQuery('<div/>', {
         "class": "row",
       }).appendTo( parent );
@@ -1538,7 +1520,7 @@ AVIATION.common.Slide.prototype = {
 
     if(this.options.showSlideControls){
 
-      if(active < 1){
+      if(active < 1 && players.length > 1){
         console.log("first audio, no way back");
         controls.previous.prop("disabled", true);
         controls.previous.attr("disabled", true);
@@ -1560,8 +1542,10 @@ AVIATION.common.Slide.prototype = {
           }
         } else if (active >= players.length - 1){
           console.log("active is the last players length");
-          controls.previous.prop("disabled", false);
-          controls.previous.removeAttr("disabled");
+          if(active > 0){
+            controls.previous.prop("disabled", false);
+            controls.previous.removeAttr("disabled");
+          }
           controls.next.attr("disabled", true);
           controls.next.prop("disabled", true);
         } else {
@@ -1779,10 +1763,43 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
+    // init neccessary variables
+    this.slideStates = [];
+
+    this.extraStates = [];
+
+    this.activeIndex = options.activeIndex || 0;
+
+    this.extraActiveIndex = options.extraActiveIndex || 0;
+
+
+    this.audioFiles = options.audioFiles;
+
+    console.log("** AUDIO FILES? ****");
+    console.log(this.audioFiles);
+    console.log(this);
+
+    this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
+    this.slideHasListened = []; // store which audios have been listened to
+
+    this.slideElements = {}; // will have status bar / control buttons / title / content and so on
+
+    this.slideTimer = -1;
+
+    this.slideContent = this.options.slideContent ||  [
+                                                        { 
+                                                          title: "No Content Provided",
+                                                          content: "Check your slideContent object", 
+                                                          audio: 0
+                                                        }
+                                                      ];
+
+
     // a way to keep track of the modals on the page
     this.modalSlides = [];
 
     // TODO: move this when neccessary, for testing and development only
+    this.slideElements.slideControls = {};
     this.slideElements.highlightElements = [];
     this.slideElements.buttonElements = [];
 
