@@ -1,0 +1,90 @@
+/*
+
+SEE Module_EdwardTest M2_Snap8_c Slide5 for implementation example.
+
+*/
+
+.ui-state-default, .ui-widget-content .ui-state-default{
+border: 1px solid #F00;
+background: url("images/ui-bg_glass_75_e6e6e6_1x400.png") repeat-x scroll 50% 50% #CC7E7E;
+}
+.ui-widget-content{
+border: 1px solid #000;
+}
+
+.takeOff_amountS{
+  border: 0;
+  color: #B0B0B0;
+  font-weight: 500;
+  left: 29px;
+  top: 4px;
+  position: absolute;
+  margin-bottom: -200px;
+  z-index: 3;
+  background-color: transparent;
+  text-align: left;
+  line-height: 2.635;
+  font-size: xx-small;
+}
+.climb_amountS{
+  border: 0;
+  color: #B0B0B0;
+  font-weight: 500;
+  left: 227px;
+  top: 4px;
+  position: absolute;
+  margin-bottom: -200px;
+  z-index: 3;
+  background-color: transparent;
+  text-align: left;
+  line-height: 2.635;
+  font-size: xx-small;
+}
+.cruise_amountS{
+  border: 0;
+  color: #B0B0B0;
+  font-weight: 500;
+  left: 29px;
+  top: 136px;
+  position: absolute;
+  margin-bottom: -200px;
+  z-index: 3;
+  background-color: transparent;
+  text-align: left;
+  line-height: 2.635;
+  font-size: xx-small;
+}
+.descent_amountS{
+  border: 0;
+  color: #B0B0B0;
+  font-weight: 500;
+  left: 227px;
+  top: 136px;
+  position: absolute;
+  margin-bottom: -200px;
+  z-index: 3;
+  background-color: transparent;
+  text-align: left;
+  line-height: 2.635;
+  font-size: xx-small;
+}
+.idle_amountS{
+  border: 0;
+  color: #B0B0B0;
+  font-weight: 500;
+  left: 29px;
+  top: 260px;
+  position: absolute;
+  margin-bottom: -200px;
+  z-index: 3;
+  background-color: transparent;
+  text-align: left;
+  line-height: 2.635;
+  font-size: xx-small;
+}
+
+.takeOff_sliderS{left: 8px; top: 9px; position: absolute; margin-bottom: -200px; z-index:3;}
+.climb_sliderS{left: 206px; top: 9px; position: absolute; margin-bottom: -200px; z-index:3;}
+.cruise_sliderS{left: 8px; top: 141px; position: absolute; margin-bottom: -200px; z-index:3;}
+.descent_sliderS{left: 206px; top: 141px; position: absolute; margin-bottom: -200px; z-index:3;}
+.idle_sliderS{left: 8px; top: 264px; position: absolute; margin-bottom: -200px; z-index:3;}
