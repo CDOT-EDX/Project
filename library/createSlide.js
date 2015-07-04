@@ -1076,6 +1076,14 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  initSlider: function(){
+    
+  },
+
+  buildSlide: function(){
+
+  },
+
   buildModals: function(modalOptions){
     var newModal, slide = this;
     // modals are basically slides with an extra option
@@ -1815,6 +1823,8 @@ AVIATION.common.Slide.prototype = {
     this.headerId = options.headerId || "#header";
     this.footerId = options.footerId || "#footer";
     this.bodyId = options.bodyId || "#body";
+
+    this.trottleId = options.throttleId || "#throttle";
 
     /* error handling example
     try {
