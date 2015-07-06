@@ -332,18 +332,20 @@ AVIATION.common.Slide.prototype = {
   buildSlide: function(){
     "use strict";
 
+    console.log("building slide");
+
     var slide = this;
 
     this.attachEvents();
     this.attachStates();
 
     //if(!this.options.noAudio){
-      this.buildSlideAudios( );
-      slide.initAudioEvents( );
+    this.buildSlideAudios( );
+    slide.initAudioEvents( );
 
-      console.log("no audio and building content! *** " + this.activeIndex);
-      console.log(this);
-      this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
+    console.log("no audio and building content! *** " + this.activeIndex);
+    console.log(this);
+    this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
     //}
 
     slide.buildQuiz();
@@ -355,7 +357,7 @@ AVIATION.common.Slide.prototype = {
     // create events for audio/video interactions and a way to track them
 
     //if(!slide.options.noAudio){
-      slide.resetSlide();  
+    slide.resetSlide();  
     //}
   
     // finished thus activate the slide
@@ -1077,15 +1079,19 @@ AVIATION.common.Slide.prototype = {
   },
 
   initSlider: function(){
-    
+    var newSlide, slide = this;
+
+    if(this.options.enableSlider){
+      
+    }
   },
 
-  buildSlide: function(){
+  buildSlider: function(){
 
   },
 
   buildModals: function(modalOptions){
-    var newModal, slide = this;
+    var newModal, newModalElement, slide = this;
     // modals are basically slides with an extra option
     // build constrained inside a modal window
     if(this.options.enableModals && this.options.enableHighlights){
