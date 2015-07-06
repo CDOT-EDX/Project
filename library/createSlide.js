@@ -1079,10 +1079,12 @@ AVIATION.common.Slide.prototype = {
   },
 
   initSlider: function(){
-    var newSlide, slide = this;
+    var newSlidee, slide = this;
 
     if(this.options.enableSlider){
-      
+      newSlider = jQuery('<div/>', {
+
+      });
     }
   },
 
