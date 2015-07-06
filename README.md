@@ -175,8 +175,6 @@ Acceptable options and defaults are as follows:
 
     previous
 
-
-
     pause
 
     stop
