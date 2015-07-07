@@ -239,6 +239,8 @@ AVIATION.common.Slide.prototype = {
     return this.options;
   },
 
+
+  // TODO: move header outside of slideContent 
   // build titles on the slide
   buildHeader: function(parent, content, setupContent, clearTitle, callback){
     "use strict";
@@ -347,6 +349,8 @@ AVIATION.common.Slide.prototype = {
     console.log(this);
     this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
     //}
+
+    //slide.initSlider();
 
     slide.buildQuiz();
 
@@ -468,7 +472,7 @@ AVIATION.common.Slide.prototype = {
   buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback){
     "use strict";
     var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
-        highlightsAddOnClick = [], buttonsAddOnClick = [], checkSlideButtons = this.checkSlideButtons,
+        highlightsAddOnClick = [], buttonsAddOnClick = [], checkSlideButtons = this.checkSlideButtons, localClass,
         activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > .cdot_contentText"), setupInnerContent;
 
     outerIndex = this.activeIndex || 0;
@@ -479,9 +483,8 @@ AVIATION.common.Slide.prototype = {
     // console.log(this.options.isModal);
 
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
-      // console.log("first if");
       contentContainer = jQuery('<div/>', {
-        "class": this.options.showAvatars ? "cdot_contentText col-lg-8" : "cdot_contentText col-xs-12"
+        "class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
       }).appendTo(this.container);
     } else if (this.options.isModal) {
       var dialogContainer = jQuery('<div/>', {
@@ -498,6 +501,8 @@ AVIATION.common.Slide.prototype = {
     // console.log(contentContainer);
     highlightsAddOnClick = this.initHighlights();
     this.buildHighlights(activeIndex, highlightsAddOnClick);
+
+    this.initSlider(activeIndex);
 
     buttonsAddOnClick = this.initButtons();
     console.log("buttons ADD ON CLICK!");
@@ -1078,24 +1083,51 @@ AVIATION.common.Slide.prototype = {
 
   },
 
-  initSlider: function(){
-    var newSlider = $(this.throttleId), slide = this;
+
+  // TODO: check the index of the slider value to show....
+  initSlider: function(activeIndex){
+    var newSlider = $(this.throttleId), throttleContainer = $(this.throttleContainer), slide = this;
+
+    console.log("attempting slider...");
+
+    console.log("slider option: " + this.options.enableSlider);
+    console.log("slider length" + newSlider.length);
 
     if(this.options.enableSlider && newSlider.length < 1){
+      if(throttleContainer && throttleContainer.length < 1){
+        throttleContainer = jQuery("<div/>", {
+          id: this.throttleContainer.split("#")[1],
+          class: "col-xs-4",
+          style: "padding:45px"
+        }).appendTo(this.container);
+      }
+
       newSlider = jQuery('<div/>', {
-        class: "slider"
-      }).appendTo(this.container);
+        id: this.throttleId.split("#")[1],
+        class: "slider",
+        style: "height: 200px;"
+      }).appendTo(throttleContainer);
+
+      console.log("DOING SLIDER!!! ***");
     }
+
+    console.log("SLIDER!!! : ");
+    console.log(newSlider);
 
     newSlider
       .slider({ 
-          min: 0, 
-          max: 20,
+          min: 0,
+          max: 4,
+          values: [0],
           orientation: "vertical"
       })
       .slider("pips", {
+          first: "label",
+          last: "label",
           rest: "label",
-          step: "5"
+          labels: ["Idle", "Descent/Aprroach", "Cruise" , "Climb" , "Take Off/Full"],
+          prefix: "",
+          suffix: ""
       });
   },
 
@@ -1844,6 +1876,7 @@ AVIATION.common.Slide.prototype = {
     this.bodyId = options.bodyId || "#body";
 
     this.throttleId = options.throttleId || "#slider";
+    this.throttleContainer = options.throttleContainer || "#sliderContainer";
 
     /* error handling example
     try {
