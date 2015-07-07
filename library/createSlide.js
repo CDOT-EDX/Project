@@ -1079,13 +1079,24 @@ AVIATION.common.Slide.prototype = {
   },
 
   initSlider: function(){
-    var newSlidee, slide = this;
+    var newSlider = $(this.throttleId), slide = this;
 
-    if(this.options.enableSlider){
+    if(this.options.enableSlider && newSlider.length < 1){
       newSlider = jQuery('<div/>', {
-
-      });
+        class: "slider"
+      }).appendTo(this.container);
     }
+
+    newSlider
+      .slider({ 
+          min: 0, 
+          max: 20,
+          orientation: "vertical"
+      })
+      .slider("pips", {
+          rest: "label",
+          step: "5"
+      });
   },
 
   buildSlider: function(){
@@ -1832,7 +1843,7 @@ AVIATION.common.Slide.prototype = {
     this.footerId = options.footerId || "#footer";
     this.bodyId = options.bodyId || "#body";
 
-    this.trottleId = options.throttleId || "#throttle";
+    this.throttleId = options.throttleId || "#slider";
 
     /* error handling example
     try {
