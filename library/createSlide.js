@@ -355,6 +355,8 @@ AVIATION.common.Slide.prototype = {
 
     slide.buildQuiz();
 
+    slide.buildQuizzes();
+
     slide.buildFooter();
 
     slide.buildModals();
@@ -1744,6 +1746,34 @@ AVIATION.common.Slide.prototype = {
     $(window).on("resize", function () {
         $('.modal:visible').each(centerModal);
     });
+
+  },
+
+  buildQuizzes: function(){
+    "use strict";
+
+    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement;
+
+    console.log("building quizzes");
+
+    console.log(quizzes);
+
+    for(i=0; i<quizzes.length; i++){
+      console.log("this is one quiz: " + this.quizId);
+      console.log("should it be? " + this.options.quizId);
+      tempElement = jQuery("<div/>", {
+        id: "quiz_" + i,
+        class: "cdot-quiz",
+        html: "<h1 class='quizName'><!-- where the quiz name goes --></h1><div class='quizArea'><div class='quizHeader'><!-- where the quiz main copy goes --><a class='button startQuiz' href='#'>Get Started!</a></div><!-- where the quiz gets built --></div><div class='quizResults'><h3 class='quizScore'>You Scored: <span><!-- where the quiz score goes --></span></h3><h3 class='quizLevel'><!--<strong>Ranking:</strong>--> <span><!-- where the quiz ranking level goes --></span></h3><div class='quizResultsCopy'><!-- where the quiz result copy goes --></div></div>",
+      }).appendTo(this.options.quizId);
+      tempElement.slickQuiz(quizzes[i]);
+      console.log("quizzes at " + i);
+      console.log(quizzes[i]);
+      quizElements.push(tempElement);
+      console.log(quizElements[i]);
+    }
+
+    this.slideElements.quizElements = quizElements;
 
   },
 
