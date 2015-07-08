@@ -136,3 +136,18 @@ a.btn.cdotBtn2[disabled] {
 div.modal-dialog.modal-cdot{
   width:auto;
 }
+
+#slideContainer .ui-slider-vertical.ui-slider-pips .ui-slider-label{
+  width: 7em;
+}
+
+#sliderContainer{
+  padding-left: 30px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+#slideContainer .ui-state-disabled, .ui-widget-content .ui-state-disabled, 
+  .ui-widget-header .ui-state-disabled{
+  opacity: 1;
+}

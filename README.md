@@ -24,6 +24,8 @@ Acceptable options and defaults are as follows:
     hiddenHighlights:   false,
     enableButtons:      true,
     hiddenButtons:      false, // am I using this yet?
+    enableSlider:       false,
+    readOnlySlider:     true,
     container:          "#slideContainer",
     statusId:           "#statusBar",
     headerId:           "#header",
@@ -123,6 +125,7 @@ Acceptable options and defaults are as follows:
                     { index: 2, onclick: function(){ console.log("button onclick");} }, 
                     3 
         ],
+        slider: 2,
         audio: 0,
         second: 10,
         callback: function(){ console.log("this is a callback function"); }
@@ -199,7 +202,7 @@ Acceptable options and defaults are as follows:
     PopcornJS: http://cdn.popcornjs.org/code/dist/popcorn.min.js || https://github.com/mozilla/popcorn-js
     jQuery Flight Indicators: https://github.com/echanna/jQuery-Flight-Indicators/tree/cdot_with_turn_coordinator
     JS CSV Parser (PapaParse): http://papaparse.com/
-
+    Resize Detection 
 
 The rest of this README is being edited at this moment
 **More options and capabilities are being added all the time**

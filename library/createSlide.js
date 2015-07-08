@@ -18,7 +18,8 @@
 /*jslint nomen: true*/
 /*jslint plusplus: true*/
 /*jslint todo: true*/
-
+/*global $:false */
+/*global jQuery:false */
 // TODO: add a "skip" button to pages
 
 var AVIATION = AVIATION || {};
@@ -245,7 +246,7 @@ AVIATION.common.Slide.prototype = {
   buildHeader: function(parent, content, setupContent, clearTitle, callback){
     "use strict";
     var headerElement = $(this.headerId), slide = this,
-        xButton, newTitle;
+        xButton;
 
     console.log("building the header");
     console.log(headerElement);
@@ -289,7 +290,7 @@ AVIATION.common.Slide.prototype = {
             html : "x"
           }).appendTo(newHeader);
 
-          newTitle = jQuery('<h4/>', {
+          jQuery('<h4/>', {
             id: "title_" + slide.headerId.split("#")[1],
             class: "modal-title",
             //id: element.id + "_label",
@@ -309,7 +310,7 @@ AVIATION.common.Slide.prototype = {
           console.log("append the header");
           console.log(newHeader);
           console.log(parent);
-          newHeader.appendTo(parent);
+          newHeader.prependTo(slide.container);
         }
       }
 
@@ -402,7 +403,11 @@ AVIATION.common.Slide.prototype = {
               "class": "avatar col-lg-2 " + avatarClass + " " + avatars[i].character,
             });
             
-            i === 0 ? avatarDiv.prependTo(parent.parent()) : avatarDiv.appendTo(parent.parent()) ; 
+            if(i === 0){
+              avatarDiv.prependTo(parent.parent());
+            } else {
+              avatarDiv.appendTo(parent.parent());
+            }
           }
 
           if(slide.avatars && slide.avatars[avatars[i].character]){
@@ -468,12 +473,37 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
+  // if content resizes, resize the throttle as well if neccessary
+  checkForContentResize: function(){
+    "use strict";
+
+    var $body = $(this.bodyId), $sliderContainer = $(this.throttleContainer), $slider = $(this.throttleId);
+
+    if(this.options.enableSlider){
+
+      console.log("body and slider... : ");
+
+      console.log($body);
+      console.log($slider);
+
+      var resizeTester = ResizeSensor( $body , function(){
+        console.log("resetting slider height!!");
+        $sliderContainer.height( $body.height() - 20 );
+        $slider.height( $body.height() - 22 );
+        console.log($slider.height() );
+        console.log($sliderContainer.height() );
+        console.log($body.height() );
+      });
+
+    }
+  },
+
   // method for building the content of the slide
   buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback){
     "use strict";
     var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
         highlightsAddOnClick = [], buttonsAddOnClick = [], checkSlideButtons = this.checkSlideButtons, localClass,
-        activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > .cdot_contentText"), setupInnerContent;
+        activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
     outerIndex = this.activeIndex || 0;
 
@@ -484,6 +514,7 @@ AVIATION.common.Slide.prototype = {
 
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
       contentContainer = jQuery('<div/>', {
+        id: this.bodyId.split("#")[1],
         "class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
       }).appendTo(this.container);
     } else if (this.options.isModal) {
@@ -510,7 +541,7 @@ AVIATION.common.Slide.prototype = {
     this.buildButtons(activeIndex, buttonsAddOnClick);
 
     setupInnerContent = function(classSize, callback){
-      var closingTag = "", src = "", slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
+      var slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
           action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
           newSlideInner;// callback = c;b
 
@@ -524,7 +555,11 @@ AVIATION.common.Slide.prototype = {
         // lets take care of our highlights
         checkSlideHighlights(slideContent.highlights, slide);
 
+        // and the buttons
         checkSlideButtons(slideContent.buttons, slide);
+
+        // let's switch the slider if needed
+        slide.setSlider(slideContent);
 
         newSlideInner = jQuery('<div/>', {
           id: "slideInner_" + outerIndex,
@@ -1098,7 +1133,7 @@ AVIATION.common.Slide.prototype = {
         throttleContainer = jQuery("<div/>", {
           id: this.throttleContainer.split("#")[1],
           class: "col-xs-4",
-          style: "padding:45px"
+
         }).appendTo(this.container);
       }
 
@@ -1114,11 +1149,14 @@ AVIATION.common.Slide.prototype = {
     console.log("SLIDER!!! : ");
     console.log(newSlider);
 
+    console.log("read only? " + this.options);
+
     newSlider
       .slider({ 
           min: 0,
           max: 4,
           values: [0],
+          disabled: this.options.readOnlySlider ? true : false,
           orientation: "vertical"
       })
       .slider("pips", {
@@ -1129,6 +1167,16 @@ AVIATION.common.Slide.prototype = {
           prefix: "",
           suffix: ""
       });
+
+    this.slideElements.slider = newSlider;
+  },
+
+  setSlider: function(slideContent){
+    "use strict";
+
+    if(this.options.enableSlider && slideContent.slider && slideContent.slider != ""){
+      this.slideElements.slider.slider("option", "values", [slideContent.slider]);
+    }
   },
 
   buildSlider: function(){
@@ -1650,6 +1698,8 @@ AVIATION.common.Slide.prototype = {
       this.playCurrent();  
     }
 
+    this.checkForContentResize();
+
     this.centerModals();
   },
 
@@ -1712,6 +1762,7 @@ AVIATION.common.Slide.prototype = {
           enableModals: false,
           enableHighlights: false,
           hiddenHighlights: false,
+          readOnlySlider: true,
           headerId: "#slideHeader",
           footerId: "#slideFooter",
           quizId: "#slideQuiz",
