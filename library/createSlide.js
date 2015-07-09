@@ -241,7 +241,6 @@ AVIATION.common.Slide.prototype = {
   },
 
 
-  // TODO: move header outside of slideContent 
   // build titles on the slide
   buildHeader: function(parent, content, setupContent, clearTitle, callback){
     "use strict";
@@ -1121,8 +1120,7 @@ AVIATION.common.Slide.prototype = {
   },
 
 
-  // TODO: check the index of the slider value to show....
-  initSlider: function(activeIndex){
+  initSlider: function(){
     var newSlider = $(this.throttleId), throttleContainer = $(this.throttleContainer), slide = this;
 
     console.log("attempting slider...");
@@ -1181,9 +1179,14 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  buildSlider: function(){
+  // create the instrument dashboard
+  initPanel: function(){
+    "use strict";
 
-  },
+    var slide = this;
+
+   
+   },
 
   buildModals: function(modalOptions){
     var newModal, newModalElement, slide = this;

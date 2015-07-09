@@ -4,6 +4,11 @@ This branch is for combining front-end libraries and features used in the edX/Av
 
 ## Slide Creation Library for the internal use of the edX team at CDOT
 
+In order to have this version of the createSlide library working you will need the following files:
+    CDOT-EDX/Project/library/createSlide.js
+    CDOT-EDX/Project/library/statis/js/*
+    CDOT-EDX/Project/library/statis/css/*
+
 createSlide now supports one options object being passed on versus multiples...
 
 therefore use: `var anySlide = new AVIATION.Slide( options )`
@@ -25,6 +30,7 @@ Acceptable options and defaults are as follows:
     enableButtons:      true,
     hiddenButtons:      false, // am I using this yet?
     enableSlider:       false,
+    enablePanel:        false, // should it be panel or dashboard or each instrument separately?
     readOnlySlider:     true,
     container:          "#slideContainer",
     statusId:           "#statusBar",
@@ -125,6 +131,7 @@ Acceptable options and defaults are as follows:
                     { index: 2, onclick: function(){ console.log("button onclick");} }, 
                     3 
         ],
+        // set slider to any throttle possition from 0-4
         slider: 2,
         audio: 0,
         second: 10,
