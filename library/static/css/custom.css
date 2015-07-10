@@ -151,3 +151,20 @@ div.modal-dialog.modal-cdot{
   .ui-widget-header .ui-state-disabled{
   opacity: 1;
 }
+
+/*.cdot_bg, .cdot_quiz, .slide_footer{
+  border: solid 1px #CCC;
+  -moz-box-shadow: 1px 1px 5px #999;
+  -webkit-box-shadow: 1px 1px 5px #999;
+  box-shadow: 1px 1px 5px #999;
+  padding: 5px;
+  border: solid 1px #EFEFEF;
+}
+*/
+.xmodule_HtmlModule {
+  border: solid 1px #CCC;
+  -moz-box-shadow: 1px 1px 5px #999;
+  -webkit-box-shadow: 1px 1px 5px #999;
+  box-shadow: 1px 1px 5px #999;
+  padding: 5px;
+}
