@@ -1185,6 +1185,7 @@ AVIATION.common.Slide.prototype = {
 
     var slide = this;
 
+    
    
    },
 

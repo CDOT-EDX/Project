@@ -2,6 +2,21 @@
 
 This branch is for combining front-end libraries and features used in the edX/Aviation project at CDOT
 
+## References to works used in this project and
+### JavaScript and jQuery libraries required by this library:
+
+    SlickQuiz: https://github.com/pkuzhel/SlickQuiz
+        Original library: https://github.com/jewlofthelotus/SlickQuiz
+    TimerJS: https://github.com/pkuzhel/timer.js
+        Original library: https://github.com/husa/timer.js
+    PopcornJS: http://cdn.popcornjs.org/code/dist/popcorn.min.js || https://github.com/mozilla/popcorn-js
+    jQuery Flight Indicators: https://github.com/uw-ray/Skyhawk-Flight-Instruments
+        Continued from: https://github.com/echanna/jQuery-Flight-Indicators/tree/cdot_with_turn_coordinator
+            Original: https://github.com/sebmatton/jQuery-Flight-Indicators
+    JS CSV Parser (PapaParse): http://papaparse.com/
+    Resize Detection (CSS Element Queries): https://github.com/marcj/css-element-queries
+
+
 ## Slide Creation Library for the internal use of the edX team at CDOT
 
 In order to have this version of the createSlide library working you will need the following files:
@@ -116,10 +131,10 @@ Acceptable options and defaults are as follows:
             action: function(){}
         }
     },
-    slideContent: {
-        title: {html: "No content provided", classes: "col-md-12" }, 
-        content: {html: "Check your slideContent object", classes: "text-center" },
-        image: {src: "/someSource/image.png", classes: "imageClass"},
+    slideContent: [{
+        title: {html: "No content provided", classes: ["col-md-12"] }, 
+        content: {html: "<p<Check your <b>slideContent</b> object</p>", classes: ["text-center"] },
+        image: {src: "/someSource/image.png", classes: ["imageClass"] },
         highlights: [ 
                         0 , 
                         { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
@@ -137,23 +152,33 @@ Acceptable options and defaults are as follows:
         second: 10,
         callback: function(){ console.log("this is a callback function"); }
     },
+    {
+        //... another slide content can go here to be triggered at a different time of the audio
+        title: {html: "This is a different title / slide"},
+        slider: 3,
+        audio: 1
+    }],
+    // default models that we want to be set-up in the background
     modals: [{ 
               id: "ai", 
               title: "Attitude Indicator", 
               content: {html: "This is the MODAL custom HTML" },
-              //audio:  "//online.cdot.senecacollege.ca:25080/aviation/audios/PlaceHolderTomLong.mp3"
             }, 
             {
               id: "alt", 
               title: "Altimeter", 
-              //audio: "//online.cdot.senecacollege.ca:25080/aviation/audios/PlaceHolderTomLong.mp3"               
             }
     ],
     // these audioFiles are for the slide only
     audioFiles: [ 
         "someURL/toAudioFile",
         "anotherURL/toOtherFile"
-    ],
+    ]
+
+The rest of this README is being edited at this moment
+**More options and capabilities are being added all the time**
+**Everything below is just notes of the developer for the developer**
+
     // these audio files are extras (audios for quizzes and interactions)
     extraAudioFiles: [
         "someURL/toAudioFile",
@@ -200,16 +225,6 @@ Acceptable options and defaults are as follows:
     paused
     //replayed?
     //stopped?
-
-
-## JavaScript and jQuery libraries required by this library
-
-    SlickQuiz: https://github.com/pkuzhel/SlickQuiz
-    TimerJS: https://github.com/pkuzhel/timer.js
-    PopcornJS: http://cdn.popcornjs.org/code/dist/popcorn.min.js || https://github.com/mozilla/popcorn-js
-    jQuery Flight Indicators: https://github.com/echanna/jQuery-Flight-Indicators/tree/cdot_with_turn_coordinator
-    JS CSV Parser (PapaParse): http://papaparse.com/
-    Resize Detection 
 
 The rest of this README is being edited at this moment
 **More options and capabilities are being added all the time**
