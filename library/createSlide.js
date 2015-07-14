@@ -750,7 +750,7 @@ AVIATION.common.Slide.prototype = {
         next: $("#btnN").data("action", "next")
       };
 
-      this.insertLineBreak(slideControlsRow);
+      //this.insertLineBreak(slideControlsRow);
 
       this.initSlideButtonEvents();
     } else {
@@ -761,9 +761,9 @@ AVIATION.common.Slide.prototype = {
   insertLineBreak: function( parent ){
     "use strict";
     try {
-      jQuery('<div/>', {
-        "class": "col-xs-12",
-        html: "<!----><br/>"
+      jQuery('<hr/>', {
+        "class": "style-two",
+        
       }).appendTo(parent);
     } catch(error) {
       console.log("error: " + error);
@@ -855,8 +855,6 @@ AVIATION.common.Slide.prototype = {
             console.log("slide audio init error: ");
             console.log(error);
           }
-  //        }
-      //  }
       });
     }
   },
@@ -864,10 +862,12 @@ AVIATION.common.Slide.prototype = {
   buildStatusBar: function(parent){
     "use strict";
     if(this.options.showStatus){
-      var closeButton, 
+      var closeButton, statusBar;
+
+      this.insertLineBreak(parent);
 
       statusBar = jQuery('<div/>', {
-        "class": "col-xs-12",
+        "class": "row",
         html: '<a id="' + this.statusId.split("#")[1] + '"' + 
               'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
               'role="button">Slide Loading...</a>'
@@ -897,6 +897,7 @@ AVIATION.common.Slide.prototype = {
     var controls = $(this.options.footerId + " .controls"), parent = parentContainer || $(this.container).parent();
 
     if(this.options.showControls){ //&& (!controls || controls.length < 1) ){
+
       var courseControlsRow = jQuery('<div/>', {
         "class": "row controls",
       }).appendTo( parent );
@@ -907,7 +908,7 @@ AVIATION.common.Slide.prototype = {
 
       // TODO: make titles of buttons editable by allowing them to be a property inside options
       var courseControlsContainer = jQuery('<div/>', {
-        "class": "col-xs-12",
+        "class": "row",
         html: '<a href="#" id="btnB" class="btn btn-default col-xs-6 col-sm-4" role="button">&lt; Back</a>' + 
               '<a href="#" id="btnC" class="btn btn-default col-xs-6 col-sm-offset-4 col-sm-4" role="button">Continue &gt;</a>'
       }).appendTo(courseControlsRow);
