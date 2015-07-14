@@ -352,6 +352,8 @@ AVIATION.common.Slide.prototype = {
 
     //slide.initSlider();
 
+    slide.initPanel();
+
     slide.buildQuiz();
 
     slide.buildQuizzes();
@@ -1182,12 +1184,65 @@ AVIATION.common.Slide.prototype = {
   },
 
   // create the instrument dashboard
-  initPanel: function(){
+  initPanel: function(options){
     "use strict";
 
-    var slide = this;
+    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), instIds = slide.options.instrumentIds, instrumentObject = {}, options = {};
 
-    
+    console.log("initing panel!");
+
+    options = {
+      size: 200,
+      showBox: false,
+      showScrews: true,
+      img_directory : '/c4x/CDOT/AV101/asset/'
+    };
+
+    console.log("container? " + slide.container);
+
+    if(panelContainer && panelContainer.length < 1){
+      console.log("adding panel cont");
+      panelContainer = jQuery("<div/>", {
+        id: slide.options.panelId.split("#")[1],
+        class: "instruments",
+        //html: ""
+      }).appendTo(slide.container);
+      console.log(panelContainer);
+    }
+
+    for (instrument in instIds){
+      if(instIds.hasOwnProperty(instrument)){
+
+        instrumentSpan = $("#" + instIds[instrument]);
+
+        console.log("checking insts: ");
+        console.log(instrumentSpan);
+
+        if( instrumentSpan && instrumentSpan.length < 1){
+          console.log("adding inst");
+          instrumentSpan = jQuery("<div/>", {
+            id: instIds[instrument],
+            class: "instrument"
+          }).appendTo(panelContainer);
+          console.log(instrumentSpan);
+          instrumentObject = $.flightIndicator("#"+instIds[instrument], instrument, options);
+          console.log("inst obj: ");
+          console.log(instrumentObject);
+          slide.instruments[instrument] = instrumentObject;
+
+          slide.slideElements.instrumentElements.push(instrumentSpan);
+        }
+      }
+    }
+
+            /*  instrumentIds: {
+            asi: "airspeed",
+            ai: "attitude",
+            alt: "altimeter",
+            tc: "turn_coordinator",
+            hi: "heading",
+            vsi: "variometer"
+          },*/
    
    },
 
@@ -1795,6 +1850,7 @@ AVIATION.common.Slide.prototype = {
           autoplay: true,
           autoRedirect: false,
           noAudio: false,
+          enablePanel: true,
           enableModals: false,
           enableHighlights: false,
           hiddenHighlights: false,
@@ -1803,6 +1859,15 @@ AVIATION.common.Slide.prototype = {
           footerId: "#slideFooter",
           quizId: "#slideQuiz",
           advanceWith: "audio",
+          panelId: "#flightInstruments",
+          instrumentIds: {
+            airspeed: "airspeed",
+            attitude: "attitude",
+            altimeter: "altimeter",
+            turn_coordinator: "turn_coordinator",
+            heading: "heading",
+            variometer: "variometer"
+          },
           avatars: {
             tom: {
               open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
@@ -1918,7 +1983,6 @@ AVIATION.common.Slide.prototype = {
 
     this.extraActiveIndex = options.extraActiveIndex || 0;
 
-
     this.audioFiles = options.audioFiles;
 
     console.log("** AUDIO FILES? ****");
@@ -1927,6 +1991,8 @@ AVIATION.common.Slide.prototype = {
 
     this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
     this.slideHasListened = []; // store which audios have been listened to
+
+    this.instruments = {};
 
     this.slideElements = {}; // will have status bar / control buttons / title / content and so on
 
@@ -1948,6 +2014,7 @@ AVIATION.common.Slide.prototype = {
     this.slideElements.slideControls = {};
     this.slideElements.highlightElements = [];
     this.slideElements.buttonElements = [];
+    this.slideElements.instrumentElements = [];
 
     this.avatars = options.avatars;
     this.highlights = options.highlights;
@@ -1985,15 +2052,11 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     var i, j, toShow = [], button;
     if(slide.options.enableButtons){ //(showHighlights && showHighlights.length > 0){
-      console.log("checking buttons here!");
-      console.log(showButtons);
       // check the index/indices of highlights to show from the bank
       // and hide/show accordingly
       // console.log("lets manage some highlights!");
       for(button in slide.buttons){
         if(slide.buttons.hasOwnProperty(button)){
-          console.log("show these buttons: " + button);
-          console.log(slide.buttons[button]);
           toShow.push(false);
         }
       }
@@ -2023,23 +2086,14 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     var i, j, toShow = [];
 
-    console.log("checking HIGHLIGHTS HERE!!!! ****");
-
-    console.log(slide);
-
-    console.log(slide.options.enableHighlights);
-
     if(slide.options.enableHighlights){ //(showHighlights && showHighlights.length > 0){
       // check the index/indices of highlights to show from the bank
       // and hide/show accordingly
       // console.log("lets manage some highlights!");
 
-      console.log("HL enabled! showHighlights: ");
-      console.log(showHighlights);
 
       for(i=0; slide.highlights && i < slide.highlights.length; i++){
         toShow.push(false);
-        console.log("creating HL to show array");
       }
 
       for(j=0; showHighlights && j < showHighlights.length; j++){
@@ -2048,18 +2102,13 @@ AVIATION.common.Slide.prototype = {
         } else {
           toShow[showHighlights[j]] = true;  
         }
-        console.log("setting the index toShow");
-        console.log(showHighlights[j]);
+
       }
 
       for(i=0; i < toShow.length; i++){
-        console.log("checking toShow at the end:");
-        console.log(toShow[i]);
         if(toShow[i]){
-          console.log("need to show this highlight at " + i);
           slide.slideElements.highlightElements[i].show();
         } else {
-          console.log("need to hide this highlight at " + i);
           slide.slideElements.highlightElements[i].hide();
         }
       }
