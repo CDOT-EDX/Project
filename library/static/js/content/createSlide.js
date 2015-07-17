@@ -354,6 +354,8 @@ AVIATION.common.Slide.prototype = {
 
     slide.initPanel();
 
+    slide.initCSVParser();
+
     slide.buildQuiz();
 
     slide.buildQuizzes();
@@ -1198,16 +1200,12 @@ AVIATION.common.Slide.prototype = {
       img_directory : '/c4x/CDOT/AV101/asset/'
     };
 
-    console.log("container? " + slide.container);
-
     if(panelContainer && panelContainer.length < 1){
-      console.log("adding panel cont");
-      panelContainer = jQuery("<div/>", {
-        id: slide.options.panelId.split("#")[1],
+      panelContainer = jQuery("<div/>", 
+{        id: slide.options.panelId.split("#")[1],
         class: "instruments",
         //html: ""
       }).appendTo(slide.container);
-      console.log(panelContainer);
     }
 
     for (instrument in instIds){
@@ -1215,19 +1213,12 @@ AVIATION.common.Slide.prototype = {
 
         instrumentSpan = $("#" + instIds[instrument]);
 
-        console.log("checking insts: ");
-        console.log(instrumentSpan);
-
         if( instrumentSpan && instrumentSpan.length < 1){
-          console.log("adding inst");
           instrumentSpan = jQuery("<div/>", {
             id: instIds[instrument],
             class: "instrument"
           }).appendTo(panelContainer);
-          console.log(instrumentSpan);
           instrumentObject = $.flightIndicator("#"+instIds[instrument], instrument, options);
-          console.log("inst obj: ");
-          console.log(instrumentObject);
           slide.instruments[instrument] = instrumentObject;
 
           slide.slideElements.instrumentElements.push(instrumentSpan);
@@ -1235,24 +1226,192 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
-            /*  instrumentIds: {
-            asi: "airspeed",
-            ai: "attitude",
-            alt: "altimeter",
-            tc: "turn_coordinator",
-            hi: "heading",
-            vsi: "variometer"
-          },*/
-   
-   },
+  },
+
+
+  setInstrument: function( instrument , functionName , value1, value2 ){
+    "use strict";
+
+    var slide = this, instruments = slide.instruments;
+
+    instruments[instrument][functionName](value1, value2);
+
+  },
+
+/*
+
+          instrumentIds: {
+            airspeed: "airspeed",
+            attitude: "attitude",
+            altimeter: "altimeter",
+            turn_coordinator: "turn_coordinator",
+            heading: "heading",
+            variometer: "variometer"
+          },
+
+          */
+
+
+
+  setAllInstruments: function( options ){
+    "use strict";
+
+    var slide = this, instruments = slide.instruments, instrumentFunctions = {}, instrument, i;
+
+    instrumentFunctions = {
+      airspeed          : [ "setAirSpeed" ],
+      attitude          : [ "setRoll" , "setPitch", "setOffFlag" ],
+      altimeter         : [ "setAltitude", "setPressure" ],
+      turn_coordinator  : [ "setTurn", "setSlip" ],
+      heading           : [ "setHeading", "setBeaconOne", "setBeaconTwo" ],
+      variometer        : [ "setVario" ]
+    };
+
+    /*
+      indicator.resize(size);                     // Set size in pixels of the indicator
+      indicator.toggleBox();                      // Toggle background box of the indicator
+      indicator.toggleScrews();                   // Toggle background screws of the indicator
+    */
+
+    for (instrument in instruments){
+      if(instruments.hasOwnProperty(instrument)){
+        for(i=0; i < instrumentFunctions[instrument].length; i++){
+          instruments[instrument][instrumentFunctions[instrument][i]](options[instrument]);
+        }
+      }
+    }
+
+  },
+
+  initCSVParser: function(){
+    "use strict";
+
+    var slide = this, i, rowNewData = {}, allFlight = [], myFlightIntVar, instrumentOptions = {};
+
+    var stepParser = function(row) {
+      console.log("Papa parser");
+       //myArray.push( [] );
+      if( row.data[0][30] && row.data[0][30] !== 'undefined' && !isNaN(row.data[0][30]) && row.data[0][30] !== '' ){
+
+        rowNewData = {
+          pitch: row.data[0][30],
+          roll: row.data[0][31],
+          heading: row.data[0][33],
+          altitude: row.data[0][41],
+          //pressure: (row.data[0][12] - (row.data[0][24]/1000) ) * inchesToMilli,
+          airSpeed: row.data[0][7], 
+          turnRate: row.data[0][28],
+          yaw: row.data[0][29],
+          vario: (row.data[0][15] / 1000)
+        };
+      
+        allFlight.push(rowNewData);
+      }
+    };
+
+    var papaComplete = function(results, file) {
+      console.log("Papa complete");
+      i = 0;
+      //console.log("Parsing complete:", results, file);
+
+      myFlightIntVar = setInterval(function(){
+        console.log("interval running");
+
+        if(allFlight && allFlight.length > 0 && i < allFlight.length){
+          console.log("run copmlete");
+
+          // if(i >= (allFlight.length - 1)){
+          // // $('#counter').addClass('stopInterval');
+          // // $('#submit-parse').text("START OVER");
+          //   console.log("int stopped1");
+          //   clearInterval(myFlightIntVar);
+          // }
+          
+          //console.log("Flight length: " + allFlight.length);
+          
+          //if(!$('#counter').hasClass('pauseInterval') && !$('#counter').hasClass('stopInterval')) {
+          
+          //console.log("Parsing complete:" + i);
+
+          instrumentOptions = {
+            attitude: {
+              pitch: (allFlight[i].pitch),
+              roll: ( -(allFlight[i].roll) ) 
+            },
+            heading: {
+              heading: allFlight[i].heading
+            },
+            altimeter: {
+              altitude: allFlight[i].altitude
+            },
+            airspeed: {
+              airspeed: allFlight[i].airSpeed
+            },
+            turn_coordinator: {
+              turnRate: ( - ( ( (allFlight[i].turnRate) * 57.3 ) - (allFlight[i].roll) ) ),
+              yaw: ( ( allFlight[i].yaw ) * 57.3 ) 
+            },
+            variometer: {
+              vario: allFlight[i].vario
+            }
+          };
+
+          slide.setAllInstruments( instrumentOptions );
+
+            /*
+              heading.setHeading(  );
+              altimeter.setAltitude();
+              //altimeter.setPressure(allFlight[i].pressure);
+              airspeed.setAirSpeed();
+                        //console.log("turn rate + roll: " + ( ( (allFlight[i].turnRate) * 57.3 ) + (allFlight[i].roll) ) );
+              turn_coordinator.setTurn;
+              turn_coordinator.setYaw( );
+              vario.setVario(  );
+            */
+      
+          //};
+          
+          i++;
+        } else {
+          console.log("int stopped2: ");
+          clearInterval(myFlightIntVar);
+        }
+        //}
+      },50);
+
+
+              //$("#submit-parse").attr('disabled', false);
+      //$("#submit-parse").text("START");
+
+    };
+
+    for(i=2; slide.options.csvFiles && i < /*slide.options.csvFiles.length*/ 3; i++){
+      console.log("parsing: " + slide.options.csvFiles[i]);
+      Papa.parse(slide.options.csvFiles[i], {
+        config: {
+          delimiter: "|",
+        },
+        download: true,
+        step: stepParser,
+        complete: function(results, file){
+          console.log(allFlight);
+          papaComplete(results, file);
+        }
+      });
+
+    }
+
+  },
 
   buildModals: function(modalOptions){
-    var newModal, newModalElement, slide = this;
+    "use strict"; // added on July 16
+
+    var newModal, slide = this, i;
     // modals are basically slides with an extra option
     // build constrained inside a modal window
     if(this.options.enableModals && this.options.enableHighlights){
       for(i = 0; i < this.modals.length; i++){
-        newModalElement = jQuery('<div/>', {
+        jQuery('<div/>', {
             id: "modal_" + this.modals[i].id,
             class : "modal fade",
             "tab-index" : "-1",
@@ -1302,12 +1461,15 @@ AVIATION.common.Slide.prototype = {
   },
   
   resetStatusBar: function(){
+    "use strict";
     // console.log("resetting status bar");
     this.slideElements.statusBar.off();
     this.slideElements.statusBar.prop("disabled", true);
   },
 
   activateTimer: function(seconds, isAuto){
+    "use strict";
+
     var timer = this._timer, slideObject = this, continueId = this.options.continueId,
         counter = seconds || 5, // duration of the timer (each 1 point is about a second)
         statusBar = this.slideElements.statusBar;
@@ -1357,6 +1519,8 @@ AVIATION.common.Slide.prototype = {
   },
 
   resetTimer: function( manual ){
+    "use strict";
+
     if(this._timer){
       if(manual){
         this.slideElements.statusBar.text("Continue when ready");
