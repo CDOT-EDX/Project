@@ -1260,7 +1260,7 @@ AVIATION.common.Slide.prototype = {
 
     instrumentFunctions = {
       airspeed          : [ "setAirSpeed" ],
-      attitude          : [ "setRoll" , "setPitch", "setOffFlag" ],
+      attitude          : [ "setRoll" , "setPitch", /*"setOffFlag"*/ ],
       altimeter         : [ "setAltitude", "setPressure" ],
       turn_coordinator  : [ "setTurn", "setSlip" ],
       heading           : [ "setHeading", "setBeaconOne", "setBeaconTwo" ],
@@ -1302,7 +1302,8 @@ AVIATION.common.Slide.prototype = {
           airSpeed: row.data[0][7], 
           turnRate: row.data[0][28],
           yaw: row.data[0][29],
-          vario: (row.data[0][15] / 1000)
+          vario: (row.data[0][15] / 1000),
+          //offFlag
         };
       
         allFlight.push(rowNewData);
@@ -1310,15 +1311,15 @@ AVIATION.common.Slide.prototype = {
     };
 
     var papaComplete = function(results, file) {
-      console.log("Papa complete");
+      //console.log("Papa complete");
       i = 0;
       //console.log("Parsing complete:", results, file);
 
       myFlightIntVar = setInterval(function(){
-        console.log("interval running");
+        //console.log("interval running");
 
         if(allFlight && allFlight.length > 0 && i < allFlight.length){
-          console.log("run copmlete");
+          //console.log("run copmlete");
 
           // if(i >= (allFlight.length - 1)){
           // // $('#counter').addClass('stopInterval');
@@ -1333,6 +1334,11 @@ AVIATION.common.Slide.prototype = {
           
           //console.log("Parsing complete:" + i);
 
+          console.log(" YAW: ");
+          console.log( allFlight[i].yaw + 0.5);
+          console.log( parseFloat(allFlight[i].yaw) + 0.5);
+          console.log( (allFlight[i].yaw * 57.3) + 0.5);
+
           instrumentOptions = {
             attitude: {
               pitch: (allFlight[i].pitch),
@@ -1345,11 +1351,11 @@ AVIATION.common.Slide.prototype = {
               altitude: allFlight[i].altitude
             },
             airspeed: {
-              airspeed: allFlight[i].airSpeed
+              airSpeed: allFlight[i].airSpeed
             },
             turn_coordinator: {
               turnRate: ( - ( ( (allFlight[i].turnRate) * 57.3 ) - (allFlight[i].roll) ) ),
-              yaw: ( ( allFlight[i].yaw ) * 57.3 ) 
+              yaw: ( parseFloat( allFlight[i].yaw ) + 0.5 )
             },
             variometer: {
               vario: allFlight[i].vario
@@ -1373,7 +1379,7 @@ AVIATION.common.Slide.prototype = {
           
           i++;
         } else {
-          console.log("int stopped2: ");
+          //console.log("int stopped2: ");
           clearInterval(myFlightIntVar);
         }
         //}
@@ -1393,10 +1399,7 @@ AVIATION.common.Slide.prototype = {
         },
         download: true,
         step: stepParser,
-        complete: function(results, file){
-          console.log(allFlight);
-          papaComplete(results, file);
-        }
+        complete: papaComplete
       });
 
     }
