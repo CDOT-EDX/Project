@@ -35,7 +35,7 @@ AVIATION.common.Player = function(){
 };
 */
 // begin a javascript class "Slide"
-AVIATION.common.Slide = function (options, slideContent, audioFiles) {
+AVIATION.common.Slide = function (options, slideContent, mediaFiles) {
   "use strict";
   //var md = new MobileDetect(window.navigator.userAgent);
 
@@ -54,8 +54,8 @@ AVIATION.common.Slide = function (options, slideContent, audioFiles) {
       options.slideContent = slideContent;
     }
 
-    if(audioFiles && !options.audioFiles){
-      options.audioFiles = audioFiles;
+    if(mediaFiles && !options.mediaFiles){
+      options.mediaFiles = mediaFiles;
     }
 
     console.log("options before constructor");
@@ -129,6 +129,10 @@ AVIATION.common.Slide.prototype = {
       this._initPanel( this.options );
     }
   */
+  },
+
+  attachCustomEvent: function(eventName, eventFunction){
+    "use strict";
   },
 
   // global events which can control the slide object from within other plugins
@@ -342,8 +346,9 @@ AVIATION.common.Slide.prototype = {
     this.attachStates();
 
     //if(!this.options.noAudio){
-    this.buildSlideAudios( );
-    slide.initAudioEvents( );
+    //this.buildSlideAudios( );
+    slide.initMediaEvents();
+    //slide.initAudioEvents();
 
     console.log("no audio and building content! *** " + this.activeIndex);
     console.log(this);
@@ -356,7 +361,7 @@ AVIATION.common.Slide.prototype = {
 
     slide.initCSVParser();
 
-    slide.buildQuiz();
+    slide.buildQuizContainer();
 
     slide.buildQuizzes();
 
@@ -653,7 +658,7 @@ AVIATION.common.Slide.prototype = {
     
   },
 
-  buildQuiz: function(){
+  buildQuizContainer: function(){
     "use strict";
 
     var quiz = $(this.options.quizId);
@@ -775,15 +780,15 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  buildSlideAudios: function(){//modalAudios, parent, modalIndex){
+  buildSlideAudios: function(audioFiles){//modalAudios, parent, modalIndex){
     "use strict";
     var slideObject = this, localAudios, parentContainer;
  
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
 
-    if(this.audioFiles && typeof this.audioFiles !== 'undefined' && this.audioFiles.length > 0){ //|| (modalAudios && parent) ){
-      localAudios = this.audioFiles; // modalAudios
+    if(audioFiles && typeof audioFiles !== 'undefined' && audioFiles.length > 0){ //|| (modalAudios && parent) ){
+      localAudios = audioFiles; // modalAudios
 
       if( typeof localAudios === 'string' ) {
         localAudios = [ localAudios ];
@@ -791,7 +796,7 @@ AVIATION.common.Slide.prototype = {
       parentContainer = slideObject.container;
 
       console.log("building audios");
-      console.log(this.audioFiles);
+      console.log(audioFiles);
 
       // if modals, 2d array thus two itterations...
       localAudios.forEach( function(audio, a){
@@ -861,6 +866,8 @@ AVIATION.common.Slide.prototype = {
           }
       });
     }
+
+    return localAudios;
   },
 
   buildStatusBar: function(parent){
@@ -1238,20 +1245,16 @@ AVIATION.common.Slide.prototype = {
 
   },
 
-/*
-
-          instrumentIds: {
-            airspeed: "airspeed",
-            attitude: "attitude",
-            altimeter: "altimeter",
-            turn_coordinator: "turn_coordinator",
-            heading: "heading",
-            variometer: "variometer"
-          },
-
-          */
-
-
+  /*
+    instrumentIds: {
+      airspeed: "airspeed",
+      attitude: "attitude",
+      altimeter: "altimeter",
+      turn_coordinator: "turn_coordinator",
+      heading: "heading",
+      variometer: "variometer"
+     },
+  */
 
   setAllInstruments: function( options ){
     "use strict";
@@ -1391,7 +1394,7 @@ AVIATION.common.Slide.prototype = {
 
     };
 
-    for(i=2; slide.options.csvFiles && i < /*slide.options.csvFiles.length*/ 3; i++){
+    for(i=0; slide.options.csvFiles && i < slide.options.csvFiles.length; i++){
       console.log("parsing: " + slide.options.csvFiles[i]);
       Papa.parse(slide.options.csvFiles[i], {
         config: {
@@ -1720,13 +1723,100 @@ AVIATION.common.Slide.prototype = {
 
   },
 
-  initAudioEvents: function(callback){
+  initMedia: function(){
     "use strict";
 
-    var players = this.slideAudios, content = this.slideContent, hasListened = this.slideHasListened,
+    var slide = this, mediaFiles = slide.mediaFiles, audioFiles, csvFiles, timers, players, media, i, 
+        audioObjects, csvObjects, timerObjects, audioIndex = 0, csvIndex = 0, timerIndex = 0,
+        medias = {};
+
+    for(i=0; i < mediaFiles.length; i++){
+      switch(mediaFiles[i].type){
+        case "audio":
+          audioFiles.push(mediaFiles[i]);
+          break;
+        case "csv":
+          csvFiles.push(mediaFiles[i]);
+          break;
+        case "timer":
+          timers.push( mediaFiles[i].duration );
+          break;
+        default:
+          console.log("unidentified media type in initMedia");
+      }
+    }
+
+    medias.audioFiles = { type: "audio", array: audioFiles };
+    medias.csvFiles = { type: "csv", array: csvFiles};
+    medias.timers = { type: "timer", array: timers};
+
+    for (media in medias){
+      if(medias.hasOwnProperty(media)){
+        switch(medias[media]){
+          case "audio":
+            audioObjects = slide.buildSlideAudios(medias[media].array);
+            break;
+          case "csv":
+            csvObjects = slide.buildCSVs(medias[media].array);
+            break;
+          case "timer":
+            timerObjects = slide.buildTimers(medias[media].array);
+            break;
+          default:
+            console.log("unknown media type to build inside initMedia2");
+        }
+      }
+    }
+
+    for(i=0; i < mediaFiles.length; i++){
+      switch(mediaFiles[i].type){
+        case "audio":
+          players.push({ type: mediaFiles[i], player: audioObjects[audioIndex] });
+          audioIndex++;
+          break;
+        case "csv":
+          players.push({ type: mediaFiles[i], player: csvObjects[csvIndex] });
+          csvIndex++;
+          break;
+        case "timer":
+          players.push({ type: mediaFiles[i], player: timerObjects[timerIndex] });
+          timerIndex++;
+          break;
+        default:
+          console.log("unidentified media type in initMedia3");
+      }
+    }
+
+    slide.initMediaEvents();
+
+  },
+
+  initMediaEvents: function(){
+    "use strict";
+
+
+
+  },
+
+  initTimerEvents: function(){
+    "use strict";
+
+  },
+
+  initCSVEvents: function(){
+    "use strict";
+
+
+  },
+
+  initAudioEvents: function(audioObjects){
+    "use strict";
+
+    var players = audioObjects/*this.slideAudios*/, content = this.slideContent, hasListened = this.slideHasListened,
         slideObject = this;
 
       players.forEach(function(player, p){
+        // TODO: check only type audios?
         var contentAtStart = "", callbackAtEnd = "";
 
         content.forEach(function(cont, c){
@@ -2150,10 +2240,10 @@ AVIATION.common.Slide.prototype = {
 
     this.extraActiveIndex = options.extraActiveIndex || 0;
 
-    this.audioFiles = options.audioFiles;
+    this.mediaFiles = options.mediaFiles;
 
     console.log("** AUDIO FILES? ****");
-    console.log(this.audioFiles);
+    console.log(this.mediaFiles);
     console.log(this);
 
     this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
