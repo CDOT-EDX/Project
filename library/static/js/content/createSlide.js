@@ -347,7 +347,8 @@ AVIATION.common.Slide.prototype = {
 
     //if(!this.options.noAudio){
     //this.buildSlideAudios( );
-    slide.initMediaEvents();
+    //slide.initMediaEvents();
+    
     //slide.initAudioEvents();
 
     console.log("no audio and building content! *** " + this.activeIndex);
@@ -358,26 +359,29 @@ AVIATION.common.Slide.prototype = {
     //slide.initSlider();
 
     slide.initPanel();
+    
+    //slide.initCSVParser();
+    
+    slide.initMedia(function(){
+      slide.buildQuizContainer();
 
-    slide.initCSVParser();
+      slide.buildQuizzes();
 
-    slide.buildQuizContainer();
+      slide.buildFooter();
 
-    slide.buildQuizzes();
+      slide.buildModals();
 
-    slide.buildFooter();
+      // create events for audio/video interactions and a way to track them
 
-    slide.buildModals();
-
-    // create events for audio/video interactions and a way to track them
-
-    //if(!slide.options.noAudio){
-    slide.resetSlide();  
-    //}
+      //if(!slide.options.noAudio){
+      slide.resetSlide();  
+      //}
+    
+      // finished thus activate the slide
+      slide.activateSlide();
   
-    // finished thus activate the slide
-    slide.activateSlide();
-
+    });
+    
   },
 
   // method for building avatars into the slide
@@ -802,7 +806,7 @@ AVIATION.common.Slide.prototype = {
       localAudios.forEach( function(audio, a){
         //if(audio && typeof audio !== 'undefined'){
           // lets make sure that the filename provided is without the extension
-          var split = audio.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
+          var split = audio.src.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
               extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
           // console.log("audio files here: " + audio); 
@@ -867,7 +871,7 @@ AVIATION.common.Slide.prototype = {
       });
     }
 
-    return localAudios;
+    return slideObject.slideAudios;
   },
 
   buildStatusBar: function(parent){
@@ -1286,10 +1290,10 @@ AVIATION.common.Slide.prototype = {
 
   },
 
-  initCSVParser: function(){
+  initCSVParser: function(csvs, callback){
     "use strict";
 
-    var slide = this, i, rowNewData = {}, allFlight = [], myFlightIntVar, instrumentOptions = {};
+    var slide = this, i, rowNewData = {}, allFlight = [], myFlightIntVar, instrumentOptions = {}, csvPlayers = [], parsed = 0;
 
     var stepParser = function(row) {
       console.log("Papa parser");
@@ -1313,13 +1317,20 @@ AVIATION.common.Slide.prototype = {
       }
     };
 
-    var papaComplete = function(results, file) {
+    var papaComplete = function(results) {
       //console.log("Papa complete");
       i = 0;
       //console.log("Parsing complete:", results, file);
 
       myFlightIntVar = setInterval(function(){
         //console.log("interval running");
+
+        $(slide).off("panelPause");
+        $(slide).on("panelPause", function(){
+          var tempI = i;
+          i = allFlight.length;
+          return tempI;
+        });
 
         if(allFlight && allFlight.length > 0 && i < allFlight.length){
           //console.log("run copmlete");
@@ -1336,11 +1347,6 @@ AVIATION.common.Slide.prototype = {
           //if(!$('#counter').hasClass('pauseInterval') && !$('#counter').hasClass('stopInterval')) {
           
           //console.log("Parsing complete:" + i);
-
-          console.log(" YAW: ");
-          console.log( allFlight[i].yaw + 0.5);
-          console.log( parseFloat(allFlight[i].yaw) + 0.5);
-          console.log( (allFlight[i].yaw * 57.3) + 0.5);
 
           instrumentOptions = {
             attitude: {
@@ -1394,18 +1400,44 @@ AVIATION.common.Slide.prototype = {
 
     };
 
-    for(i=0; slide.options.csvFiles && i < slide.options.csvFiles.length; i++){
-      console.log("parsing: " + slide.options.csvFiles[i]);
-      Papa.parse(slide.options.csvFiles[i], {
+    var papaSaveObject = function(result){
+      console.log("initing papa save object");
+      this.result = result;
+      this.allFlight = allFlight;
+      this.play = papaComplete;
+      csvPlayers.push(this);
+
+      parsed++;
+
+      console.log("is parsed equal to lengh? " + parsed + " " + (csvs.length-1) );
+
+      if(parsed === csvs.length){
+        callback();
+      }
+    };
+
+    papaSaveObject.prototype.play = function(){
+      console.log("playing csv");
+      papaComplete();
+    };
+
+    for(i=0; csvs && i < csvs.length; i++){
+      console.log("parsing: " + csvs[i].src);
+      Papa.parse(csvs[i].src, {
         config: {
           delimiter: "|",
+          skipEmptyLines: true,
+          fastMode: true,
+          download: true
         },
         download: true,
         step: stepParser,
-        complete: papaComplete
+        complete: papaSaveObject
       });
 
     }
+
+    return csvPlayers;
 
   },
 
@@ -1537,12 +1569,12 @@ AVIATION.common.Slide.prototype = {
   },
 
   playCurrent: function(e){
-    var active = this.activeIndex, players = this.slideAudios;
+    var active = this.activeIndex, players = this.players;
 
     this.checkSlideControlPlayButtons("play");
     // console.log("playCurrent active: " + active);
-    if(players[active]){
-      players[active].play();  
+    if(players[active] && players[active].player){
+      players[active].player.play();  
     }
 
     // console.log("trying to play...");
@@ -1554,9 +1586,15 @@ AVIATION.common.Slide.prototype = {
     
     this.checkSlideControlPlayButtons("pause");
 
+    if(players[active] && players[active].player){
+      players[active].player.pause();  
+    }
+
+/*
     if(players[active]){
       players[active].pause();  
     }
+    */
     $(this).trigger("pause");
   },
 
@@ -1723,83 +1761,171 @@ AVIATION.common.Slide.prototype = {
 
   },
 
-  initMedia: function(){
+  initMedia: function(callback){
     "use strict";
 
-    var slide = this, mediaFiles = slide.mediaFiles, audioFiles, csvFiles, timers, players, media, i, 
+    var slide = this, mediaFiles = slide.mediaFiles, audioFiles = [], csvFiles = [], timers = [], players = [], media, i, 
         audioObjects, csvObjects, timerObjects, audioIndex = 0, csvIndex = 0, timerIndex = 0,
         medias = {};
 
-    for(i=0; i < mediaFiles.length; i++){
-      switch(mediaFiles[i].type){
-        case "audio":
-          audioFiles.push(mediaFiles[i]);
-          break;
-        case "csv":
-          csvFiles.push(mediaFiles[i]);
-          break;
-        case "timer":
-          timers.push( mediaFiles[i].duration );
-          break;
-        default:
-          console.log("unidentified media type in initMedia");
-      }
-    }
+    if(mediaFiles){
 
-    medias.audioFiles = { type: "audio", array: audioFiles };
-    medias.csvFiles = { type: "csv", array: csvFiles};
-    medias.timers = { type: "timer", array: timers};
-
-    for (media in medias){
-      if(medias.hasOwnProperty(media)){
-        switch(medias[media]){
+      for(i=0; mediaFiles &&i < mediaFiles.length; i++){
+        switch(mediaFiles[i].type){
           case "audio":
-            audioObjects = slide.buildSlideAudios(medias[media].array);
+            audioFiles.push(mediaFiles[i]);
             break;
           case "csv":
-            csvObjects = slide.buildCSVs(medias[media].array);
+            csvFiles.push(mediaFiles[i]);
             break;
           case "timer":
-            timerObjects = slide.buildTimers(medias[media].array);
+            timers.push( mediaFiles[i].duration );
             break;
           default:
-            console.log("unknown media type to build inside initMedia2");
+            console.log("unidentified media type in initMedia");
         }
       }
+
+      medias.audioFiles = { type: "audio", array: audioFiles };
+      medias.csvFiles = { type: "csv", array: csvFiles};
+      medias.timers = { type: "timer", array: timers};
+
+      csvObjects = slide.initCSVParser(medias.csvFiles.array, function(){
+        console.log("csv callback");
+        for (media in medias){
+          if(medias.hasOwnProperty(media)){
+            switch(medias[media].type){
+              case "audio":
+                audioObjects = slide.buildSlideAudios(medias[media].array);
+                break;
+                /*
+              case "csv":
+                //csvObjects = slide.buildCSVs(medias[media].array);
+                csvObjects = slide.initCSVParser(medias[media].array);
+                break;
+                */
+              case "timer":
+                //timerObjects = slide.buildTimers(medias[media].array);
+                break;
+              default:
+                console.log("unknown media type to build inside initMedia2");
+            }
+          }
+        }
+
+        for(i=0; i < mediaFiles.length; i++){
+          switch(mediaFiles[i].type){
+            case "audio":
+              players.push({ type: mediaFiles[i].type, player: audioObjects[audioIndex] });
+              audioIndex++;
+              break;
+            case "csv":
+              players.push({ type: mediaFiles[i].type, player: csvObjects[csvIndex] });
+              csvIndex++;
+              break;
+            case "timer":
+              players.push({ type: mediaFiles[i].type, player: timerObjects[timerIndex] });
+              timerIndex++;
+              break;
+            default:
+              console.log("unidentified media type in initMedia3");
+          }
+        }
+
+        slide.players = players;
+
+        slide.initMediaEvents();
+  
+        if(callback && typeof callback === 'function'){
+          callback();
+        }
+
+      });
+
+      
     }
 
-    for(i=0; i < mediaFiles.length; i++){
-      switch(mediaFiles[i].type){
-        case "audio":
-          players.push({ type: mediaFiles[i], player: audioObjects[audioIndex] });
-          audioIndex++;
-          break;
-        case "csv":
-          players.push({ type: mediaFiles[i], player: csvObjects[csvIndex] });
-          csvIndex++;
-          break;
-        case "timer":
-          players.push({ type: mediaFiles[i], player: timerObjects[timerIndex] });
-          timerIndex++;
-          break;
-        default:
-          console.log("unidentified media type in initMedia3");
+  },
+
+  initMediaEvents : function () {
+      "use strict";
+
+      // TODO: change "slideHasListened" to "isCompleted"??
+      var players = this.players, content = this.slideContent, hasListened = this.slideHasListened,
+          slideObject = this, player, i, slide = this;
+
+      for(i = 0; i < content.length; i++){
+        if(content[i].media && content[i].media.type){
+          switch(content[i].media.type){
+            case "audio":
+              slide.initAudioEvents(  players[content[i].media.index], content[i], slide, i);
+              break;
+            case "csv":
+              slide.initCSVEvents(    players[content[i].media.index], content[i], slide, i);
+              break;
+            case "timer":
+              slide.initTimerEvents(  players[content[i].media.index], content[i], slide, i);
+              break;
+            default:
+              console.log("unknown media type in content in initMediaEvents");
+          }
+        }
+      }
+  },
+
+  initTimerEvents: function(player, content, slide, index){
+    "use strict";
+    
+    var callbackAtBeginning = "", contentAtStart = "", hasListened = slide.slideHasListened;
+    
+    if(content.media && content.media.second){
+      player.on("tick", function(second){
+        if(second === content.media.second){
+          slideObject.buildContent(true, i);
+        }
+
+        if(content.callback && typeof content.callback === "function"){
+          content.callback();
+        }
+
+      });
+    } else {
+      if(content.callback && typeof content.callback === "function"){
+        contentAtStart = index;
+        callbackAtBeginning = content.callback;
       }
     }
 
-    slide.initMediaEvents();
+    if( !player.on("start") ){
+      player.on("start", function(){
+        // TODO: global player start event
+        console.log("timer started");
+      });
+    }
 
-  },
+    if( !player.on("end") ){
+      player.on("end", function(){
+        // TODO: global player end event
+        console.log("timer ended");
+      });
+    }
 
-  initMediaEvents: function(){
-    "use strict";
+    if( !player.on("pause") ){
+      player.on("pause", function(){
+        // TODO: global pause event
+        console.log("timer paused");
+      });
+    }
 
+    // TODO: do we need the onstop event at all?
+    /*
+    ontick  : function(second) {},
+    onstart : function() { console.log('timer started') },
+    onstop  : function() { console.log('timer stop') },
+    onpause : function() { console.log('timer set on pause') },
+    onend   : function() { console.log('timer ended normally') }
+    */
 
-
-  },
-
-  initTimerEvents: function(){
-    "use strict";
 
   },
 
@@ -1807,12 +1933,103 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
 
+
   },
 
+  initAudioEvents: function(player, content, slide, index){
+    "use strict";
+    
+    var callbackAtBeginning = "", contentAtStart = "", hasListened = slide.slideHasListened;
+
+    if(content.media && content.media.second){
+      player.cue(content.media.second, function(){
+        slideObject.buildContent(true, index);
+
+        if(content.callback && typeof content.callback === "function"){
+          content.callback();
+        }
+      });  
+    } else {
+      if(content.callback && typeof content.callback === "function"){
+        contentAtStart = index;
+        callbackAtBeginning = content.callback;
+      }
+    }
+
+    if( !player.cue("0.01") ){
+      player.cue("0.01", function(){
+        slide.buildContent(true, contentAtStart);
+        if(callbackAtBeginning){
+          callbackAtBeginning();
+        }
+      });
+    }
+
+    if( !player.on("ended") ){
+      // TODO: fire an ended event?
+      player.on("ended", function(e){
+        console.log("audio ended event");
+        hasListened[index] = true;
+      });
+    }
+
+    if( !player.on("playing") ){
+      player.on("playing", function(e){
+        // TODO: check global events for this
+        // fire playing event
+        // something that happens every time we press play (avatar opens mouth?)
+        console.log("audio playing event");
+      });
+    }
+
+    if ( !player.on("pause") ){
+      players.on("pause", function(e){
+        // TODO: check global events for this
+        // fire pause event
+        console.log("audio paused event");
+      });
+    }
+  },
+
+//checkButtonsOnEnd : function(){
+
+      //slideObject.checkSlideControlPlayButtonsState();
+
+      // start the next audio if it exists and autoplay is true
+
+      // TODO: use checkAdvance method here instead?
+      /*
+      if(players[p+1] && slideObject.options.autoplay && slideObject.options.advanceWith === "audio"){
+        slideObject.playNextAudio();
+      } else if (players[p+1] && slideObject.options.advanceWith === "highlight"){
+        slideObject.slideElements.statusBar.html('Click on the next instrument to Continue');
+        slideObject.pauseCurrent();
+      }
+      */
+
+        // if it is last audio and no need for audioFirst
+      /*
+      if(!players[p+1] && !slideObject.options.audioFirst){
+        //slideObject.activeIndex++;
+
+        if(slideObject.options.autoRedirect){
+          // only activate the timer if the autplay is on
+          
+          slideObject.activateTimer(5, true);  
+        } else {
+          slideObject.slideElements.statusBar.html('Click "Continue" when you are ready');
+        }
+        
+        slideObject.checkSlideControlPlayButtons("end");
+      }
+      */
+//}
+
+/*
   initAudioEvents: function(audioObjects){
     "use strict";
 
-    var players = audioObjects/*this.slideAudios*/, content = this.slideContent, hasListened = this.slideHasListened,
+    var players = audioObjects, content = this.slideContent, hasListened = this.slideHasListened,
         slideObject = this;
 
       players.forEach(function(player, p){
@@ -1900,7 +2117,7 @@ AVIATION.common.Slide.prototype = {
     //this.buildFooter();
 
   },
-
+*/
   checkSlideControlPlayButtons: function( action ){
     var controls = this.slideElements.slideControls;
 
