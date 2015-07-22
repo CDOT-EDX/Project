@@ -20,9 +20,11 @@
 /*jslint todo: true*/
 /*global $:false */
 /*global jQuery:false */
+/*global ResizeSensor:false */
+
 // TODO: add a "skip" button to pages
 
-var AVIATION = AVIATION || {};
+var AVIATION = {};
 
 AVIATION.common = {};
 
@@ -156,7 +158,7 @@ AVIATION.common.Slide.prototype = {
             element: element,
             slide: slide
           }
-        })
+        });
 
       },
       play: function(){
@@ -348,7 +350,7 @@ AVIATION.common.Slide.prototype = {
 
     console.log("building slide");
 
-    var slide = this, callback;
+    var slide = this, callback, panelContainer = $(slide.options.panelId);
 
     this.attachEvents();
     this.attachStates();
@@ -361,6 +363,13 @@ AVIATION.common.Slide.prototype = {
 
     console.log("no audio and building content! *** " + this.activeIndex);
     console.log(this);
+    if(this.options.enablePanel && panelContainer && panelContainer.length < 1){
+      panelContainer = jQuery("<div/>", {
+        id: slide.options.panelId.split("#")[1],
+        class: "instruments " + (this.options.enableSlider ? "col-xs-8" : "col-xs-12"),
+        html: '<div id="instRow1" class="row"></div><div id="instRow2" class="row"></div>'
+      }).appendTo(slide.container);
+    }
     this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
     //}
 
@@ -387,7 +396,7 @@ AVIATION.common.Slide.prototype = {
       // finished thus activate the slide
       slide.activateSlide();
   
-    }
+    };
 
     //if(slide.options.enablePanel){
     slide.initMedia(callback);
@@ -504,7 +513,7 @@ AVIATION.common.Slide.prototype = {
   checkForContentResize: function(){
     "use strict";
 
-    var $body = $(this.bodyId), $sliderContainer = $(this.throttleContainer), $slider = $(this.throttleId);
+    var $body = $(this.bodyId), $sliderContainer = $(this.throttleContainer), $slider = $(this.throttleId), slide = this;
 
     if(this.options.enableSlider){
 
@@ -513,10 +522,18 @@ AVIATION.common.Slide.prototype = {
       console.log($body);
       console.log($slider);
 
-      var resizeTester = ResizeSensor( $body , function(){
+      if(slide.options.enablePanel){
+
+        $body = $(this.options.panelId);
+        console.log("and body is... ");
+        console.log($body);
+      }
+
+      ResizeSensor( $body , function(){
         console.log("resetting slider height!!");
-        $sliderContainer.height( $body.height() - 20 );
+        $sliderContainer.height( $body.height() );
         $slider.height( $body.height() - 22 );
+        slide.instrumentResizer( $body.width() / 3);
         console.log($slider.height() );
         console.log($sliderContainer.height() );
         console.log($body.height() );
@@ -1110,7 +1127,7 @@ AVIATION.common.Slide.prototype = {
   initHighlights: function(){
     "use strict";
     
-    var highlight, $highlight, modalInvoker, addOnClick = [];
+    var highlight, $highlight, modalInvoker, addOnClick = [], contentContainer = $(this.container + " > .cdot_contentText"), panelContainer = $(this.options.panelId);
 
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0 && 
         this.slideElements.highlightElements.length !== this.highlights.length){
@@ -1131,8 +1148,17 @@ AVIATION.common.Slide.prototype = {
                      ";height:" + this.highlights[highlight].height +
                      (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
                      ";position:absolute" + 
-                     ";display:none;z-index:1;"
-          }).appendTo(this.container + " > .cdot_contentText");            
+                     ";z-index:1;"
+          });
+
+          if(this.options.enablePanel){
+            console.log("panel container highlight");
+            console.log(panelContainer);
+            modalInvoker.appendTo(panelContainer);
+          } else {
+            console.log("content container highlight");
+            modalInvoker.appendTo(contentContainer);
+          }
 
           this.slideElements.highlightElements.push(modalInvoker);
           addOnClick.push({ id: highlight, callback: false});
@@ -1188,6 +1214,7 @@ AVIATION.common.Slide.prototype = {
 
 
   initSlider: function(){
+    "use strict";
     var newSlider = $(this.throttleId), throttleContainer = $(this.throttleContainer), slide = this;
 
     console.log("attempting slider...");
@@ -1201,7 +1228,7 @@ AVIATION.common.Slide.prototype = {
           id: this.throttleContainer.split("#")[1],
           class: "col-xs-4",
 
-        }).appendTo(this.container);
+        }).appendTo(slide.container);
       }
 
       newSlider = jQuery('<div/>', {
@@ -1250,7 +1277,8 @@ AVIATION.common.Slide.prototype = {
   initPanel: function(options){
     "use strict";
 
-    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), instIds = slide.options.instrumentIds, instrumentObject = {}, options = {};
+    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), instIds = slide.options.instrumentIds, instrumentObject = {}, options = {},
+        i=0;
 
 
     if(slide.options.enablePanel){
@@ -1260,14 +1288,14 @@ AVIATION.common.Slide.prototype = {
         size: 200,
         showBox: false,
         showScrews: true,
-        img_directory : '/c4x/Seneca_College/M01S01_Test/asset/'
+        img_directory : slide.options.development ? '/c4x/CDOT/AV101/asset/' : '/c4x/Seneca_College/M01S01_Test/asset/'
       };
 
       if(panelContainer && panelContainer.length < 1){
         panelContainer = jQuery("<div/>", {
           id: slide.options.panelId.split("#")[1],
-          class: "instruments",
-          //html: ""
+          class: "instruments col-xs-12",
+          html: '<div id="instRow1" class="row"></div><div id="instRow2" class="row"></div>'
         }).appendTo(slide.container);
       }
 
@@ -1280,17 +1308,42 @@ AVIATION.common.Slide.prototype = {
             instrumentSpan = jQuery("<div/>", {
               id: instIds[instrument],
               class: "instrument"
-            }).appendTo(panelContainer);
+            });
+
+            if(i <3){
+              instrumentSpan.appendTo("#instRow1");
+            } else {
+              instrumentSpan.appendTo("#instRow2");
+            }
+
+
             instrumentObject = $.flightIndicator("#"+instIds[instrument], instrument, options);
             slide.instruments[instrument] = instrumentObject;
 
             slide.slideElements.instrumentElements.push(instrumentSpan);
           }
+          i++;
         }
       }
     }
   },
 
+  instrumentResizer: function(size){
+    "use strict";
+
+    var slide = this, instrument, instIds = slide.options.instrumentIds;
+
+    console.log("resizing to: " + size);
+
+    for (instrument in instIds){
+      if(instIds.hasOwnProperty(instrument)){
+        if(slide.instruments && slide.instruments[instrument]){
+          slide.instruments[instrument].resize({ resize: (parseFloat(size)-10) });
+        }
+      }
+    }
+
+  },
 
   setInstrument: function( instrument , functionName , value1, value2 ){
     "use strict";
@@ -1371,9 +1424,10 @@ AVIATION.common.Slide.prototype = {
         }
       };
 
-      var papaComplete = function(results) {
-        console.log("Papa complete");
-        i = 0;
+      var papaComplete = function(index) {
+        slide.panelPause = false;
+        
+        i = index || slide.pausedPanelIndex || 0;
         //console.log("Parsing complete: ", results);
         myFlightIntVar = setInterval(function(){
           //console.log("interval running");
@@ -1387,7 +1441,7 @@ AVIATION.common.Slide.prototype = {
           });
           */
 
-          if(allFlight && allFlight.length > 0 && i < allFlight.length){
+          if(allFlight && allFlight.length > 0 && i < allFlight.length && !slide.panelPause){
             //console.log("run copmlete");
 
             // if(i >= (allFlight.length - 1)){
@@ -1444,6 +1498,12 @@ AVIATION.common.Slide.prototype = {
             i++;
           } else {
             //console.log("int stopped2: ");
+            if(i < allFlight.length){
+              slide.pausedPanelIndex = i;
+            } else {
+              i = 0;
+            }
+            
             clearInterval(myFlightIntVar);
           }
           //}
@@ -1455,19 +1515,28 @@ AVIATION.common.Slide.prototype = {
 
       };
 
+      var papaPause = function(){
+        slide.panelPause = true;
+      };
+
+      var papaCurrentLine = function(index){
+        i = index || i;
+
+        return i;
+      };
+
       var papaSaveObject = function(result){
-        console.log("initing papa save object");
         this.result = result;
         this.allFlight = allFlight;
         this.play = papaComplete;
+        this.pause = papaPause;
+        this.currentTime = papaCurrentLine;
         csvPlayers.push(this);
 
         parsed++;
 
-        console.log("is parsed equal to lengh? " + parsed + " " + (csvs.length-1) );
-
         if(parsed === csvs.length){
-          callback();
+          callback(csvPlayers);
         }
       };
 
@@ -1491,13 +1560,12 @@ AVIATION.common.Slide.prototype = {
         });
 
       }
-
-      return csvPlayers;
+      
     } else {
-      callback();
-
-      return [null];
+      callback(csvPlayers);
     }
+
+    return csvPlayers;
   },
 
   buildModals: function(modalOptions){
@@ -1859,7 +1927,7 @@ AVIATION.common.Slide.prototype = {
       medias.csvFiles = { type: "csv", array: csvFiles};
       medias.timers = { type: "timer", array: timers};
 
-      csvObjects = slide.initCSVParser(medias.csvFiles.array, function(){
+      csvObjects = slide.initCSVParser(medias.csvFiles.array, function(csvInner){
         console.log("csv callback");
         for (media in medias){
           if(medias.hasOwnProperty(media)){
@@ -1869,12 +1937,10 @@ AVIATION.common.Slide.prototype = {
               case "audio":
                 audioObjects = slide.buildSlideAudios(medias[media].array);
                 break;
-                /*
               case "csv":
                 //csvObjects = slide.buildCSVs(medias[media].array);
-                csvObjects = slide.initCSVParser(medias[media].array);
+                csvObjects = csvInner || [];//slide.initCSVParser(medias[media].array);
                 break;
-                */
               case "timer":
                 //timerObjects = slide.buildTimers(medias[media].array);
                 break;
@@ -2435,10 +2501,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "5%",
+              top : "3%",
               left : "36.2%",
-              width : "26%",
-              height: "41%",
+              width : "30%",
+              height: "44%",
               border : "7px ridge yellow",
             }, 
             { // #2
@@ -2448,10 +2514,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "5%",
-              left : "62%",
-              width : "26%",
-              height: "41%",
+              top : "3%",
+              left : "68%",
+              width : "30%",
+              height: "44%",
               border : "7px ridge yellow",                            
             },
             { // #3
@@ -2461,10 +2527,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "50%",
+              top : "53%",
               left : "36.2%",
-              width : "26%",
-              height: "41%",
+              width : "30%",
+              height: "44%",
               border : "7px ridge yellow",                            
             },
             { // #4
@@ -2474,10 +2540,10 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "5%",
-              left : "10.5%",
-              width : "26%",
-              height: "41%",
+              top : "3%",
+              left : "4.5%",
+              width : "30%",
+              height: "44%",
               border : "7px ridge yellow",                            
             },
             { // #5
@@ -2487,10 +2553,10 @@ AVIATION.common.Slide.prototype = {
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
               //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top: "50%",
-              left: "62%",
-              width: "26%",
-              height: "41%",
+              top: "53%",
+              left: "68%",
+              width: "30%",
+              height: "44%",
               border : "7px ridge yellow",
             },
             { // #6
@@ -2500,10 +2566,10 @@ AVIATION.common.Slide.prototype = {
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
               //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "50%",
-              left : "10.5%",
-              width : "26%",
-              height: "41%",
+              top : "53%",
+              left : "4.5%",
+              width : "30%",
+              height: "44%",
               border : "7px ridge yellow",                            
             },
           ]}, option;
