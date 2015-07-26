@@ -1897,6 +1897,10 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  buildTimers: function(timers){
+    return timers;
+  },
+
   initMedia: function(callback){
     "use strict";
 
@@ -1942,7 +1946,7 @@ AVIATION.common.Slide.prototype = {
                 csvObjects = csvInner || [];//slide.initCSVParser(medias[media].array);
                 break;
               case "timer":
-                //timerObjects = slide.buildTimers(medias[media].array);
+                timerObjects = slide.buildTimers(medias[media].array);
                 break;
               default:
                 console.log("unknown media type to build inside initMedia2");
