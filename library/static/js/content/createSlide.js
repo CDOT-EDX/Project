@@ -149,15 +149,13 @@ AVIATION.common.Slide.prototype = {
         console.log("!* started event fired");
       },
       */
-      end: function(element){
+      end: function(event, data){
         console.log("!* end event fired");
+        console.log(data);
         // check if everything has stopped playing
         // advance with?
         slide.checkAdvanceWith({ 
-          data: {
-            element: element,
-            slide: slide
-          }
+          data: data
         });
 
       },
@@ -399,6 +397,8 @@ AVIATION.common.Slide.prototype = {
     };
 
     //if(slide.options.enablePanel){
+
+    console.log("inside build slide before init media");
     slide.initMedia(callback);
     //} else {
     //  callback();
@@ -973,6 +973,8 @@ AVIATION.common.Slide.prototype = {
   },
 
   checkAdvanceWith: function(event){
+    "use strict";
+
     var callback = event.data.onclick, c,
         element = event.data.element,
         slide = event.data.slide,
@@ -981,17 +983,11 @@ AVIATION.common.Slide.prototype = {
     console.log("event.data");
     console.log(callback);
 
-
-
     for(c=0; callback && c < callback.length; c++){
       if(typeof callback[c] === 'function'){
         callback[c]();
       }
     }
-
-    // if(callback && typeof callback === "function"){
-    //   callback();
-    // }
 
     console.log("inside advanceWith: " + content);
 
@@ -1425,6 +1421,7 @@ AVIATION.common.Slide.prototype = {
       };
 
       var papaComplete = function(index) {
+        console.log("papa play! started");
         slide.panelPause = false;
         
         i = index || slide.pausedPanelIndex || 0;
@@ -1698,7 +1695,7 @@ AVIATION.common.Slide.prototype = {
   playCurrent: function(e){
     var active = this.activeIndex, players = this.players;
 
-    this.checkSlideControlPlayButtons("play");
+    //this.checkSlideControlPlayButtons("play");
     console.log("playCurrent active: " + active);
     console.log(players[active]);
     if(players[active] && players[active].player){
@@ -1711,7 +1708,7 @@ AVIATION.common.Slide.prototype = {
   
   pauseCurrent: function(e){
     var active = this.activeIndex, players = this.players;
-    this.checkSlideControlPlayButtons("pause");
+    //this.checkSlideControlPlayButtons("pause");
     console.log("inside pause");
 
     console.log(players[active]);
@@ -1904,6 +1901,8 @@ AVIATION.common.Slide.prototype = {
   initMedia: function(callback){
     "use strict";
 
+    console.log("running init media");
+
     var slide = this, mediaFiles = slide.mediaFiles, audioFiles = [], csvFiles = [], timers = [], players = [], media, i, 
         audioObjects, csvObjects, timerObjects, audioIndex = 0, csvIndex = 0, timerIndex = 0,
         medias = {};
@@ -1992,21 +1991,35 @@ AVIATION.common.Slide.prototype = {
   initMediaEvents : function () {
       "use strict";
 
+      console.log("running media events");
+
       // TODO: change "slideHasListened" to "isCompleted"??
       var players = this.players, content = this.slideContent, hasListened = this.slideHasListened,
-          slideObject = this, player, i, slide = this;
+          slideObject = this, player, i, slide = this, playerInitted = [];
+
+      for(i=0; i < players.length; i++){
+        playerInitted.push(false);
+      }
+
+      console.log(content);
 
       for(i = 0; i < content.length; i++){
         if(content[i].media && content[i].media.type){
           switch(content[i].media.type){
             case "audio":
-              slide.initAudioEvents(  players[content[i].media.index].player, content[i], slide, i);
+              if(!playerInitted[content[i].media.index]){
+                slide.initAudioEvents(players[content[i].media.index].player, content[i], slide, i);
+                playerInitted[content[i].media.index] = true;
+              } else {
+                slide.initAudioCueEvents(players[content[i].media.index].player, content[i], slide, i);
+              }
+              
               break;
             case "csv":
-              slide.initCSVEvents(    players[content[i].media.index].player, content[i], slide, i);
+              slide.initCSVEvents(players[content[i].media.index].player, content[i], slide, i);
               break;
             case "timer":
-              slide.initTimerEvents(  players[content[i].media.index].player, content[i], slide, i);
+              slide.initTimerEvents(players[content[i].media.index].player, content[i], slide, i);
               break;
             default:
               console.log("unknown media type in content in initMediaEvents");
@@ -2080,8 +2093,64 @@ AVIATION.common.Slide.prototype = {
 
   initAudioEvents: function(player, content, slide, index){
     "use strict";
+    var callbackAtBeginning = "", contentAtStart = "";
+
+    if(!content.media || !content.media.second){
+      if(content.callback && typeof content.callback === "function"){
+        contentAtStart = index;
+        callbackAtBeginning = content.callback;
+
+        player.cue("0.01", function(){
+          slide.buildContent(true, contentAtStart);
+          if(callbackAtBeginning){
+            callbackAtBeginning();
+          }
+        });
+        
+      }
+      
+    }
+
+    player.on("ended", function(e){
+      console.log("ended pop");
+      console.log(player);
+      //player.off("ended");
+      var data = {};
+      data.element = {};
+      data.element.type = "audio";
+      data.slide = slide;
+
+      console.log("audio ended event");
+      $(slide).trigger("end", data);
+
+    });
+        
+    player.on("playing", function(e){
+      console.log("playing pop");
+      console.log(player);
+      //player.off("playing");
+      // TODO: check global events for this
+      // fire playing event
+      // something that happens every time we press play (avatar opens mouth?)
+
+      console.log("audio playing event");
+    });
+
+    player.on("pause", function(e){
+      //player.off("pause");
+      // TODO: check global events for this
+      // fire pause event
+      console.log("audio paused event");
+    });
+  },
+
+  initAudioCueEvents: function(player, content, slide, index){
+    "use strict";
     
-    var callbackAtBeginning = "", contentAtStart = "", hasListened = slide.slideHasListened;
+    var hasListened = slide.slideHasListened;
+
+    console.log("INIT AUDIO EVENT HERE!!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    console.log(player);
 
     if(content.media && content.media.second){
       player.cue(content.media.second, function(){
@@ -2091,47 +2160,7 @@ AVIATION.common.Slide.prototype = {
           content.callback();
         }
       });  
-    } else {
-      if(content.callback && typeof content.callback === "function"){
-        contentAtStart = index;
-        callbackAtBeginning = content.callback;
-      }
     }
-
-    //if( !player.cue("0.01") ){
-      player.cue("0.01", function(){
-        slide.buildContent(true, contentAtStart);
-        if(callbackAtBeginning){
-          callbackAtBeginning();
-        }
-      });
-    //}
-
-    //if( !player.on("ended") ){
-      // TODO: fire an ended event?
-      player.on("ended", function(e){
-        console.log("audio ended event");
-        $(slide).trigger("end", { type: "audio", index: index });
-        //hasListened[index] = true;
-      });
-    //}
-
-    //if( !player.on("playing") ){
-      player.on("playing", function(e){
-        // TODO: check global events for this
-        // fire playing event
-        // something that happens every time we press play (avatar opens mouth?)
-        console.log("audio playing event");
-      });
-    //}
-
-    //if ( !player.on("pause") ){
-      player.on("pause", function(e){
-        // TODO: check global events for this
-        // fire pause event
-        console.log("audio paused event");
-      });
-    //}
   },
 
 //checkButtonsOnEnd : function(){
