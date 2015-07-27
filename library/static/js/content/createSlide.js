@@ -2013,7 +2013,6 @@ AVIATION.common.Slide.prototype = {
               } else {
                 slide.initAudioCueEvents(players[content[i].media.index].player, content[i], slide, i);
               }
-              
               break;
             case "csv":
               slide.initCSVEvents(players[content[i].media.index].player, content[i], slide, i);
@@ -2084,10 +2083,10 @@ AVIATION.common.Slide.prototype = {
 
   },
 
-  initCSVEvents: function(){
+  initCSVEvents: function(player, content, slide, index){
     "use strict";
 
-
+    
 
   },
 
