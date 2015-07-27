@@ -930,10 +930,7 @@ AVIATION.common.Slide.prototype = {
         
       }
 
-      // console.log("trying to see if statusBar exists");
-      this.slideElements.statusBar = statusBar.find(this.statusId);//$(this.statusId);
-      // console.log(this.slideElements.statusBar);
-      //this.slideElements.statusBar = $("#statusBar");
+      this.slideElements.statusBar = statusBar.find(this.statusId);
     }
   },
 
@@ -965,9 +962,6 @@ AVIATION.common.Slide.prototype = {
 
       this.initCourseButtonEvents();
     } else {
-      //this.buildStatusBar( this.options.isModal ? parent : this.options.container);    
-      // console.log("building only status bar ! on parent");
-      // console.log(parent);
       this.buildStatusBar(parent);
     }
   },
@@ -1006,7 +1000,6 @@ AVIATION.common.Slide.prototype = {
           slide.playCurrent();
         }
       }
-      //slide.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
     } else {
       slide.playNextAudio();
     }
@@ -1127,7 +1120,6 @@ AVIATION.common.Slide.prototype = {
 
     if(this.options.enableHighlights && this.highlights && this.highlights.length > 0 && 
         this.slideElements.highlightElements.length !== this.highlights.length){
-      // console.log("lets build highlights");
 
       for(highlight in this.highlights){
         $highlight = $("#" + highlight + "_highlight");
@@ -1425,34 +1417,10 @@ AVIATION.common.Slide.prototype = {
         slide.panelPause = false;
         
         i = index || slide.pausedPanelIndex || 0;
-        //console.log("Parsing complete: ", results);
-        myFlightIntVar = setInterval(function(){
-          //console.log("interval running");
 
-          /*
-          $(slide).off("panelPause");
-          $(slide).on("panelPause", function(){
-            var tempI = i;
-            i = allFlight.length;
-            return tempI;
-          });
-          */
+        myFlightIntVar = setInterval(function(){
 
           if(allFlight && allFlight.length > 0 && i < allFlight.length && !slide.panelPause){
-            //console.log("run copmlete");
-
-            // if(i >= (allFlight.length - 1)){
-            // // $('#counter').addClass('stopInterval');
-            // // $('#submit-parse').text("START OVER");
-            //   console.log("int stopped1");
-            //   clearInterval(myFlightIntVar);
-            // }
-            
-            //console.log("Flight length: " + allFlight.length);
-            
-            //if(!$('#counter').hasClass('pauseInterval') && !$('#counter').hasClass('stopInterval')) {
-            
-            //console.log("Parsing: " + allFlight[i].pitch);
 
             instrumentOptions = {
               attitude: {
@@ -1479,22 +1447,8 @@ AVIATION.common.Slide.prototype = {
 
             slide.setAllInstruments( instrumentOptions );
 
-              /*
-                heading.setHeading(  );
-                altimeter.setAltitude();
-                //altimeter.setPressure(allFlight[i].pressure);
-                airspeed.setAirSpeed();
-                          //console.log("turn rate + roll: " + ( ( (allFlight[i].turnRate) * 57.3 ) + (allFlight[i].roll) ) );
-                turn_coordinator.setTurn;
-                turn_coordinator.setYaw( );
-                vario.setVario(  );
-              */
-        
-            //};
-            
             i++;
           } else {
-            //console.log("int stopped2: ");
             if(i < allFlight.length){
               slide.pausedPanelIndex = i;
             } else {
@@ -1503,12 +1457,7 @@ AVIATION.common.Slide.prototype = {
             
             clearInterval(myFlightIntVar);
           }
-          //}
         },50);
-
-
-                //$("#submit-parse").attr('disabled', false);
-        //$("#submit-parse").text("START");
 
       };
 
@@ -1941,8 +1890,7 @@ AVIATION.common.Slide.prototype = {
                 audioObjects = slide.buildSlideAudios(medias[media].array);
                 break;
               case "csv":
-                //csvObjects = slide.buildCSVs(medias[media].array);
-                csvObjects = csvInner || [];//slide.initCSVParser(medias[media].array);
+                csvObjects = csvInner || [];
                 break;
               case "timer":
                 timerObjects = slide.buildTimers(medias[media].array);
