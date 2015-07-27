@@ -149,7 +149,7 @@ AVIATION.common.Slide.prototype = {
         console.log("!* started event fired");
       },
       */
-      end: function(event, data){
+      end: function(e, data){
         console.log("!* end event fired");
         console.log(data);
         // check if everything has stopped playing
@@ -159,37 +159,78 @@ AVIATION.common.Slide.prototype = {
         });
 
       },
-      play: function(){
+      play: function(e){
         console.log("!* play event fired");
-        console.log(slide.states);
-        // play something
-        //slide.states.playing = true;
+
+        var active = this.activeIndex, players = slide.players;
+
+        slide.checkSlideControlPlayButtons("play");
+        console.log(players[active]);
+        if(players[active] && players[active].player){
+          players[active].player.play();  
+        } else {
+          // change to replay and run the redirect/timer to advance
+        }
       },
-      pause: function(){
+      pause: function(e){
         console.log("!* pause event fired");
-        // pause everything that is playing
-        //slide.states.paused = true;
-        //slide.states.playing = false;
+
+        var active = slide.activeIndex, players = slide.players;
+        slide.checkSlideControlPlayButtons("pause");
+
+        console.log(players[active]);
+        if(players[active] && players[active].player){
+          console.log("trying to pause ");
+          players[active].player.pause();  
+        }
+
       },
-      stop: function(){
+      stop: function(e){
         console.log("!* stop event fired");
         //slide.states.stopped = true;
         //slide.states.playing = false;
       },
-      next: function(){
-        console.log("!* playNext event fired");
+      next: function(e){
+        console.log("!* next event fired");
         // move on to the next track
-        //this.states.playing = true;
-      },
-      previous: function(){
-        console.log("!* playPrevious event fired");
-        // go to the previous track
-      },
-      replay: function(){
-        console.log("!* replay event fired");
-        // replay counter++ and replay set to true
-        //slide.states.replayed = true;
+        $(slide).trigger("pause");
 
+        $(slide).trigger("reset");
+
+        slide.activeIndex++;
+        $(slide).trigger("play");
+      },
+      previous: function(e){
+        console.log("!* previous event fired");
+        // go to the previous track
+        slide.resetStatusBar();
+
+        $(slide).trigger("pause");
+
+        $(slide).trigger("reset");
+
+        slide.activeIndex--;
+
+        $(slide).trigger("play");
+      },
+      replay: function(e){
+        console.log("!* replay event fired");
+        slide.resetStatusBar();
+
+        slide.resetSlide();
+
+        $(slide).trigger("play");
+      },
+      replayOne: function(e){
+        console.log("!* replayOne event fired");
+        $(slide).trigger("previous");
+      },
+      reset: function(e){
+        console.log("!* reset event fired");
+
+        if(slide.players[slide.activeIndex] && slide.players[slide.activeIndex].player){
+          slide.players[slide.activeIndex].player.currentTime(0);
+        }
       }
     };
 
@@ -238,6 +279,8 @@ AVIATION.common.Slide.prototype = {
 
     if(options){
       this.options = options;
+    } else {
+      this.options = {};
     }
 
     this.constructor();
@@ -989,19 +1032,19 @@ AVIATION.common.Slide.prototype = {
       // TODO: check if audio has completed
       if(content.advanceWith.index){
         if(content.advanceWith.index === element.index){
-          slide.playNextAudio();
+          $(slide).trigger("next");
         } else {  
           // TODO: set status to wrong / retry
         }
       } else {
         try{
-          slide.playNextAudio();
+          $(slide).trigger("next");
         } catch (err){
-          slide.playCurrent();
+          $(slide).trigger("play");
         }
       }
     } else {
-      slide.playNextAudio();
+      $(slide).trigger("next");
     }
   },
 
@@ -1390,58 +1433,40 @@ AVIATION.common.Slide.prototype = {
 
     if(slide.options.enablePanel){
 
-      var stepParser = function(row) {
-        console.log("Papa parser");
-         //myArray.push( [] );
-        if( row.data[0][30] && row.data[0][30] !== 'undefined' && !isNaN(row.data[0][30]) && row.data[0][30] !== '' ){
-
-          rowNewData = {
-            pitch: row.data[0][30],
-            roll: row.data[0][31],
-            heading: row.data[0][33],
-            altitude: row.data[0][41],
-            //pressure: (row.data[0][12] - (row.data[0][24]/1000) ) * inchesToMilli,
-            airSpeed: row.data[0][7], 
-            turnRate: row.data[0][28],
-            yaw: row.data[0][29],
-            vario: (row.data[0][15] / 1000),
-            //offFlag
-          };
-        
-          allFlight.push(rowNewData);
-        }
-      };
-
       var papaComplete = function(index) {
-        console.log("papa play! started");
+        var data = {}, flight = this.result.data;
+        // columns are
+        // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
+        // yaw: 29, vario: 15/1000
         slide.panelPause = false;
         
         i = index || slide.pausedPanelIndex || 0;
 
         myFlightIntVar = setInterval(function(){
 
-          if(allFlight && allFlight.length > 0 && i < allFlight.length && !slide.panelPause){
+          if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
 
             instrumentOptions = {
               attitude: {
-                pitch: (allFlight[i].pitch),
-                roll: ( -(allFlight[i].roll) ) 
+                pitch: ( flight[i][30] ),
+                roll: ( -( flight[i][31] ) ) //( -(allFlight[i].roll) ) 
               },
               heading: {
-                heading: allFlight[i].heading
+                heading: flight[i][33]
               },
               altimeter: {
-                altitude: allFlight[i].altitude
+                altitude: flight[i][41],//allFlight[i].altitude
+                pressure: flight[i][12]
               },
               airspeed: {
-                airSpeed: allFlight[i].airSpeed
+                airSpeed: flight[i][7]//allFlight[i].airSpeed
               },
               turn_coordinator: {
-                turnRate: ( - ( ( (allFlight[i].turnRate) * 57.3 ) - (allFlight[i].roll) ) ),
-                yaw: ( parseFloat( allFlight[i].yaw ) + 0.5 )
+                turnRate: ( - ( ( (flight[i][28]) * 57.3 ) - (flight[i][31]) ) ),
+                yaw: ( parseFloat( flight[i][29] || 0 ) + 0.5 )
               },
               variometer: {
-                vario: allFlight[i].vario
+                vario: (parseFloat(flight[i][15]) / 1000)//allFlight[i].vario
               }
             };
 
@@ -1449,10 +1474,16 @@ AVIATION.common.Slide.prototype = {
 
             i++;
           } else {
-            if(i < allFlight.length){
+            if(i < flight.length){
               slide.pausedPanelIndex = i;
             } else {
               i = 0;
+              data.element = {};
+              data.element.type = "csv";
+              data.slide = slide;
+
+              console.log("csv ended event");
+              $(slide).trigger("end", data);
             }
             
             clearInterval(myFlightIntVar);
@@ -1471,11 +1502,15 @@ AVIATION.common.Slide.prototype = {
         return i;
       };
 
+      var papaCueLine = function(){
+
+      };
+
       var papaSaveObject = function(result){
         this.result = result;
-        this.allFlight = allFlight;
         this.play = papaComplete;
         this.pause = papaPause;
+        this.cueLine = papaCueLine;
         this.currentTime = papaCurrentLine;
         csvPlayers.push(this);
 
@@ -1484,11 +1519,6 @@ AVIATION.common.Slide.prototype = {
         if(parsed === csvs.length){
           callback(csvPlayers);
         }
-      };
-
-      papaSaveObject.prototype.play = function(){
-        console.log("playing csv");
-        papaComplete();
       };
 
       for(i=0; csvs && i < csvs.length; i++){
@@ -1501,7 +1531,6 @@ AVIATION.common.Slide.prototype = {
             download: true,
           },
           download: true,
-          step: stepParser,
           complete: papaSaveObject
         });
 
@@ -1640,82 +1669,7 @@ AVIATION.common.Slide.prototype = {
       clearInterval(this._timer);
     }
   },
-
-  playCurrent: function(e){
-    var active = this.activeIndex, players = this.players;
-
-    //this.checkSlideControlPlayButtons("play");
-    console.log("playCurrent active: " + active);
-    console.log(players[active]);
-    if(players[active] && players[active].player){
-      players[active].player.play();  
-    }
-
-    // console.log("trying to play...");
-    $(this).trigger("play");
-  },
   
-  pauseCurrent: function(e){
-    var active = this.activeIndex, players = this.players;
-    //this.checkSlideControlPlayButtons("pause");
-    console.log("inside pause");
-
-    console.log(players[active]);
-    console.log(players[active].player);
-    if(players[active] && players[active].player){
-      console.log("trying to pause ");
-      players[active].player.pause();  
-    }
-
-/*
-    if(players[active]){
-      players[active].pause();  
-    }
-    */
-    $(this).trigger("pause");
-  },
-
-  playPreviousAudio: function(e){
-    this.resetStatusBar();
-
-    this.pauseCurrent();
-
-    this.resetAudio();
-
-    this.activeIndex--;
-
-    $(this).trigger("previous");
-    this.playCurrent();
-  },
-
-  playNextAudio: function(e){
-    console.log("playing next...");
-    console.log(this);
-    this.pauseCurrent();
-
-    this.resetAudio();
-
-    this.activeIndex++;
-    // console.log("playing next, whats the activeIndex now? " + this.activeIndex);
-    $(this).trigger("next");
-    this.playCurrent();
-  },
-
-  replayAll: function(e){
-    this.resetStatusBar();
-
-    this.resetSlide();
-
-    $(this).trigger("replay")
-    this.playCurrent();
-  },
-
-  resetAudio: function(e){
-    if(this.players[this.activeIndex] && this.players[this.activeIndex].player){
-      this.players[this.activeIndex].player.currentTime(0);
-    }
-  },
-
   buttonOnClickEvents: function(){
     // check if there is a timer and reset if we click on a control button
     this.resetTimer();
@@ -1736,28 +1690,28 @@ AVIATION.common.Slide.prototype = {
             case "previous":
               console.log("clicked previous");
               slide.resetTimer();
-              slide.playPreviousAudio();
+              $(slide).trigger("previous");
               break;
 
             case "play":
               console.log("clicked play");
-              slide.playCurrent();
+              $(slide).trigger("play");
               break;
 
             case "pause":
               console.log("clicked pause");
-              slide.pauseCurrent();
+              $(slide).trigger("pause");
               break;
 
             case "replay":
               console.log("clicked replay");
               slide.resetTimer();
-              slide.replayAll();
+              $(slide).trigger("replay");
               break;
 
             case "next":
               console.log("clicked next");
-              slide.playNextAudio();
+              $(slide).trigger("next");
               break;
 
             default: 
@@ -2309,6 +2263,11 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
+          if(active > players.length){
+            controls.pause.hide();
+            controls.play.hide();
+            controls.replay.show(); 
+          }
           controls.next.attr("disabled", true);
           controls.next.prop("disabled", true);
         } else {
@@ -2350,13 +2309,14 @@ AVIATION.common.Slide.prototype = {
   },
 
   activateSlide: function(){
-    if(!this.options.noAudio && !this.options.isModal){
-      this.playCurrent();  
+    var slide = this;
+    if(!slide.options.noAudio && !slide.options.isModal){
+      $(slide).trigger("play");
     }
 
-    this.checkForContentResize();
+    slide.checkForContentResize();
 
-    this.centerModals();
+    slide.centerModals();
   },
 
   resetSlide: function(){
