@@ -1445,7 +1445,9 @@ AVIATION.common.Slide.prototype = {
         myFlightIntVar = setInterval(function(){
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
-
+            console.log(flight[i][28] * 57.3);
+            console.log(flight[i][31]);
+            console.log( (parseFloat(flight[i][28]) * 57.3 ) + (parseFloat(flight[i][31]) ) );
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
@@ -1462,7 +1464,7 @@ AVIATION.common.Slide.prototype = {
                 airSpeed: flight[i][7]//allFlight[i].airSpeed
               },
               turn_coordinator: {
-                turnRate: ( - ( ( (flight[i][28]) * 57.3 ) - (flight[i][31]) ) ),
+                turnRate: ( ( parseFloat(flight[i][28]) * 57.3 ) + (parseFloat(flight[i][31]) ) ),
                 yaw: ( parseFloat( flight[i][29] || 0 ) + 0.5 )
               },
               variometer: {
@@ -1471,6 +1473,10 @@ AVIATION.common.Slide.prototype = {
             };
 
             slide.setAllInstruments( instrumentOptions );
+
+            if(flight[i][flight[i].length-1] && typeof flight[i][flight[i].length-1] === 'function'){
+              flight[i][flight[i].length-1]();
+            }
 
             i++;
           } else {
@@ -1502,8 +1508,9 @@ AVIATION.common.Slide.prototype = {
         return i;
       };
 
-      var papaCueLine = function(){
-
+      var papaCueLine = function(line, callback){
+        console.log("csv cueing at line " + line);
+        this.result.data[line].push(callback);
       };
 
       var papaSaveObject = function(result){
@@ -1907,8 +1914,18 @@ AVIATION.common.Slide.prototype = {
 
       for(i = 0; i < content.length; i++){
         if(content[i].media && content[i].media.type){
+          if(!playerInitted[content[i].media.index]){
+            slide.initGenericEvents(players[content[i].media.index].player, content[i], slide, i);
+            playerInitted[content[i].media.index] = true;
+          } else {
+            slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
+          }
+          /*
           switch(content[i].media.type){
             case "audio":
+              console.log("its an audio");
+              console.log(content[i]);
+              console.log(playerInitted);
               if(!playerInitted[content[i].media.index]){
                 slide.initAudioEvents(players[content[i].media.index].player, content[i], slide, i);
                 playerInitted[content[i].media.index] = true;
@@ -1917,17 +1934,160 @@ AVIATION.common.Slide.prototype = {
               }
               break;
             case "csv":
-              slide.initCSVEvents(players[content[i].media.index].player, content[i], slide, i);
+              if(!playerInitted[content[i].media.index]){
+                slide.initCSVEvents(players[content[i].media.index].player, content[i], slide, i);
+                playerInitted[content[i].media.index] = true;
+              } else {
+                slide.initCSVCueEvents(players[content[i].media.index].player, content[i], slide, i);
+              }
               break;
             case "timer":
-              slide.initTimerEvents(players[content[i].media.index].player, content[i], slide, i);
+              if(!playerInitted[content[i].media.index]){
+                slide.initTimerEvents(players[content[i].media.index].player, content[i], slide, i);
+              } else {
+                slide.initTimerCueEvents(players[content[i].media.index].player, content[i], slide, i);
+              }
               break;
             default:
               console.log("unknown media type in content in initMediaEvents");
           }
+          */
         }
       }
   },
+
+  initGenericEvents: function(player, content, slide, index){
+    "use strict";
+
+    switch(content.media.type){
+      case "csv":
+        break;
+      case "audio":
+        player.on("ended", function(e){
+          console.log("ended pop");
+          console.log(player);
+          //player.off("ended");
+          var data = {};
+          data.element = {};
+          data.element.type = "audio";
+          data.slide = slide;
+
+          console.log("audio ended event");
+          $(slide).trigger("end", data);
+        });
+        
+        player.on("pause", function(e){
+          // TODO: check global events for this
+          // fire pause event
+          console.log("audio paused event");
+        });
+        break;
+      case "timer":
+        player.on("end", function(){
+          // TODO: global player end event
+          console.log("timer ended");
+        });
+      
+        player.on("pause", function(){
+          // TODO: global pause event
+          console.log("timer paused");
+        });
+        break;
+      default:
+        console.log("unknown media type in generic events");
+    }
+
+  },
+
+  initCueEvents: function(player, content, slide, index){
+    "use strict";
+    
+    var hasListened = slide.slideHasListened, callbackAtBeginning = "", contentAtStart = "";
+
+    console.log("INIT ALL EVENTs HERE!!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    console.log(player);
+
+    switch(content.media.type){
+      case "csv":
+        if(content.media && content.media.line){
+          player.cueLine(content.media.line, function(){
+            slide.buildContent(true, index);
+
+            if(content.callback && typeof content.callback === "function"){
+              content.callback();
+            }
+          });  
+        } else {
+          contentAtStart = index;
+          if(content.callback && typeof content.callback === 'function'){
+            callbackAtBeginning = content.callback;
+          }
+          player.cueLine(1, function(){
+            slide.buildContent(true, contentAtStart);
+            if(callbackAtBeginning){
+              callbackAtBeginning();
+            }
+          });
+        }
+        break;
+      case "timer":
+        if(content.media && content.media.second){
+          player.on("tick", function(second){
+            if(second === content.media.second){
+              slideObject.buildContent(true, i);
+            }
+            if(content.callback && typeof content.callback === "function"){
+              content.callback();
+            }
+          });
+        } else {
+          contentAtStart = index;
+          if(content.callback && typeof content.callback === "function"){
+            callbackAtBeginning = content.callback;
+          }
+          player.on("start", function(){
+            slide.buildContent(true, contentAtStart);
+            if(callbackAtBeginning){
+              callbackAtBeginning();
+            }
+            console.log("timer started");
+          });
+        }
+        break;
+      case "audio":
+        if(content.media && content.media.second){
+          player.cue(content.media.second, function(){
+            slide.buildContent(true, index);
+
+            if(content.callback && typeof content.callback === "function"){
+              content.callback();
+            }
+          });  
+        } else {
+          contentAtStart = index;
+          if(content.callback && typeof content.callback === "function"){
+            callbackAtBeginning = content.callback;
+          }
+          player.cue("0.01", function(){
+            slide.buildContent(true, contentAtStart);
+            if(callbackAtBeginning){
+              callbackAtBeginning();
+            }
+          });
+        }
+        break;
+      default:
+        console.log("unknown media type inside initCueEvents");
+    }
+    
+  },
+/*
+
+
+  initTimerCueEvents:function(player, content, slide, index){
+
+  },
+
 
   initTimerEvents: function(player, content, slide, index){
     "use strict";
@@ -1980,15 +2140,41 @@ AVIATION.common.Slide.prototype = {
     onstop  : function() { console.log('timer stop') },
     onpause : function() { console.log('timer set on pause') },
     onend   : function() { console.log('timer ended normally') }
-    */
+    
 
 
   },
 
+  initCSVCueEvents: function(player, content, slide, index){
+    console.log("trying to csv cue event");
+    console.log(content.media);
+    if(content.media && content.media.line){
+      player.cueLine(content.media.line, function(){
+        slide.buildContent(true, index);
+
+        if(content.callback && typeof content.callback === "function"){
+          content.callback();
+        }
+      });
+    }
+  },
+
   initCSVEvents: function(player, content, slide, index){
     "use strict";
+    var callbackAtBeginning = "", contentAtStart = "";
 
-    
+    if(!content.media || !content.media.line){
+      contentAtStart = index;
+      if(content.callback && typeof content.callback === 'function'){
+        callbackAtBeginning = content.callback;
+      }
+      player.cueLine(1, function(){
+        slide.buildContent(true, contentAtStart);
+        if(callbackAtBeginning){
+          callbackAtBeginning();
+        }
+      });
+    }
 
   },
 
@@ -1996,20 +2182,21 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     var callbackAtBeginning = "", contentAtStart = "";
 
+    console.log("audio content stuff");
+    console.log(content.media.second);
     if(!content.media || !content.media.second){
+      contentAtStart = index;
       if(content.callback && typeof content.callback === "function"){
-        contentAtStart = index;
         callbackAtBeginning = content.callback;
-
-        player.cue("0.01", function(){
-          slide.buildContent(true, contentAtStart);
-          if(callbackAtBeginning){
-            callbackAtBeginning();
-          }
-        });
-        
       }
-      
+      player.cue("0.01", function(){
+        slide.buildContent(true, contentAtStart);
+        if(callbackAtBeginning){
+          callbackAtBeginning();
+        }
+      });
+    } else {
+      slide.initAudioCueEvents(player, content, slide, index);
     }
 
     player.on("ended", function(e){
@@ -2045,7 +2232,7 @@ AVIATION.common.Slide.prototype = {
     });
   },
 
-  initAudioCueEvents: function(player, content, slide, index){
+  initCueEvents: function(player, content, slide, index, type){
     "use strict";
     
     var hasListened = slide.slideHasListened;
@@ -2053,17 +2240,36 @@ AVIATION.common.Slide.prototype = {
     console.log("INIT AUDIO EVENT HERE!!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA");
     console.log(player);
 
-    if(content.media && content.media.second){
-      player.cue(content.media.second, function(){
-        slide.buildContent(true, index);
+    switch(type){
+      case "csv":
+        if(content.media && content.media.line){
+          player.cue(content.media.second, function(){
+            slide.buildContent(true, index);
 
-        if(content.callback && typeof content.callback === "function"){
-          content.callback();
+            if(content.callback && typeof content.callback === "function"){
+              content.callback();
+            }
+          });  
         }
-      });  
-    }
-  },
+        break;
+      case "timer":
+      case "audio":
+        if(content.media && content.media.second){
+          player.cue(content.media.second, function(){
+            slide.buildContent(true, index);
 
+            if(content.callback && typeof content.callback === "function"){
+              content.callback();
+            }
+          });  
+        }
+        break;
+      default:
+        console.log("unknown media type inside initCueEvents");
+    }
+    
+  },
+**/
 //checkButtonsOnEnd : function(){
 
       //slideObject.checkSlideControlPlayButtonsState();

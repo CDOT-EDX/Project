@@ -40,6 +40,8 @@
                 completionResponseMessaging: false,
                 displayQuestionCount: true,   // Deprecate?
                 displayQuestionNumber: true,  // Deprecate?
+                showRemediationOnSuccess: true,
+                showRemediationOnFail: true,
                 animationCallbacks: { // only for the methods that have jQuery animations offering callback
                     setupQuiz: function () {},
                     startQuiz: function () {},
@@ -412,6 +414,7 @@
 
                 internal.method.turnKeyAndGo (key, options && options.callback ? options.callback : function () {});
             },
+
             buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr){
                 var remidiation = [];
                 var singleRemidiation = '';
@@ -450,7 +453,7 @@
 
 
             },
-
+            
             // Validates the response selection(s), displays explanations & next question button
             checkAnswer: function(checkButton, options) {
                 var key, keyNotch, kN;
@@ -464,7 +467,6 @@
                     questionIndex = parseInt(questionLI.attr('id').replace(/(question)/, ''), 10),
                     answers       = questions[questionIndex].a,
                     selectAny     = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
-                    plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
 
                 answerLIs.addClass(incorrectResponseClass);
 
@@ -505,6 +507,10 @@
 
                 if (correctResponse) {
                 
+                    if (plugin.config.showRemediationOnSuccess){
+                        plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
+                    }
+                
                     if(questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function'){
                     
                         //"Firing callback"
@@ -515,6 +521,10 @@
                     questionLI.addClass(correctClass);
                 } else {
                 
+                    if (plugin.config.showRemediationOnFail){
+                        plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
+                    }
+
                     if(questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function'){
                     
                         //"Firing callback"
@@ -553,7 +563,6 @@
 
                 internal.method.turnKeyAndGo (key, options && options.callback ? options.callback : function () {});
             },
-            
 
             // Moves to the next question OR completes the quiz if on last question
             nextQuestion: function(nextButton, options) {
