@@ -2,7 +2,27 @@
 
 This branch is for combining front-end libraries and features used in the edX/Aviation project at CDOT
 
+## References to works used in this project and
+### JavaScript and jQuery libraries required by this library:
+
+    SlickQuiz: https://github.com/pkuzhel/SlickQuiz
+        Original library: https://github.com/jewlofthelotus/SlickQuiz
+    TimerJS: https://github.com/pkuzhel/timer.js
+        Original library: https://github.com/husa/timer.js
+    PopcornJS: http://cdn.popcornjs.org/code/dist/popcorn.min.js || https://github.com/mozilla/popcorn-js
+    jQuery Flight Indicators: https://github.com/uw-ray/Skyhawk-Flight-Instruments
+        Continued from: https://github.com/echanna/jQuery-Flight-Indicators/tree/cdot_with_turn_coordinator
+            Original: https://github.com/sebmatton/jQuery-Flight-Indicators
+    JS CSV Parser (PapaParse): http://papaparse.com/
+    Resize Detection (CSS Element Queries): https://github.com/marcj/css-element-queries
+
+
 ## Slide Creation Library for the internal use of the edX team at CDOT
+
+In order to have this version of the createSlide library working you will need the following files:
+    CDOT-EDX/Project/library/createSlide.js
+    CDOT-EDX/Project/library/statis/js/*
+    CDOT-EDX/Project/library/statis/css/*
 
 createSlide now supports one options object being passed on versus multiples...
 
@@ -25,6 +45,7 @@ Acceptable options and defaults are as follows:
     enableButtons:      true,
     hiddenButtons:      false, // am I using this yet?
     enableSlider:       false,
+    enablePanel:        false, // should it be panel or dashboard or each instrument separately?
     readOnlySlider:     true,
     container:          "#slideContainer",
     statusId:           "#statusBar",
@@ -36,7 +57,62 @@ Acceptable options and defaults are as follows:
     quizId:             "#slideQuiz",
     continueId:         "", // string specifying the next id to redirect to
     backId:             "", // string specifying the previous id to redirect to
-    advanceWith:        "audio", // other options -> "highlight", "timer", "button"
+    advanceWith:        "audio", // other options -> "highlight", "timer", "button", "instruments"
+    panelOptions: { // options passed on to flightInstruments library
+        size : 200,             // Sets the size in pixels of the indicator (square)
+        showBox : true,         // Sets the visibility of the box behind the instruments
+        showScrews: true,       // Sets the visibility of the four screws around the instruments
+        airspeed: 0,            // Air speed in knots for an air speed indicator
+        roll : 0,               // Roll angle in degrees for an attitude indicator
+        pitch : 0,              // Pitch angle in degrees for an attitude indicator
+        off_flag: false         // Off flag for an attitude indicator
+        altitude: 0,            // Altitude in feets for an altimeter indicator
+        pressure: 30,           // Pressure in inHg for an altimeter indicator
+        turn: 0,                // Turn direction for turn coordinator
+        slip: 0,                // Slip ball position for turn coordinator (0 to 1; 0.5 is middle)
+        heading: 0,             // Heading angle in degrees for an heading indicator
+        beaconone: 0,           // Angle of first beacon on the heading indicator
+        beacononeshow: true,    // Sets the visibility of the first beacon on the heading indicator
+        beacontwo: 0,           // Angle of second beacon on heading indicator
+        beacontwoshow: true,    // Sets the visibility of the second beacon on the heading indicator
+        vario: 0,               // Variometer in 1000 feets/min for the variometer indicator
+        img_directory : 'img/'  // The directory where the images are saved to
+    },
+    quizzes: [{json: // options passed on to the slickQuiz library
+      {
+        "info": {
+          "name":    "Answer the following questions to the best of your ability.",
+          "main":    "",
+          "results": "",
+          "level1":  "",
+          "level2":  "",
+          "level3":  "",
+          "level4":  "",
+          "level5":  "" // no comma here
+        },
+        "questions": [
+          { // Question 1 - Multiple Choice, Single True Answer
+            "q": "Now speak the correct clearance: >>AS12, I read back",
+            "a": [
+              {"option": "Climb on runway heading to 3000 ft, turning right onto 125 degrees", "correct": "", "reason": ""},
+              {"option": "Climb on 135 degrees to 1500 ft, then climb to 3000 ft", "correct": "",  "reason": ""},
+              {"option": "Climb on runway heading to 1500 ft, turning right onto 125 degrees", "correct": "",  "reason": ""},
+              {"option": "Climb on runway heading to 1500 ft, turning right onto 135 degrees. Continue climb to 3000 feet to complete the correct read back.",  "correct": "",  "reason": ""} // no comma here
+            ],
+            "correct": "<p><span>Control, correct, AS12 is clear to take-off</span></p>",
+            "incorrect": "<p><span>That's not correct.  Ask for the clearance to be repeated.</span></p>" // no comma here
+          }
+
+        ],
+        
+      },
+      "animationCallbacks": {
+        "checkAnswer": function(){
+          console.log("do something");
+          $(anySlide).trigger("completedQuiz");
+        }
+      }
+    }],
     avatars: 
     {
       tom: {
@@ -110,10 +186,10 @@ Acceptable options and defaults are as follows:
             action: function(){}
         }
     },
-    slideContent: {
-        title: {html: "No content provided", classes: "col-md-12" }, 
-        content: {html: "Check your slideContent object", classes: "text-center" },
-        image: {src: "/someSource/image.png", classes: "imageClass"},
+    slideContent: [{
+        title: {html: "No content provided", classes: ["col-md-12"] }, 
+        content: {html: "<p<Check your <b>slideContent</b> object</p>", classes: ["text-center"] },
+        image: {src: "/someSource/image.png", classes: ["imageClass"] },
         highlights: [ 
                         0 , 
                         { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
@@ -125,28 +201,40 @@ Acceptable options and defaults are as follows:
                     { index: 2, onclick: function(){ console.log("button onclick");} }, 
                     3 
         ],
+        // set slider to any throttle possition from 0-4
         slider: 2,
         audio: 0,
         second: 10,
         callback: function(){ console.log("this is a callback function"); }
     },
+    {
+        //... another slide content can go here to be triggered at a different time of the audio
+        title: {html: "This is a different title / slide"},
+        slider: 3,
+        audio: 1
+    }],
+    // default models that we want to be set-up in the background
     modals: [{ 
               id: "ai", 
               title: "Attitude Indicator", 
               content: {html: "This is the MODAL custom HTML" },
-              //audio:  "//online.cdot.senecacollege.ca:25080/aviation/audios/PlaceHolderTomLong.mp3"
             }, 
             {
               id: "alt", 
               title: "Altimeter", 
-              //audio: "//online.cdot.senecacollege.ca:25080/aviation/audios/PlaceHolderTomLong.mp3"               
             }
     ],
     // these audioFiles are for the slide only
-    audioFiles: [ 
-        "someURL/toAudioFile",
-        "anotherURL/toOtherFile"
-    ],
+    mediaFiles: [ 
+        {type: "audio", src: "someURL/toAudioFile"},
+        {type: "audio", src: "anotherURL/toOtherFile"},
+        {type: "csv", src: "someURL/flightData"},
+    ]
+
+The rest of this README is being edited at this moment
+**More options and capabilities are being added all the time**
+**Everything below is just notes of the developer for the developer**
+
     // these audio files are extras (audios for quizzes and interactions)
     extraAudioFiles: [
         "someURL/toAudioFile",
@@ -193,16 +281,6 @@ Acceptable options and defaults are as follows:
     paused
     //replayed?
     //stopped?
-
-
-## JavaScript and jQuery libraries required by this library
-
-    SlickQuiz: https://github.com/pkuzhel/SlickQuiz
-    TimerJS: https://github.com/pkuzhel/timer.js
-    PopcornJS: http://cdn.popcornjs.org/code/dist/popcorn.min.js || https://github.com/mozilla/popcorn-js
-    jQuery Flight Indicators: https://github.com/echanna/jQuery-Flight-Indicators/tree/cdot_with_turn_coordinator
-    JS CSV Parser (PapaParse): http://papaparse.com/
-    Resize Detection 
 
 The rest of this README is being edited at this moment
 **More options and capabilities are being added all the time**
