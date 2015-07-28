@@ -31,7 +31,7 @@
                 numberOfQuestions: null,
                 randomSortQuestions: false,
                 randomSortAnswers: false,
-                preventUnanswered: false,	// set true for student to be alerted for unanswered questions
+                preventUnanswered: false,   // set true for student to be alerted for unanswered questions
                 disableScore: false,
                 disableRanking: false,
                 scoreAsPercentage: false,
@@ -48,7 +48,7 @@
                     nextQuestion: function () {},
                     backToQuestion: function () {},
                     completeQuiz: function () {},
-					disappearOptions: function () {}
+                    disappearOptions: function () {}
                 },
                 events: {
                     onStartQuiz: function (options) {},
@@ -412,6 +412,44 @@
 
                 internal.method.turnKeyAndGo (key, options && options.callback ? options.callback : function () {});
             },
+            buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr){
+                var remidiation = [];
+                var singleRemidiation = '';
+                                
+                for (i in answersPr) {
+                    if (answersPr.hasOwnProperty(i)) {
+                        var answer = answersPr[i];
+                                     
+                        //console.log("answer " + answer.reason);
+
+                        if (!answer.correct) {
+                            if(answer.reason !== undefined || answer.reason != ''){
+                                singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason;
+                                remidiation.push(singleRemidiation);
+                            }
+                        }else{
+                            if(answer.reason !== undefined || answer.reason != ''){
+                                singleRemidiation = '<b><i>Q. ' + answer.option + '</i></b><br />' + '<b><i>' + answer.reason + '<b><i>';
+                                remidiation.push(singleRemidiation);
+                            }
+                        }
+                    }
+                }
+
+                var optionHeader = '<i><h2 class="' + correctResponseClassPr + '">OK, now let\'s look at what options show:</h2></i>';
+                
+                var buttonQuestion = '#question' + questionIndexPr + ' > a.button.nextQuestion'/* + '.lastQuestion'*/;
+                                    
+                $(buttonQuestion).before(optionHeader);
+                                    
+                var remidiationResponseHTML = $('<ul class="' + responsesClassPr + '"></ul>');
+                for (i in remidiation) {
+                    remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
+                    $(buttonQuestion).before(remidiationResponseHTML);
+                }
+
+
+            },
 
             // Validates the response selection(s), displays explanations & next question button
             checkAnswer: function(checkButton, options) {
@@ -426,6 +464,7 @@
                     questionIndex = parseInt(questionLI.attr('id').replace(/(question)/, ''), 10),
                     answers       = questions[questionIndex].a,
                     selectAny     = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
+                    plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
 
                 answerLIs.addClass(incorrectResponseClass);
 
@@ -465,23 +504,23 @@
                 var correctResponse = plugin.method.compareAnswers(trueAnswers, selectedAnswers, selectAny);
 
                 if (correctResponse) {
-				
-					if(questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function'){
-					
-						//"Firing callback"
-						questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-					}
-				
-				
+                
+                    if(questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function'){
+                    
+                        //"Firing callback"
+                        questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
+                    }
+                
+                
                     questionLI.addClass(correctClass);
                 } else {
-				
-					if(questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function'){
-					
-						//"Firing callback"
-						questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
-					}
-				
+                
+                    if(questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function'){
+                    
+                        //"Firing callback"
+                        questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
+                    }
+                
                     questionLI.addClass(incorrectClass);
                 }
 
@@ -514,6 +553,7 @@
 
                 internal.method.turnKeyAndGo (key, options && options.callback ? options.callback : function () {});
             },
+            
 
             // Moves to the next question OR completes the quiz if on last question
             nextQuestion: function(nextButton, options) {
@@ -734,10 +774,10 @@
                 plugin.method.nextQuestion(this, {callback: plugin.config.animationCallbacks.nextQuestion});
             });
 
-			if(plugin.config.animationCallbacks.disappearOptions && typeof plugin.config.animationCallbacks.disappearOptions === 'function'){
-				plugin.config.animationCallbacks.disappearOptions();
-			}
-			
+            if(plugin.config.animationCallbacks.disappearOptions && typeof plugin.config.animationCallbacks.disappearOptions === 'function'){
+                plugin.config.animationCallbacks.disappearOptions();
+            }
+            
             // Accessibility (WAI-ARIA).
             var _qnid = $element.attr('id') + '-name';
             $quizName.attr('id', _qnid);
