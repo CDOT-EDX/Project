@@ -65,52 +65,6 @@ AVIATION.common.Slide = function (options, slideContent, mediaFiles) {
     //this.constructor(options);
   }
 
-  
-
-
-
-/*
-  this.parent = options.parent;
-
-  this.type = options.type || "simple"; // check which options are given and then assign a default
-
-  this.options = options;
-
-  //this.options.slideContent = slideContent;
-
-  this.options.audioFiles = audioFiles;
-
-  this.slideStates = [];
-
-  this.extraStates = [];
-
-  this.activeIndex = options.activeIndex || 0;
-
-  this.extraActiveIndex = options.extraActiveIndex || 0;
-
-  this.slideAudios = []; // init an empty array to store audio (popcorn) elements in
-  this.slideHasListened = []; // store which audios have been listened to
-
-  this.slideElements = {}; // will have status bar / control buttons / title / content and so on
-
-  this.slideTimer = -1;
-
-
-  console.log(this.options);
-
-  console.log(this.options.slideContent);
-
-
-  console.log("!!! CONTENT !!!: ");
-  console.log(this.slideContent);
-
-  this.audioFiles = audioFiles; //["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3"];
-
-  //this.parser = 
-
-  console.log("this inside Slide:");
-  console.log(this);
-*/
 };
 
 AVIATION.common.Slide.prototype = {
@@ -125,17 +79,13 @@ AVIATION.common.Slide.prototype = {
       this.options = options || this.options || {};
 
       this._initSimple( this.options );
-  /*
-    } else {
-      console.log("not simple slide");
-      this._initPanel( this.options );
-    }
-  */
   },
 
+/*
   attachCustomEvent: function(eventName, eventFunction){
     "use strict";
   },
+*/
 
   // global events which can control the slide object from within other plugins
   attachEvents: function(){
@@ -396,13 +346,7 @@ AVIATION.common.Slide.prototype = {
     this.attachEvents();
     this.attachStates();
 
-    //if(!this.options.noAudio){
-    //this.buildSlideAudios( );
-    //slide.initMediaEvents();
-    
-    //slide.initAudioEvents();
-
-    console.log("no audio and building content! *** " + this.activeIndex);
+    //console.log("no audio and building content! *** " + this.activeIndex);
     console.log(this);
     if(this.options.enablePanel && panelContainer && panelContainer.length < 1){
       panelContainer = jQuery("<div/>", {
@@ -412,40 +356,22 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(slide.container);
     }
     this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
-    //}
-
-    //slide.initSlider();
 
     slide.initPanel();
     
-    //slide.initCSVParser();
     callback = function(){
       slide.buildQuizContainer();
-
       slide.buildQuizzes();
-
       slide.buildFooter();
-
       slide.buildModals();
-
-      // create events for audio/video interactions and a way to track them
-
-      //if(!slide.options.noAudio){
       slide.resetSlide();  
-      //}
-    
       // finished thus activate the slide
       slide.activateSlide();
   
     };
 
-    //if(slide.options.enablePanel){
-
     console.log("inside build slide before init media");
     slide.initMedia(callback);
-    //} else {
-    //  callback();
-    //}
     
   },
 
@@ -687,15 +613,11 @@ AVIATION.common.Slide.prototype = {
         console.log(slideInner);
 
         if(action === "remove" || action === "replace"){
-          // console.log("removing");
-          //$(".slideInner").children().remove();
           slideInner.children().remove();
           slideInner.remove();
-          //$(".slideInner").remove();
         }
 
         if(action === "append" || action === "replace"){
-          // console.log("appending");
           if(innerContent){
             innerContent.appendTo(newSlideInner);
           }
@@ -706,12 +628,7 @@ AVIATION.common.Slide.prototype = {
         }
       } else {
         slideInner.children().remove();
-        //$(".slideInner").children().remove();
       }
-
-      //if(call && typeof cb === 'function'){
-        //cb();
-      //}
 
       if(callback && typeof callback === 'function'){
         callback();
@@ -722,8 +639,6 @@ AVIATION.common.Slide.prototype = {
         console.log("triggering the callback! ****");
         slideContent.callback();
       }
-      
-      //slide.buildFooter();
 
     };
 
@@ -758,9 +673,6 @@ AVIATION.common.Slide.prototype = {
 
     var footer = $(this.options.footerId);
 
-    // console.log("inside footer");
-
-
     if(!footer || footer.length < 1){
 
       footer = jQuery('<div/>', {
@@ -776,20 +688,10 @@ AVIATION.common.Slide.prototype = {
         footer.appendTo( $(this.container).parent() );  
       }
 
-      // console.log("trying to append footer to " + this.container);
-      console.log("wheres the footer");
-      console.log(footer);
-      // console.log("launching build controls");
-      
       this.buildSlideControls(footer);
-      
-      // console.log("launching build course controls");
-      
+
       this.buildCourseControls(footer);
-
     }
-
-
   },
 
   // build controls that go immediately after the slide (play/pause buttons)
@@ -836,8 +738,6 @@ AVIATION.common.Slide.prototype = {
         next: $("#btnN").data("action", "next")
       };
 
-      //this.insertLineBreak(slideControlsRow);
-
       this.initSlideButtonEvents();
     } else {
       this.insertLineBreak( parent );
@@ -857,13 +757,11 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  buildSlideAudios: function(audioFiles){//modalAudios, parent, modalIndex){
+  buildSlideAudios: function(audioFiles){
     "use strict";
     var slideObject = this, localAudios, parentContainer;
- 
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
-
     if(audioFiles && typeof audioFiles !== 'undefined' && audioFiles.length > 0){ //|| (modalAudios && parent) ){
       localAudios = audioFiles; // modalAudios
 
@@ -921,18 +819,6 @@ AVIATION.common.Slide.prototype = {
               type: types[i]
             }).appendTo(addedSlideAudio);
           }
-  /*
-          if(modalAudios && parent){
-            try {
-              slideObject.modalData[modalIndex].modalAudios.push(Popcorn("#audio_" + a));
-              slideObject.modalData[modalIndex].modalHasListened.push(false);
-            } catch(error) {
-              // was popcorn initialized ok?
-              console.log("modal audio init error: ");
-              console.log(error);
-            }
-          } else {
-  */
           try {
             slideObject.slideAudios.push(Popcorn("#audio_" + a));
             slideObject.slideHasListened.push(false);
@@ -1033,7 +919,8 @@ AVIATION.common.Slide.prototype = {
       if(content.advanceWith.index){
         if(content.advanceWith.index === element.index){
           $(slide).trigger("next");
-        } else {  
+        } else {
+          slide.setStatus("Nope, that's wrong. Try again");
           // TODO: set status to wrong / retry
         }
       } else {
@@ -1299,7 +1186,7 @@ AVIATION.common.Slide.prototype = {
   setSlider: function(slideContent){
     "use strict";
 
-    if(this.options.enableSlider && slideContent.slider && slideContent.slider != ""){
+    if(this.options.enableSlider && slideContent.slider && slideContent.slider !== ""){
       this.slideElements.slider.slider("option", "values", [slideContent.slider]);
     }
   },
@@ -1307,10 +1194,9 @@ AVIATION.common.Slide.prototype = {
   // create the instrument dashboard
   initPanel: function(options){
     "use strict";
-
-    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), instIds = slide.options.instrumentIds, instrumentObject = {}, options = {},
-        i=0;
-
+    // extend to support a single instrument!
+    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), 
+        instIds = slide.options.instrumentIds, instrumentObject = {}, options = {}, i=0;
 
     if(slide.options.enablePanel){
       console.log("initing panel!");
@@ -1353,7 +1239,9 @@ AVIATION.common.Slide.prototype = {
 
             slide.slideElements.instrumentElements.push(instrumentSpan);
           }
+
           i++;
+
         }
       }
     }
