@@ -1,0 +1,245 @@
+/***
+  ** Custom CSS File for frequently used classes in the aviation snap courses
+  ** of the edX CDOT project
+  ** created by: Maggie Ha and Pavlo Kuzhel
+  **/
+#cancelRedirect{
+  text-align: center;
+  width: 100%;
+  top: 60%;
+}
+
+.cdot_bg > img {
+  width: 100%;
+}
+
+/* asdasd */
+/*
+.cdot_bg > img {
+  max-width: 100%;
+}
+*/
+
+.cdot_bg > div {
+  position:absolute;
+}
+
+/* do we need this */
+.cdot_show {
+  display:inline-block;
+}
+
+.cdot_hidden {
+ 	display:none; 
+}
+
+.cdot_bg {
+  display: inline-block;
+  position: relative;
+}
+
+.cdot_bg .fg_left > img {
+  max-width: 100%;
+  max-height: 100%;
+}
+.cdot_bg .fg_right > img {
+  max-width: 100%;
+  max-height: 100%;
+}
+.cdot_bg .cdot_contentImgFull > img {
+  max-width: 100%;
+}
+.cdot_bg .cdot_contentImgFull2 > img {
+  width: 100%;
+}
+
+/*** Board With Avatars ***/
+/* Image Fullscreen on Board */
+.cdot_contentImgFull {
+  top: 8.5%;
+  left: 20.1%;
+  width: 60%;
+}
+
+/* Image Part on Board */
+.cdot_contentImgPart {
+  position: relative;
+  /*width: 70%;*/
+  height: 88%; 
+}
+.cdot_contentImgPart img {
+  /*position: relative;*/
+  position: absolute;
+  /*left: 19%;*/
+  max-height: 100%;
+    
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, 0%);
+}
+
+/* Text on Board */
+.cdot_contentText {
+  top: 8.5%;
+  left: 20.1%;
+  width: 51%;
+  height: 54%;
+  padding: 2% 4.5%;
+}
+.cdot_contentText ul {
+  text-align: left;
+  margin: 10px 0px !important;
+}
+.cdot_contentText li {
+  font-size: 110%;
+}
+
+.cdot_pTitle {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 2% !important;
+  font-size: 114% !important;
+}
+
+.cdot_contentQuote {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 20%;
+  font-size: 120% !important;
+}
+
+/*** Board Without Avatars ***/
+/* Image Fullscreen on Board */
+.cdot_contentImgFull2 {
+  top: 8.5%;
+  left: 11.7%;
+  width: 76.6%;
+}
+/* Text on Full Zoom Board */
+.cdot_contentText2 {
+  top: 8.5%;
+  left: 15%;
+  width: 64%;
+  height: 67%;
+  padding: 2% 3%;
+}
+
+.cdot_contentText2 ul {
+  text-align: left;
+  margin: 10px 0px !important;
+}
+.cdot_contentText2 li {
+  font-size: 130%;
+}
+
+.cdot_pTitle2 {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 2% !important;
+  font-size: 150% !important;
+}
+
+/*** Avatars ***/
+.fg_left {
+  top: 1.5%;
+  left: 0px;
+  max-width: 28%;
+  height: 100%; 
+    
+}
+.fg_right {
+  top: 1.5%;
+  left: 72%;
+  height: 100%;
+}
+
+/*** Buttons ***/
+#cdot_navBtn {
+  padding: 10px 0px;
+  position:  relative;
+  height: 40px;
+}
+/* Slide Navigation */
+.cdot_btnContinue {
+  position: absolute;
+  right: 0%;
+}
+.cdot_btnBack {
+  position: absolute;
+  left: 0%;
+}
+
+#navCtrlBtn {
+  position: relative;
+  top: -3px;
+}
+.cdot_btnNext {
+  position: absolute;
+  bottom: 0%;
+  left: 54.5%;
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnNext.png') !important;   
+  background-repeat: no-repeat;
+  background-size: 32px; 
+}
+.cdot_btnPrev {
+  position: absolute;
+  bottom: 0%;
+  left: 41.5%;
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPrev.png') !important;   
+  background-repeat: no-repeat;
+  background-size: 32px; 
+}
+.cdot_btnPlay {
+  position: absolute;
+  bottom: 0%;
+  left: 48%;
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPlay.png') !important;  
+  background-repeat: no-repeat;
+  background-size: 32px; 
+}
+.cdot_btnReplay {
+  position: absolute;
+  bottom: 0%;
+  left: 48%;
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnReplay.png') !important; 
+  background-repeat: no-repeat;
+  background-size: 32px; 
+}
+.cdot_btnPause {
+  position: absolute;
+  bottom: 0%;
+  left: 48%;
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPause.png') !important;  
+  background-repeat: no-repeat;
+  background-size: 32px; 
+}
+
+button.cdotBtn{
+  /* bottom: 40px; */
+  background-color: #1899f3 !important;
+  color: white;
+  height: 35px;
+  width: 100px;
+    
+  /* require to remove inherited attributes*/
+  box-shadow: none !important;
+  background-image: none !important;
+  font-weight: normal !important;
+  text-shadow: none !important;
+  font-size: 100% !important;
+}
+
+button.cdotBtn2 {
+  background-color: #1899f3 !important;
+  color: white;
+  height: 34px;
+  width: 34px;
+    
+  background-position: center;
+  
+  /* require to remove inherited attributes*/
+  box-shadow: none !important;
+  font-weight: normal !important;
+  text-shadow: none !important;
+  font-size: 100% !important;
+}
