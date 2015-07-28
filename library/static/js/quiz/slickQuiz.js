@@ -554,7 +554,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         // var questionIdFound = str.replace("#quiz_", "");
 
 
-<<<<<<< HEAD:library/static/js/slickQuiz.js
                 // Verify all/any true answers (and no false ones) were submitted
                 var correctResponse = plugin.method.compareAnswers(trueAnswers, selectedAnswers, selectAny);
 
