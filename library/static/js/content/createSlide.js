@@ -180,6 +180,9 @@ AVIATION.common.Slide.prototype = {
 
         if(slide.players[slide.activeIndex] && slide.players[slide.activeIndex].player){
           slide.players[slide.activeIndex].player.currentTime(0);
+          if(slide.panelPause){
+            slide.panelPause = false;
+          }
         }
       }
     };
@@ -947,6 +950,133 @@ AVIATION.common.Slide.prototype = {
     return counter;
   },
 
+/***
+  * NEW BUILD for BTNS/HGHLTS
+  **/
+  initActionables: function(){
+    "use strict";
+
+    var slide = this, action, $parent, objCount, possibleActions = {}, options = {};
+
+    possibleActions = {
+      "button": {
+        "enableOption": "enableButtons",
+        "arrayName": "buttons",
+        "elementArray": "buttonElements",
+        "container": "buttonContainer"
+      },
+      "highlight":{
+        "enableOption": "enableHighlights",
+        "arrayName": "highlights",
+        "elementArray": "highlightnElements",
+        "container": "highlightsContainer"
+      }
+    };
+
+    for(action in possibleActions){
+      if(possibleActions.hasOwnProperty(action)){
+        objCount = slide.slideElements[possibleActions[action].elementArray];
+        if( possibleActions[action].enableOption && slide[possibleActions[action].arrayName] && 
+              objCount > 0 && objCount !== slide.slideElements[possibleActions[action].elementArray] ){
+          switch(action){
+            case "button":
+              $parent = $(slide[possibleActions[action].container]);
+              options.element = '<a/>';
+              options.classes = "btn btn-default ";
+              options.dataToggle = "";
+              options.style = "";
+              options.role = "";
+              break;
+
+            case "highlight":
+              $parent = this.options.enablePanel ? $(slide.options.panelId) : $(slide.container + " > .cdot_contentText");
+              options.element = '<div/>';
+              options.classes = "clearClickable ";
+              options.dataToggle = "modal";
+              options.style = "top:" + this.highlights[highlight].top + 
+                               ";left:" + this.highlights[highlight].left +
+                               ";width:" + this.highlights[highlight].width +
+                               ";height:" + this.highlights[highlight].height +
+                               (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
+                               ";position:absolute" + 
+                               ";z-index:1;";
+              options.role = "button";              
+              break;
+
+            default:
+              console.log("unknown action inside initActionables");
+          }
+
+          if($parent && $parent.length < 1){
+            $parent = jQuery('<div/>',{
+              id: slide[possibleActions[action].container].split("#")[1],
+              class: "row"
+            }).appendTo(slide.container);
+          }
+
+          slide.buildActionables(action, possibleActions[action], $parent, options);
+        }
+      }
+    }
+  },
+  
+  executeAllCallbacks: function(event){
+    "use strict";
+
+    var callbacks = event.data.callbacks, i,
+        element = event.data.element,
+        slide = event.data.slide;
+        //content = slide.slideContent[slide.activeIndex];
+
+    for(i = 0; i < callbacks.length; i++){
+      if(callbacks[i] && typeof callbacks[i] === 'function'){
+        callbacks[i]();
+      }
+    }
+  },
+
+  buildActionables: function(action, obj, parent, options){
+    "use strict";
+
+    var act, slide = this, actions = slide[obj.arrayName], $action, callback;
+
+    for( act in actions ){
+      if(actions.hasOwnProperty(act)){
+      
+        $action = $("#" + act + "_" + action);
+
+        if( $action || $action.length < 1){
+          $action = jQuery(options.element,{
+            id: act + "_" + action,
+            class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
+            html: actions[act].title,
+            "data-toggle": options.dataToggle,
+            role: options.role,
+            style: options.style
+          }).appendTo(parent);
+
+          if(actions[act].action){
+            callback = [actions[act].action];  
+          } else {
+            callback = [];
+          }
+
+
+          if(callback && callback.length > 0){
+            $action.on('click', { callbacks: callback, element: { type: action, index: slide[obj.elementArray].length, slide: slide } }, 
+                          slide.checkAdvanceWith );
+          }
+
+          $action.data("action", callback);
+          slide[obj.elementArray].push($action);
+        }
+      }
+    }
+
+  },
+
+
+/**********
   initButtons: function(){
     "use strict";
 
@@ -1129,6 +1259,8 @@ AVIATION.common.Slide.prototype = {
     }
 
   },
+*****/
+
 
 
   initSlider: function(){
@@ -1317,12 +1449,12 @@ AVIATION.common.Slide.prototype = {
   initCSVParser: function(csvs, callback){
     "use strict";
 
-    var slide = this, i, rowNewData = {}, allFlight = [], myFlightIntVar, instrumentOptions = {}, csvPlayers = [], parsed = 0;
+    var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [], myFlightIntVar, instrumentOptions = {}, csvPlayers = [], parsed = 0, c;
 
     if(slide.options.enablePanel){
 
       var papaComplete = function(index) {
-        var data = {}, flight = this.result.data;
+        var data = {}, flight = this.result.data, i = this.index || 0;
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
@@ -1333,9 +1465,6 @@ AVIATION.common.Slide.prototype = {
         myFlightIntVar = setInterval(function(){
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
-            console.log(flight[i][28] * 57.3);
-            console.log(flight[i][31]);
-            console.log( (parseFloat(flight[i][28]) * 57.3 ) + (parseFloat(flight[i][31]) ) );
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
@@ -1391,9 +1520,9 @@ AVIATION.common.Slide.prototype = {
       };
 
       var papaCurrentLine = function(index){
-        i = index || i;
+        this.index = index || 0;
 
-        return i;
+        return this.index;
       };
 
       var papaCueLine = function(line, callback){
@@ -1416,9 +1545,9 @@ AVIATION.common.Slide.prototype = {
         }
       };
 
-      for(i=0; csvs && i < csvs.length; i++){
-        console.log("parsing: " + csvs[i].src);
-        Papa.parse(csvs[i].src, {
+      for(c=0; csvs && c < csvs.length; c++){
+        console.log("parsing: " + csvs[c].src);
+        Papa.parse(csvs[c].src, {
           config: {
             delimiter: "|",
             skipEmptyLines: true,
@@ -1505,7 +1634,7 @@ AVIATION.common.Slide.prototype = {
   activateTimer: function(seconds, isAuto){
     "use strict";
 
-    var timer = this._timer, slideObject = this, continueId = this.options.continueId,
+    var timer = this._timer, slideObject = this, continueId = slideObject.options.continueId,
         counter = seconds || 5, // duration of the timer (each 1 point is about a second)
         statusBar = this.slideElements.statusBar;
 
@@ -1804,48 +1933,19 @@ AVIATION.common.Slide.prototype = {
         if(content[i].media && content[i].media.type){
           if(!playerInitted[content[i].media.index]){
             slide.initGenericEvents(players[content[i].media.index].player, content[i], slide, i);
+            slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
             playerInitted[content[i].media.index] = true;
           } else {
             slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
           }
-          /*
-          switch(content[i].media.type){
-            case "audio":
-              console.log("its an audio");
-              console.log(content[i]);
-              console.log(playerInitted);
-              if(!playerInitted[content[i].media.index]){
-                slide.initAudioEvents(players[content[i].media.index].player, content[i], slide, i);
-                playerInitted[content[i].media.index] = true;
-              } else {
-                slide.initAudioCueEvents(players[content[i].media.index].player, content[i], slide, i);
-              }
-              break;
-            case "csv":
-              if(!playerInitted[content[i].media.index]){
-                slide.initCSVEvents(players[content[i].media.index].player, content[i], slide, i);
-                playerInitted[content[i].media.index] = true;
-              } else {
-                slide.initCSVCueEvents(players[content[i].media.index].player, content[i], slide, i);
-              }
-              break;
-            case "timer":
-              if(!playerInitted[content[i].media.index]){
-                slide.initTimerEvents(players[content[i].media.index].player, content[i], slide, i);
-              } else {
-                slide.initTimerCueEvents(players[content[i].media.index].player, content[i], slide, i);
-              }
-              break;
-            default:
-              console.log("unknown media type in content in initMediaEvents");
-          }
-          */
         }
       }
   },
 
   initGenericEvents: function(player, content, slide, index){
     "use strict";
+
+    console.log("INIT All Generic Events");
 
     switch(content.media.type){
       case "csv":
@@ -1854,7 +1954,6 @@ AVIATION.common.Slide.prototype = {
         player.on("ended", function(e){
           console.log("ended pop");
           console.log(player);
-          //player.off("ended");
           var data = {};
           data.element = {};
           data.element.type = "audio";
@@ -1881,6 +1980,9 @@ AVIATION.common.Slide.prototype = {
           console.log("timer paused");
         });
         break;
+      case "action":
+
+        break;
       default:
         console.log("unknown media type in generic events");
     }
@@ -1892,7 +1994,7 @@ AVIATION.common.Slide.prototype = {
     
     var hasListened = slide.slideHasListened, callbackAtBeginning = "", contentAtStart = "";
 
-    console.log("INIT ALL EVENTs HERE!!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    console.log("INIT ALL CUED EVENTs HERE!");
     console.log(player);
 
     switch(content.media.type){
@@ -2525,7 +2627,6 @@ AVIATION.common.Slide.prototype = {
               close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
             }
           },
-          continueId: "",
           highlights: 
           [
             { // #1
