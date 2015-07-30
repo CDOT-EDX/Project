@@ -956,7 +956,7 @@ AVIATION.common.Slide.prototype = {
   **/
   initActionables: function(){
     "use strict";
-
+    console.log("trying to make buttons highlights");
     var slide = this, action, $parent, objCount, possibleActions = {}, options = {};
 
     possibleActions = {
@@ -969,17 +969,27 @@ AVIATION.common.Slide.prototype = {
       "highlight":{
         "enableOption": "enableHighlights",
         "arrayName": "highlights",
-        "elementArray": "highlightnElements",
+        "elementArray": "highlightElements",
         "container": "highlightsContainer"
       }
     };
 
     for(action in possibleActions){
       if(possibleActions.hasOwnProperty(action)){
-        objCount = slide.slideElements[possibleActions[action].elementArray];
-        if( possibleActions[action].enableOption && slide[possibleActions[action].arrayName] && 
-              objCount > 0 && objCount !== slide.slideElements[possibleActions[action].elementArray] ){
+        objCount = slide.countObjectLength(slide[possibleActions[action].arrayName]);
+
+        console.log("action1");
+        console.log(slide.options[possibleActions[action].enableOption]);
+        console.log(slide[possibleActions[action].arrayName]);
+        console.log(objCount);
+        console.log(slide.slideElements[possibleActions[action].elementArray].length);
+
+        if( slide.options[possibleActions[action].enableOption] && slide[possibleActions[action].arrayName] && 
+              objCount > 0 && objCount !== slide.slideElements[possibleActions[action].elementArray].length ){
+          console.log("action!!");
+          console.log(action);
           switch(action){
+
             case "button":
               $parent = $(slide[possibleActions[action].container]);
               options.element = '<a/>';
@@ -994,13 +1004,6 @@ AVIATION.common.Slide.prototype = {
               options.element = '<div/>';
               options.classes = "clearClickable ";
               options.dataToggle = "modal";
-              options.style = "top:" + this.highlights[highlight].top + 
-                               ";left:" + this.highlights[highlight].left +
-                               ";width:" + this.highlights[highlight].width +
-                               ";height:" + this.highlights[highlight].height +
-                               (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
-                               ";position:absolute" + 
-                               ";z-index:1;";
               options.role = "button";              
               break;
 
@@ -1040,10 +1043,20 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var act, slide = this, actions = slide[obj.arrayName], $action, callback;
-
+    console.log("building actionables");
+    console.log(action);
     for( act in actions ){
       if(actions.hasOwnProperty(act)){
-      
+        if(action === 'highlight'){
+          options.style = "top:" + slide.highlights[act].top + 
+                   ";left:" + this.highlights[act].left +
+                   ";width:" + this.highlights[act].width +
+                   ";height:" + this.highlights[act].height +
+                   (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[act].border + ";cursor:pointer") ) + 
+                   ";position:absolute" + 
+                   ";z-index:1;";          
+        }
+
         $action = $("#" + act + "_" + action);
 
         if( $action || $action.length < 1){
@@ -1064,12 +1077,12 @@ AVIATION.common.Slide.prototype = {
 
 
           if(callback && callback.length > 0){
-            $action.on('click', { callbacks: callback, element: { type: action, index: slide[obj.elementArray].length, slide: slide } }, 
+            $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide[obj.elementArray]), slide: slide } }, 
                           slide.checkAdvanceWith );
           }
 
           $action.data("action", callback);
-          slide[obj.elementArray].push($action);
+          slide.slideElements[obj.elementArray].push($action);
         }
       }
     }
@@ -2633,8 +2646,8 @@ AVIATION.common.Slide.prototype = {
             }
           },
           highlights: 
-          [
-            { // #1
+          {
+            "ai":{ // #1
               id: "ai",
               orderNumber: 0,
               name: "Attitude Indicator (AI)",
@@ -2647,7 +2660,7 @@ AVIATION.common.Slide.prototype = {
               height: "44%",
               border : "7px ridge yellow",
             }, 
-            { // #2
+            "alt":{ // #2
               id: "alt",
               orderNumber: 1,
               name: "Altimeter (ALT)",
@@ -2660,7 +2673,7 @@ AVIATION.common.Slide.prototype = {
               height: "44%",
               border : "7px ridge yellow",                            
             },
-            { // #3
+            "hi":{ // #3
               id: "hi",
               orderNumber: 2,
               name: "Heading Indicator (HI)",
@@ -2673,7 +2686,7 @@ AVIATION.common.Slide.prototype = {
               height: "44%",
               border : "7px ridge yellow",                            
             },
-            { // #4
+            "asi":{ // #4
               id: "asi",
               orderNumber: 3,
               name: "Airspeed Indicator (ASI)",
@@ -2686,7 +2699,7 @@ AVIATION.common.Slide.prototype = {
               height: "44%",
               border : "7px ridge yellow",                            
             },
-            { // #5
+            "vsi":{ // #5
               id: "vsi",
               orderNumber: 4,
               name: "Vertical Speed Indicator (VSI)",
@@ -2699,7 +2712,7 @@ AVIATION.common.Slide.prototype = {
               height: "44%",
               border : "7px ridge yellow",
             },
-            { // #6
+            "tc":{ // #6
               id: "tc",
               orderNumber: 5,
               name: "Turn Coordinator (TC)",
@@ -2712,7 +2725,7 @@ AVIATION.common.Slide.prototype = {
               height: "44%",
               border : "7px ridge yellow",                            
             },
-          ]}, option;
+          }}, option;
 
     if(!options){
       options = this.options || {};
