@@ -37,7 +37,7 @@ AVIATION.common.Player = function(){
 };
 */
 // begin a javascript class "Slide"
-AVIATION.common.Slide = function (options, slideContent, mediaFiles) {
+AVIATION.common.Slide = function (options, slideContent, mediaFiles, parentSlide) {
   "use strict";
   //var md = new MobileDetect(window.navigator.userAgent);
 
@@ -62,6 +62,7 @@ AVIATION.common.Slide = function (options, slideContent, mediaFiles) {
 
     console.log("options before constructor");
     this.options = options;
+    this.parentSlide = parentSlide;
     //this.constructor(options);
   }
 
@@ -2045,7 +2046,9 @@ AVIATION.common.Slide.prototype = {
         }
         break;
       case "audio":
+        // if the settings are specified
         if(content.media && content.media.second){
+          // check if the settings are a number or a string for 'end'
           player.cue(content.media.second, function(){
             slide.buildContent(true, index);
 
@@ -2576,6 +2579,7 @@ AVIATION.common.Slide.prototype = {
         class: "cdot_quiz",
         html: "<h1 class='quizName'><!-- where the quiz name goes --></h1><div class='quizArea'><div class='quizHeader'><!-- where the quiz main copy goes --><a class='button startQuiz' href='#'>Get Started!</a></div><!-- where the quiz gets built --></div><div class='quizResults'><h3 class='quizScore'>You Scored: <span><!-- where the quiz score goes --></span></h3><h3 class='quizLevel'><!--<strong>Ranking:</strong>--> <span><!-- where the quiz ranking level goes --></span></h3><div class='quizResultsCopy'><!-- where the quiz result copy goes --></div></div>",
       }).appendTo(this.options.quizId);
+      quizzes[i].slide = slide.parentSlide;
       tempElement.slickQuiz(quizzes[i]);
       console.log("quizzes at " + i);
       console.log(quizzes[i]);
