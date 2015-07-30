@@ -575,7 +575,7 @@ AVIATION.common.Slide.prototype = {
 
         // and the buttons
         //checkSlideButtons(slideContent.buttons, slide);
-
+        slide.checkHideShowActions(slideContent, slide);
         // let's switch the slider if needed
         slide.setSlider(slideContent);
 
@@ -971,6 +971,12 @@ AVIATION.common.Slide.prototype = {
         "arrayName": "highlights",
         "elementArray": "highlightElements",
         "container": "highlightsContainer"
+      },
+      "quiz": {
+        "enableOption": "enableQuizzes",
+        "arrayName": "quizzes",
+        "elementArray": "quizElements",
+        "container": "quizId"
       }
     };
 
@@ -991,6 +997,7 @@ AVIATION.common.Slide.prototype = {
           switch(action){
 
             case "button":
+
               $parent = $(slide[possibleActions[action].container]);
               options.element = '<a/>';
               options.classes = "btn btn-default ";
@@ -1007,6 +1014,10 @@ AVIATION.common.Slide.prototype = {
               options.role = "button";              
               break;
 
+            case "quiz":
+
+              break;
+
             default:
               console.log("unknown action inside initActionables");
           }
@@ -1020,6 +1031,7 @@ AVIATION.common.Slide.prototype = {
 
           slide.buildActionables(action, possibleActions[action], $parent, options);
         }
+        slide.elementsToShow[action] = [];
       }
     }
   },
@@ -2597,7 +2609,8 @@ AVIATION.common.Slide.prototype = {
       console.log("quizzes at " + i);
       console.log(quizzes[i]);
       quizElements.push(tempElement);
-      console.log(quizElements[i]);
+      tempElement.hide();
+      //console.log(quizElements[i]);
     }
 
     this.slideElements.quizElements = quizElements;
@@ -2766,6 +2779,8 @@ AVIATION.common.Slide.prototype = {
 
     this.slideTimer = -1;
 
+    this.elementsToShow = {};
+
     this.slideContent = this.options.slideContent ||  [
                                                         { 
                                                           title: "No Content Provided",
@@ -2784,6 +2799,7 @@ AVIATION.common.Slide.prototype = {
     this.slideElements.highlightElements = [];
     this.slideElements.buttonElements = [];
     this.slideElements.instrumentElements = [];
+    this.slideElements.quizElements = [];
 
     this.avatars = options.avatars;
     this.highlights = options.highlights;
@@ -2820,10 +2836,69 @@ AVIATION.common.Slide.prototype = {
   checkHideShowActions: function(slideContent, slide){
     "use strict";
 
-    var possibleActions = [ "buttons", "highlights", "quiz"];
+    var possibleActions = { 
+          "buttons": "buttonElements", 
+          "highlights": "highlightElements", 
+          "quiz":"quizElements" 
+        }, action, toShowBtn = [], toShowHighlights = [], toShowQuiz = [], i;
 
+    for(action in slideContent){
+      if(slideContent.hasOwnProperty(action)){
+        for(i; i < slideContent[action].length; i++){
+          switch(action){
+            case "buttons":
+
+              break;
+            case "highlights":
+              break;
+            case "quiz":
+              break;
+            default:
+              console.log("another slideContent action we are ignoring inside checkHideShowActions");
+          }
+          if(typeof slideContent[action][i] === "object"){
+            slide.elementsToShow[action][slideContent[action][i].index] = true;
+            //toShow[showButtons[j].index] = true;
+          } else {
+            slide.elementsToShow[action][slideContent[action][i]] = true;
+            //toShow[showButtons[j]] = true;  
+          }
+        }
+      }
+    }
+
+    for(action in possibleActions){
+      if(possibleActions.hasOwnProperty(action)){
+        for(i=0; slide.elementsToShow[action] && i < slide.elementsToShow[action].length; i++){
+          if(slide.elementsToShow[action][i]){
+            //show this one
+            slide.slideElements[possibleActions[action]][i].show();
+          } else {
+            //hide this one
+            slide.slideElements[possibleActions[action]][i].show();
+          }
+        }
+      }
+    }
 
   },
+
+  /*
+
+  quizElements
+        "button": {
+        "enableOption": "enableButtons",
+        "arrayName": "buttons",
+        "elementArray": "buttonElements",
+        "container": "buttonContainer"
+      },
+      "highlight":{
+        "enableOption": "enableHighlights",
+        "arrayName": "highlights",
+        "elementArray": "highlightElements",
+        "container": "highlightsContainer"
+      }
+  */
 
   checkSlideButtons: function( showButtons, slide ){
     "use strict";
