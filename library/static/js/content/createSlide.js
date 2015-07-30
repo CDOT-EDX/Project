@@ -518,8 +518,8 @@ AVIATION.common.Slide.prototype = {
   // method for building the content of the slide
   buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback){
     "use strict";
-    var outerSlideContent = this.slideContent, checkSlideHighlights = this.checkSlideHighlights, slide = this,
-        highlightsAddOnClick = [], buttonsAddOnClick = [], checkSlideButtons = this.checkSlideButtons, localClass,
+    var outerSlideContent = this.slideContent, /*checkSlideHighlights = this.checkSlideHighlights*/ slide = this,
+        highlightsAddOnClick = [], buttonsAddOnClick = [], /*checkSlideButtons = this.checkSlideButtons*/ localClass,
         activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
     outerIndex = this.activeIndex || 0;
@@ -550,13 +550,13 @@ AVIATION.common.Slide.prototype = {
     
     // console.log("and the contentainer after?");
     // console.log(contentContainer);
-    highlightsAddOnClick = this.initHighlights();
-    this.buildHighlights(activeIndex, highlightsAddOnClick);
-
-    buttonsAddOnClick = this.initButtons();
-    console.log("buttons ADD ON CLICK!");
-    console.log(buttonsAddOnClick);
-    this.buildButtons(activeIndex, buttonsAddOnClick);
+    // highlightsAddOnClick = this.initHighlights();
+    // this.buildHighlights(activeIndex, highlightsAddOnClick);
+    slide.initActionables();
+    // buttonsAddOnClick = this.initButtons();
+    // console.log("buttons ADD ON CLICK!");
+    // console.log(buttonsAddOnClick);
+    // this.buildButtons(activeIndex, buttonsAddOnClick);
 
     setupInnerContent = function(classSize, callback){
       var slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
@@ -571,10 +571,10 @@ AVIATION.common.Slide.prototype = {
         }
 
         // lets take care of our highlights
-        checkSlideHighlights(slideContent.highlights, slide);
+        //checkHideShowActions(slideContent, slide);
 
         // and the buttons
-        checkSlideButtons(slideContent.buttons, slide);
+        //checkSlideButtons(slideContent.buttons, slide);
 
         // let's switch the slider if needed
         slide.setSlider(slideContent);
@@ -2579,7 +2579,7 @@ AVIATION.common.Slide.prototype = {
         class: "cdot_quiz",
         html: "<h1 class='quizName'><!-- where the quiz name goes --></h1><div class='quizArea'><div class='quizHeader'><!-- where the quiz main copy goes --><a class='button startQuiz' href='#'>Get Started!</a></div><!-- where the quiz gets built --></div><div class='quizResults'><h3 class='quizScore'>You Scored: <span><!-- where the quiz score goes --></span></h3><h3 class='quizLevel'><!--<strong>Ranking:</strong>--> <span><!-- where the quiz ranking level goes --></span></h3><div class='quizResultsCopy'><!-- where the quiz result copy goes --></div></div>",
       }).appendTo(this.options.quizId);
-      quizzes[i].slide = slide.parentSlide;
+      quizzes[i].slide = $.isEmptyObject(slide.parentSlide) ? slide : slide.parentSlide;
       tempElement.slickQuiz(quizzes[i]);
       console.log("quizzes at " + i);
       console.log(quizzes[i]);
@@ -2802,6 +2802,14 @@ AVIATION.common.Slide.prototype = {
       this.container = "#slideContainer"
     };
     */
+  },
+
+  checkHideShowActions: function(slideContent, slide){
+    "use strict";
+
+    var possibleActions = [ "buttons", "highlights", "quiz"];
+
+
   },
 
   checkSlideButtons: function( showButtons, slide ){
