@@ -2595,6 +2595,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     var avatars, content = [], audio = [],
         defaults = {
+          parentSlide: {},
           showAvatars: false,
           showSlideControls: true,
           showStatus: true,
@@ -2728,6 +2729,8 @@ AVIATION.common.Slide.prototype = {
 
     // init neccessary variables
     this.slideStates = [];
+
+    this.parentSlide = options.parentSlide || {};
 
     this.extraStates = [];
 
