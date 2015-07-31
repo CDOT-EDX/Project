@@ -960,13 +960,13 @@ AVIATION.common.Slide.prototype = {
     var slide = this, action, $parent, objCount, possibleActions = {}, options = {};
 
     possibleActions = {
-      "button": {
+      "buttons": {
         "enableOption": "enableButtons",
         "arrayName": "buttons",
         "elementArray": "buttonElements",
         "container": "buttonContainer"
       },
-      "highlight":{
+      "highlights":{
         "enableOption": "enableHighlights",
         "arrayName": "highlights",
         "elementArray": "highlightElements",
@@ -990,13 +990,15 @@ AVIATION.common.Slide.prototype = {
         console.log(objCount);
         console.log(slide.slideElements[possibleActions[action].elementArray].length);
 
+        //slide.elementsToShow[action] = slide.elementsToShow[action] || [];
+
         if( slide.options[possibleActions[action].enableOption] && slide[possibleActions[action].arrayName] && 
               objCount > 0 && objCount !== slide.slideElements[possibleActions[action].elementArray].length ){
           console.log("action!!");
           console.log(action);
           switch(action){
 
-            case "button":
+            case "buttons":
 
               $parent = $(slide[possibleActions[action].container]);
               options.element = '<a/>';
@@ -1006,7 +1008,7 @@ AVIATION.common.Slide.prototype = {
               options.role = "";
               break;
 
-            case "highlight":
+            case "highlights":
               $parent = this.options.enablePanel ? $(slide.options.panelId) : $(slide.container + " > .cdot_contentText");
               options.element = '<div/>';
               options.classes = "clearClickable ";
@@ -1028,10 +1030,10 @@ AVIATION.common.Slide.prototype = {
               class: "row"
             }).appendTo(slide.container);
           }
+  
 
           slide.buildActionables(action, possibleActions[action], $parent, options);
         }
-        slide.elementsToShow[action] = [];
       }
     }
   },
@@ -1059,7 +1061,7 @@ AVIATION.common.Slide.prototype = {
     console.log(action);
     for( act in actions ){
       if(actions.hasOwnProperty(act)){
-        if(action === 'highlight'){
+        if(action === 'highlights'){
           options.style = "top:" + slide.highlights[act].top + 
                    ";left:" + this.highlights[act].left +
                    ";width:" + this.highlights[act].width +
@@ -1094,6 +1096,7 @@ AVIATION.common.Slide.prototype = {
           }
 
           $action.data("action", callback);
+          slide.elementsToShow[action].push(false);
           slide.slideElements[obj.elementArray].push($action);
         }
       }
@@ -2779,7 +2782,7 @@ AVIATION.common.Slide.prototype = {
 
     this.slideTimer = -1;
 
-    this.elementsToShow = {};
+    this.elementsToShow = { "buttons": [], "highlights": [], "quiz": [] };
 
     this.slideContent = this.options.slideContent ||  [
                                                         { 
@@ -2842,9 +2845,15 @@ AVIATION.common.Slide.prototype = {
           "quiz":"quizElements" 
         }, action, toShowBtn = [], toShowHighlights = [], toShowQuiz = [], i;
 
-    for(action in slideContent){
-      if(slideContent.hasOwnProperty(action)){
-        for(i; i < slideContent[action].length; i++){
+    for(action in possibleActions){
+      if( possibleActions.hasOwnProperty(action) ){
+        for(i=0; i < slide.slideElements[possibleActions[action]].length; i++){
+          slide.elementsToShow[action][i] = false;
+        }
+      }
+      
+      if(slideContent.hasOwnProperty(action) && possibleActions.hasOwnProperty(action)){
+        for(i = 0; slideContent[action] &&  i < slideContent[action].length; i++){
           switch(action){
             case "buttons":
 
@@ -2856,7 +2865,7 @@ AVIATION.common.Slide.prototype = {
             default:
               console.log("another slideContent action we are ignoring inside checkHideShowActions");
           }
-          if(typeof slideContent[action][i] === "object"){
+          if(typeof slideContent[action][i] === "object" ){
             slide.elementsToShow[action][slideContent[action][i].index] = true;
             //toShow[showButtons[j].index] = true;
           } else {
@@ -2869,22 +2878,20 @@ AVIATION.common.Slide.prototype = {
 
     for(action in possibleActions){
       if(possibleActions.hasOwnProperty(action)){
-        for(i=0; slide.elementsToShow[action] && i < slide.elementsToShow[action].length; i++){
+        for(i=0; i < slide.elementsToShow[action].length; i++){
           if(slide.elementsToShow[action][i]){
             //show this one
             slide.slideElements[possibleActions[action]][i].show();
           } else {
             //hide this one
-            slide.slideElements[possibleActions[action]][i].show();
+            slide.slideElements[possibleActions[action]][i].hide();
           }
         }
       }
     }
-
   },
 
   /*
-
   quizElements
         "button": {
         "enableOption": "enableButtons",
