@@ -1084,10 +1084,12 @@ AVIATION.common.Slide.prototype = {
           }).appendTo(parent);
 
           if(actions[act].action){
-            callback = [actions[act].action];  
+            callback = [actions[act].action];
           } else {
             callback = [];
           }
+
+
 
 
           if(callback && callback.length > 0){
@@ -1099,6 +1101,7 @@ AVIATION.common.Slide.prototype = {
           slide.elementsToShow[action].push(false);
           slide.slideElements[obj.elementArray].push($action);
         }
+
       }
     }
 
@@ -2854,17 +2857,6 @@ AVIATION.common.Slide.prototype = {
       
       if(slideContent.hasOwnProperty(action) && possibleActions.hasOwnProperty(action)){
         for(i = 0; slideContent[action] &&  i < slideContent[action].length; i++){
-          switch(action){
-            case "buttons":
-
-              break;
-            case "highlights":
-              break;
-            case "quiz":
-              break;
-            default:
-              console.log("another slideContent action we are ignoring inside checkHideShowActions");
-          }
           if(typeof slideContent[action][i] === "object" ){
             slide.elementsToShow[action][slideContent[action][i].index] = true;
             //toShow[showButtons[j].index] = true;
@@ -2891,22 +2883,7 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  /*
-  quizElements
-        "button": {
-        "enableOption": "enableButtons",
-        "arrayName": "buttons",
-        "elementArray": "buttonElements",
-        "container": "buttonContainer"
-      },
-      "highlight":{
-        "enableOption": "enableHighlights",
-        "arrayName": "highlights",
-        "elementArray": "highlightElements",
-        "container": "highlightsContainer"
-      }
-  */
-
+/*
   checkSlideButtons: function( showButtons, slide ){
     "use strict";
     var i, j, toShow = [], button;
@@ -2973,6 +2950,6 @@ AVIATION.common.Slide.prototype = {
       }
     }
   }
-
+*/
 };
 console.log("testing this class execution");
