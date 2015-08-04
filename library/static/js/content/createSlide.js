@@ -1967,7 +1967,9 @@ AVIATION.common.Slide.prototype = {
       console.log(content);
 
       for(i = 0; i < content.length; i++){
-        if(content[i].media && content[i].media.type){
+        if(content[i].media && content[i].media.type && 
+            (content[i].media.type !== "button" || content[i].media.type !== "highlight") ){
+          // case for audio, csv, timer
           if(!playerInitted[content[i].media.index]){
             slide.initGenericEvents(players[content[i].media.index].player, content[i], slide, i);
             slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
@@ -1975,6 +1977,15 @@ AVIATION.common.Slide.prototype = {
           } else {
             slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
           }
+
+        } else {
+          // case for btn, hlight
+          console.log("the media event should be a btn/hlight");
+          // for content.media.type
+          // get the proper array of slideElements 
+          // attach the buildContent callback to be added to their array of onclicks/callbacks
+          // and add it to the existing data("action") of the element
+          //
         }
       }
   },
