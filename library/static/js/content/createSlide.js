@@ -938,9 +938,11 @@ AVIATION.common.Slide.prototype = {
         //   $(slide).trigger("play");
         // }
       }
-    } else {
+    } else if (content.advanceWith) {
       //$(slide).trigger("next");
       console.log("wrong advanceWith, waiting for correcet input");
+    } else {
+      $(slide).trigger("next");
     }
   },
 
@@ -2663,11 +2665,11 @@ AVIATION.common.Slide.prototype = {
           advanceWith: "audio",
           panelId: "#flightInstruments",
           pulseProperties: {
-            color: "blue"
+            backgroundColor: "blue"
           },
           pulseSettings: {
-            duration: 3000,
-            pulses: 5
+            duration: 2000,
+            pulses: 3
           },
           instrumentIds: {
             airspeed: "airspeed",
