@@ -312,13 +312,13 @@ AVIATION.common.Slide.prototype = {
         }
         
         if(headerElement && headerElement.length > 0){
-          headerElement.replaceWith(newHeader);
+          headerElement.replaceWith(newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings));
           console.log("replace the header");
         } else {
           console.log("append the header");
           console.log(newHeader);
           console.log(parent);
-          newHeader.prependTo(slide.container);
+          newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings).prependTo(slide.container);
         }
       }
 
