@@ -925,17 +925,21 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("next");
         } else {
           slide.setStatus("Nope, that's wrong. Try again");
+          console.log("wrong advance index, waiting for correcet input");
           // TODO: set status to wrong / retry
         }
       } else {
-        try{
-          $(slide).trigger("next");
-        } catch (err){
-          $(slide).trigger("play");
-        }
+        console.log("no index on advance with, advancing...");
+        $slide.trigger("next");
+        // try{
+        //   $(slide).trigger("next");
+        // } catch (err){
+        //   $(slide).trigger("play");
+        // }
       }
     } else {
-      $(slide).trigger("next");
+      //$(slide).trigger("next");
+      console.log("wrong advanceWith, waiting for correcet input");
     }
   },
 
