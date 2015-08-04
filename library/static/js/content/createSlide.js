@@ -628,7 +628,7 @@ AVIATION.common.Slide.prototype = {
           if(innerImage){
             innerImage.appendTo(newSlideInner);
           }
-          newSlideInner.appendTo(contentContainer);
+          newSlideInner.appendTo(contentContainer)/*---------test-------------*/.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
         }
       } else {
         slideInner.children().remove();

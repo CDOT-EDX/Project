@@ -15,6 +15,7 @@ This branch is for combining front-end libraries and features used in the edX/Av
             Original: https://github.com/sebmatton/jQuery-Flight-Indicators
     JS CSV Parser (PapaParse): http://papaparse.com/
     Resize Detection (CSS Element Queries): https://github.com/marcj/css-element-queries
+	jQuery Pulse Animation Plugin: https://github.com/jsoverson/jquery.pulse.js
 
 
 ## Slide Creation Library for the internal use of the edX team at CDOT
