@@ -909,6 +909,7 @@ AVIATION.common.Slide.prototype = {
 
     console.log("event.data");
     console.log(callback);
+    console.log("CHECKING ADVANCE WITH!");
 
     for(c=0; callback && c < callback.length; c++){
       if(typeof callback[c] === 'function'){
@@ -930,7 +931,7 @@ AVIATION.common.Slide.prototype = {
         }
       } else {
         console.log("no index on advance with, advancing...");
-        $slide.trigger("next");
+        $(slide).trigger("next");
         // try{
         //   $(slide).trigger("next");
         // } catch (err){
@@ -964,13 +965,13 @@ AVIATION.common.Slide.prototype = {
     var slide = this, action, $parent, objCount, possibleActions = {}, options = {};
 
     possibleActions = {
-      "buttons": {
+      "button": {
         "enableOption": "enableButtons",
         "arrayName": "buttons",
         "elementArray": "buttonElements",
         "container": "buttonContainer"
       },
-      "highlights":{
+      "highlight":{
         "enableOption": "enableHighlights",
         "arrayName": "highlights",
         "elementArray": "highlightElements",
@@ -1002,7 +1003,7 @@ AVIATION.common.Slide.prototype = {
           console.log(action);
           switch(action){
 
-            case "buttons":
+            case "button":
 
               $parent = $(slide[possibleActions[action].container]);
               options.element = '<a/>';
@@ -1012,7 +1013,7 @@ AVIATION.common.Slide.prototype = {
               options.role = "";
               break;
 
-            case "highlights":
+            case "highlight":
               $parent = this.options.enablePanel ? $(slide.options.panelId) : $(slide.container + " > .cdot_contentText");
               options.element = '<div/>';
               options.classes = "clearClickable ";
@@ -1065,7 +1066,7 @@ AVIATION.common.Slide.prototype = {
     console.log(action);
     for( act in actions ){
       if(actions.hasOwnProperty(act)){
-        if(action === 'highlights'){
+        if(action === 'highlight'){
           options.style = "top:" + slide.highlights[act].top + 
                    ";left:" + this.highlights[act].left +
                    ";width:" + this.highlights[act].width +
@@ -1096,10 +1097,10 @@ AVIATION.common.Slide.prototype = {
 
 
 
-          if(callback && callback.length > 0){
-            $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide[obj.elementArray]), slide: slide } }, 
-                          slide.checkAdvanceWith );
-          }
+          //if(callback && callback.length > 0){
+          $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide[obj.elementArray]) }, slide: slide }, 
+                        slide.checkAdvanceWith );
+          //}
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
@@ -2650,6 +2651,13 @@ AVIATION.common.Slide.prototype = {
           quizId: "#slideQuiz",
           advanceWith: "audio",
           panelId: "#flightInstruments",
+          pulseProperties: {
+            color: "blue"
+          },
+          pulseSettings: {
+            duration: 3000,
+            pulses: 5
+          },
           instrumentIds: {
             airspeed: "airspeed",
             attitude: "attitude",
@@ -2789,7 +2797,7 @@ AVIATION.common.Slide.prototype = {
 
     this.slideTimer = -1;
 
-    this.elementsToShow = { "buttons": [], "highlights": [], "quiz": [] };
+    this.elementsToShow = { "button": [], "highlight": [], "quiz": [] };
 
     this.slideContent = this.options.slideContent ||  [
                                                         { 
@@ -2847,25 +2855,34 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var possibleActions = { 
-          "buttons": "buttonElements", 
-          "highlights": "highlightElements", 
-          "quiz":"quizElements" 
+          "button": {
+            "elements": "buttonElements",
+            "mult": "buttons"
+          }, 
+          "highlight": {
+            "elements" : "highlightElements",
+            "mult" : "highlights"
+          }, 
+          "quiz": {
+            "elements" : "quizElements",
+            "mult": "quiz"
+          } 
         }, action, toShowBtn = [], toShowHighlights = [], toShowQuiz = [], i;
 
     for(action in possibleActions){
       if( possibleActions.hasOwnProperty(action) ){
-        for(i=0; i < slide.slideElements[possibleActions[action]].length; i++){
+        for(i=0; i < slide.slideElements[possibleActions[action].elements].length; i++){
           slide.elementsToShow[action][i] = false;
         }
       }
       
-      if(slideContent.hasOwnProperty(action) && possibleActions.hasOwnProperty(action)){
-        for(i = 0; slideContent[action] &&  i < slideContent[action].length; i++){
-          if(typeof slideContent[action][i] === "object" ){
-            slide.elementsToShow[action][slideContent[action][i].index] = true;
+      if(slideContent.hasOwnProperty(possibleActions[action].mult) && possibleActions.hasOwnProperty(action)){
+        for(i = 0; slideContent[possibleActions[action].mult] &&  i < slideContent[possibleActions[action].mult].length; i++){
+          if(typeof slideContent[possibleActions[action].mult][i] === "object" ){
+            slide.elementsToShow[action][slideContent[possibleActions[action].mult].index] = true;
             //toShow[showButtons[j].index] = true;
           } else {
-            slide.elementsToShow[action][slideContent[action][i]] = true;
+            slide.elementsToShow[action][slideContent[possibleActions[action].mult][i]] = true;
             //toShow[showButtons[j]] = true;  
           }
         }
@@ -2877,10 +2894,10 @@ AVIATION.common.Slide.prototype = {
         for(i=0; i < slide.elementsToShow[action].length; i++){
           if(slide.elementsToShow[action][i]){
             //show this one
-            slide.slideElements[possibleActions[action]][i].show();
+            slide.slideElements[possibleActions[action].elements][i].show();
           } else {
             //hide this one
-            slide.slideElements[possibleActions[action]][i].hide();
+            slide.slideElements[possibleActions[action].elements][i].hide();
           }
         }
       }
