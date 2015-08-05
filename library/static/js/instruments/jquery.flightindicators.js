@@ -298,22 +298,22 @@ Published under GPLv3 License.
 			});
 		}
 
-		// Public methods
-		this.setAirSpeed = function(speed){_setAirSpeed(speed);}
-		this.setRoll = function(roll){_setRoll(roll);}
-		this.setPitch = function(pitch){_setPitch(pitch);}
-		this.setOffFlag = function(visible){_setOffFlag(visible);}
-		this.setAltitude = function(altitude){_setAltitude(altitude);}
-		this.setPressure = function(pressure, milibar){_setPressure(pressure, milibar);}
-		this.setTurn = function(turn){_setTurn(turn);}
-		this.setSlip = function(slip){_setSlip(slip);}
-		this.setHeading = function(heading){_setHeading(heading);}
-		this.setBeaconOne = function(heading, visible){_setBeaconOne(heading, visible);}
-		this.setBeaconTwo = function(heading, visible){_setBeaconTwo(heading, visible);}
-		this.setVario = function(vario){_setVario(vario);}
-		this.resize = function(size){_resize(size);}
-		this.toggleBox = function(toggle){_toggleBox(toggle);}
-		this.toggleScrews = function(toggle){_toggleScrews(toggle);}
+        // Public methods
+        this.setAirSpeed =  function(options){ var test = options.airSpeed    ; if(test !== undefined) _setAirSpeed(test);};
+        this.setRoll =      function(options){ var test = options.roll        ; if(test !== undefined) _setRoll(test);};
+        this.setPitch =     function(options){ var test = options.pitch       ; if(test !== undefined) _setPitch(test);};
+        this.setOffFlag =   function(options){ var test = options.offFlag     ; if(test !== undefined) _setOffFlag(test);};
+        this.setAltitude =  function(options){ var test = options.altitude    ; if(test !== undefined) _setAltitude(test);};
+        this.setPressure =  function(options){ var test = options.pressure    ; if(test !== undefined) _setPressure(test);};
+        this.setTurn =      function(options){ var test = options.turnRate    ; if(test !== undefined) _setTurn(test);};
+        this.setSlip =      function(options){ var test = options.yaw         ; if(test !== undefined) _setSlip(test);};
+        this.setHeading =   function(options){ var test = options.heading     ; if(test !== undefined) _setHeading(test);};
+        this.setBeaconOne = function(options){ var test = options.beaconOne   ; if(test !== undefined) _setBeaconOne(test);};
+        this.setBeaconTwo = function(options){ var test = options.beaconTwo   ; if(test !== undefined) _setBeaconTwo(test);};
+        this.setVario =     function(options){ var test = options.vario       ; if(test !== undefined) _setVario(test);};
+        this.resize =       function(options){ var test = options.resize      ; if(test !== undefined) _resize(test);};
+        this.toggleBox =    function(options){ var test = options.toggleBox   ; if(test !== undefined) _toggleBox(test);};
+        this.toggleScrews = function(options){ var test = options.toggleScrews; if(test !== undefined) _toggleScrews(test);};
 
 		return built;
 	};

@@ -902,8 +902,8 @@ AVIATION.common.Slide.prototype = {
   checkAdvanceWith: function(event){
     "use strict";
 
-    var callback = event.data.onclick, c,
-        element = event.data.element,
+    var onclick = event.data.onclick, callback = event.data.callbacks, c,
+        element = event.data.element, onSuccess = event.data.onSuccess,
         slide = event.data.slide,
         content = slide.slideContent[slide.activeIndex];
 
@@ -911,18 +911,32 @@ AVIATION.common.Slide.prototype = {
     console.log(callback);
     console.log("CHECKING ADVANCE WITH!");
 
+    for(c=0; onclick && c < onclick.length; c++){
+      if(typeof onclick[c] === 'function'){
+        onclick[c]();
+      }
+    }
+
     for(c=0; callback && c < callback.length; c++){
       if(typeof callback[c] === 'function'){
         callback[c]();
       }
     }
 
-    console.log("inside advanceWith: " + content);
+    console.log("inside advanceWith: ");
+
+    console.log("expected advanceWith...");
+    console.log(content.advanceWith);
+    console.log("actual element");
+    console.log(element);
 
     if(content.advanceWith && content.advanceWith.type === element.type){
       // TODO: check if audio has completed
-      if(content.advanceWith.index){
+      if(typeof content.advanceWith.index !== undefined){
         if(content.advanceWith.index === element.index){
+          if(onSuccess && typeof onSuccess === 'function'){
+            onSuccess();
+          }
           $(slide).trigger("next");
         } else {
           slide.setStatus("Nope, that's wrong. Try again");
@@ -940,6 +954,8 @@ AVIATION.common.Slide.prototype = {
       }
     } else if (content.advanceWith) {
       //$(slide).trigger("next");
+
+
       console.log("wrong advanceWith, waiting for correcet input");
     } else {
       $(slide).trigger("next");
@@ -1100,7 +1116,7 @@ AVIATION.common.Slide.prototype = {
 
 
           //if(callback && callback.length > 0){
-          $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide[obj.elementArray]) }, slide: slide }, 
+          $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]) }, slide: slide }, 
                         slide.checkAdvanceWith );
           //}
 
@@ -1114,7 +1130,52 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  attachActionableEvent: function(content, slide, index){
+    "use strict";
+    var oldActions, possibleActions = {
+      "button": {
+        "enableOption": "enableButtons",
+        "arrayName": "buttons",
+        "elementArray": "buttonElements",
+        "container": "buttonContainer"
+      },
+      "highlight":{
+        "enableOption": "enableHighlights",
+        "arrayName": "highlights",
+        "elementArray": "highlightElements",
+        "container": "highlightsContainer"
+      },
+      "quiz": {
+        "enableOption": "enableQuizzes",
+        "arrayName": "quizzes",
+        "elementArray": "quizElements",
+        "container": "quizId"
+      }
+    };
 
+    oldActions = slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].data('action');
+    console.log(oldActions);
+    /*
+    oldActions.push(function(){
+      slide.buildContent(true, index);
+      $(slide).trigger("end", { callbacks: oldActions, 
+        element: { type: content.media.type, index: content.media.index }, slide: slide });
+    });
+    */
+
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].off();
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', function(){
+      $(slide).trigger("end", { callbacks: oldActions,  onSuccess: function(){ slide.buildContent(true, index); },
+        element: { type: content.media.type, index: content.media.index }, slide: slide });
+    });
+
+    console.log("assigning EVENTS to ACTS: ");
+    console.log("type: "+ content.media.type + " index: " + content.media.index);
+    console.log(slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index]);
+
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].data("action", oldActions);
+
+  },
 /**********
   initButtons: function(){
     "use strict";
@@ -1376,6 +1437,7 @@ AVIATION.common.Slide.prototype = {
         size: 200,
         showBox: false,
         showScrews: true,
+        bootstrapFriendly: true,
         img_directory : slide.options.development ? '/c4x/CDOT/AV101/asset/' : '/c4x/Seneca_College/M01S01_Test/asset/'
       };
 
@@ -1953,6 +2015,7 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+
   initMediaEvents : function () {
       "use strict";
 
@@ -1980,9 +2043,10 @@ AVIATION.common.Slide.prototype = {
             slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
           }
 
-        } else {
+        } else if(content[i].media && content[i].media.type){
           // case for btn, hlight
           console.log("the media event should be a btn/hlight");
+          slide.attachActionableEvent(content[i], slide, i);
           // for content.media.type
           // get the proper array of slideElements 
           // attach the buildContent callback to be added to their array of onclicks/callbacks
