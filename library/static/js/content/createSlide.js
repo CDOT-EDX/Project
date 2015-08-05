@@ -1970,7 +1970,7 @@ AVIATION.common.Slide.prototype = {
 
       for(i = 0; i < content.length; i++){
         if(content[i].media && content[i].media.type && 
-            (content[i].media.type !== "button" || content[i].media.type !== "highlight") ){
+            (content[i].media.type !== "button" && content[i].media.type !== "highlight") ){
           // case for audio, csv, timer
           if(!playerInitted[content[i].media.index]){
             slide.initGenericEvents(players[content[i].media.index].player, content[i], slide, i);
