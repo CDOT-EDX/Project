@@ -938,6 +938,8 @@ AVIATION.common.Slide.prototype = {
             onSuccess();
           }
           $(slide).trigger("next");
+        } else if(content.advanceWith.action === "pattern"){
+          slide.checkScanningPattern(element.type, element.index);
         } else {
           slide.setStatus("Nope, that's wrong. Try again");
           console.log("wrong advance index, waiting for correcet input");
@@ -2990,15 +2992,40 @@ AVIATION.common.Slide.prototype = {
   checkScanningPattern: function(type, index){
     "use strict";
 
-    var completedScan = slide.completedScan || 0, lastScanned = slide.lastScanned || 0, overallScanIndex = slide.overallScanIndex || 0, 
-        scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5, 0];
+    var slide = this, completedScan = slide.completedScan || 0, overallScanIndex, 
+        scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5];
 
-
-    if(type === 'highlight' && index){
-      lastScanned = index;
+    if(slide.overallScanIndex !== undefined){
+      overallScanIndex = slide.overallScanIndex;
+    } else {
+      overallScanIndex = -1;
     }
 
-    slide.lastScanned  = lastScanned;
+    console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
+
+    if(type === 'highlight' && typeof index !== undefined){
+      
+      if( scanPattern[overallScanIndex+1] === index){
+
+        overallScanIndex++;
+
+        if(overallScanIndex === scanPattern.length-1){
+          completedScan++;
+          overallScanIndex = -1;
+        }
+
+      } else {
+
+        slide.setStatus("Wrong instrument on scan. Try Again!" + "Completed scans: " + completedScan);
+
+      }
+
+
+    }
+
+    slide.overallScanIndex = overallScanIndex;
+
+    //slide.lastScanned  = lastScanned;
 
     slide.completedScan = completedScan;
   },
