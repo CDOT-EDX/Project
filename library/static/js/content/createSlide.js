@@ -2981,6 +2981,28 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
+
+  /***
+    *   Function for checking if the student is performing the correct scanning pattern
+    *   The scanning pattern order is:
+    *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
+    **/
+  checkScanningPattern: function(type, index){
+    "use strict";
+
+    var completedScan = slide.completedScan || 0, lastScanned = slide.lastScanned || 0, overallScanIndex = slide.overallScanIndex || 0, 
+        scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5, 0];
+
+
+    if(type === 'highlight' && index){
+      lastScanned = index;
+    }
+
+    slide.lastScanned  = lastScanned;
+
+    slide.completedScan = completedScan;
+  },
+
 /*
   checkSlideButtons: function( showButtons, slide ){
     "use strict";
