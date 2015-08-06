@@ -1568,6 +1568,8 @@ AVIATION.common.Slide.prototype = {
         myFlightIntVar = setInterval(function(){
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
+
+            console.log("speed: " + flight[i][7]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
@@ -1606,6 +1608,7 @@ AVIATION.common.Slide.prototype = {
               i = 0;
               data.element = {};
               data.element.type = "csv";
+              data.element.index = slide.activeIndex;
               data.slide = slide;
 
               console.log("csv ended event");
@@ -1614,7 +1617,7 @@ AVIATION.common.Slide.prototype = {
             
             clearInterval(myFlightIntVar);
           }
-        },50);
+        },75);
 
       };
 
@@ -2992,7 +2995,8 @@ AVIATION.common.Slide.prototype = {
   checkScanningPattern: function(type, index){
     "use strict";
 
-    var slide = this, completedScan = slide.completedScan || 0, overallScanIndex, 
+    var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
+        allowedUnsuccesful, unsuccesfulAttempts, 
         scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5];
 
     if(slide.overallScanIndex !== undefined){
@@ -3001,9 +3005,23 @@ AVIATION.common.Slide.prototype = {
       overallScanIndex = -1;
     }
 
+    if(slide.allowedUnsuccesful !== undefined){
+      allowedUnsuccesful = slide.allowedUnsuccesful;
+    } else {
+      allowedUnsuccesful = 3;
+    }
+    
+    if(slide.unsuccesfulAttempts !== undefined){
+      unsuccesfulAttempts = slide.unsuccesfulAttempts;
+    } else {
+      unsuccesfulAttempts = 0;
+    }
+
     console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
     if(type === 'highlight' && typeof index !== undefined){
+      
+      slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
       
       if( scanPattern[overallScanIndex+1] === index){
 
@@ -3015,18 +3033,19 @@ AVIATION.common.Slide.prototype = {
         }
 
       } else {
+        unsuccesfulAttempts++;
+        slide.setStatus("Wrong instrument during scan. Try Again!");
 
-        slide.setStatus("Wrong instrument on scan. Try Again!" + "Completed scans: " + completedScan);
+        if(unsuccesfulAttempts === allowedUnsuccesful){
 
+        }
       }
-
 
     }
 
+    slide.allowedUnsuccesful = allowedUnsuccesful;
+    slide.unsuccesfulAttempts = unsuccesfulAttempts;
     slide.overallScanIndex = overallScanIndex;
-
-    //slide.lastScanned  = lastScanned;
-
     slide.completedScan = completedScan;
   },
 
