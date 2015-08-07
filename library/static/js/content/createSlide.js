@@ -356,7 +356,9 @@ AVIATION.common.Slide.prototype = {
       panelContainer = jQuery("<div/>", {
         id: slide.options.panelId.split("#")[1],
         class: "instruments " + (this.options.enableSlider ? "col-xs-8" : "col-xs-12"),
-        html: '<div id="instRow1" class="row"></div><div id="instRow2" class="row"></div>'
+        html: '<div id="'+slide.options.instStatusId1.split("#")[1]+'" class="row"></div><div id="instRow1" class="row">'+
+                '</div><div id="instRow2" class="row"></div><div id="'+
+                  slide.options.instStatusId2.split("#")[1]+'" class="row"></div>'
       }).appendTo(slide.container);
     }
     this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
@@ -939,7 +941,7 @@ AVIATION.common.Slide.prototype = {
           }
           $(slide).trigger("next");
         } else if(content.advanceWith.action === "pattern"){
-          slide.checkScanningPattern(element.type, element.index);
+          slide.checkScanningPattern(element.type, element.index, event.target);
         } else {
           slide.setStatus("Nope, that's wrong. Try again");
           console.log("wrong advance index, waiting for correcet input");
@@ -948,11 +950,6 @@ AVIATION.common.Slide.prototype = {
       } else {
         console.log("no index on advance with, advancing...");
         $(slide).trigger("next");
-        // try{
-        //   $(slide).trigger("next");
-        // } catch (err){
-        //   $(slide).trigger("play");
-        // }
       }
     } else if (content.advanceWith) {
       //$(slide).trigger("next");
@@ -1091,7 +1088,7 @@ AVIATION.common.Slide.prototype = {
                    ";left:" + this.highlights[act].left +
                    ";width:" + this.highlights[act].width +
                    ";height:" + this.highlights[act].height +
-                   (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[act].border + ";cursor:pointer") ) + 
+                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") ) + 
                    ";position:absolute" + 
                    ";z-index:1;";          
         }
@@ -1447,7 +1444,9 @@ AVIATION.common.Slide.prototype = {
         panelContainer = jQuery("<div/>", {
           id: slide.options.panelId.split("#")[1],
           class: "instruments col-xs-12",
-          html: '<div id="instRow1" class="row"></div><div id="instRow2" class="row"></div>'
+          html: '<div id="'+slide.options.instStatusId1.split("#")[1]+'" class="row"></div><div id="instRow1" class="row">'+
+                '</div><div id="instRow2" class="row"></div><div id="'+
+                  slide.options.instStatusId2.split("#")[1]+'" class="row"></div>'
         }).appendTo(slide.container);
       }
 
@@ -1479,6 +1478,29 @@ AVIATION.common.Slide.prototype = {
 
         }
       }
+
+      slide.slideElements.instrumentStatus1 = $(slide.options.instStatusId1);
+      slide.slideElements.instrumentStatus2 = $(slide.options.instStatusId2);
+    }
+  },
+
+  setInstrumentStatus1: function(status){
+    "use strict";
+
+    var slide = this;
+
+    if(slide.slideElements.instrumentStatus1 && slide.slideElements.instrumentStatus1.length > 0){
+      slide.slideElements.instrumentStatus1.text(status);
+    }
+  },
+
+  setInstrumentStatus2: function(status){
+    "use strict";
+
+    var slide = this;
+
+    if(slide.slideElements.instrumentStatus2 && slide.slideElements.instrumentStatus2.length > 0){
+      slide.slideElements.instrumentStatus2.text(status);
     }
   },
 
@@ -1566,10 +1588,12 @@ AVIATION.common.Slide.prototype = {
         i = index || slide.pausedPanelIndex || 0;
 
         myFlightIntVar = setInterval(function(){
+          slide.setInstrumentStatus2("Instrument panel PLAYING...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
 
-            console.log("speed: " + flight[i][7]);
+//            console.log("i: "+i + " flight: "+flight.length );
+            console.log("pressure: " + flight[i][19] + " alt: " + flight[i][41]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
@@ -1580,7 +1604,7 @@ AVIATION.common.Slide.prototype = {
               },
               altimeter: {
                 altitude: flight[i][41],//allFlight[i].altitude
-                pressure: flight[i][12]
+                pressure: flight[i][19]
               },
               airspeed: {
                 airSpeed: flight[i][7]//allFlight[i].airSpeed
@@ -1590,7 +1614,7 @@ AVIATION.common.Slide.prototype = {
                 yaw: ( parseFloat( flight[i][29] || 0 ) + 0.5 )
               },
               variometer: {
-                vario: (parseFloat(flight[i][15]) / 1000)//allFlight[i].vario
+                vario: (parseFloat(flight[i][15]) / 100)//allFlight[i].vario
               }
             };
 
@@ -1604,6 +1628,7 @@ AVIATION.common.Slide.prototype = {
           } else {
             if(i < flight.length){
               slide.pausedPanelIndex = i;
+              slide.setInstrumentStatus2("Instrument panel PAUSED.");
             } else {
               i = 0;
               data.element = {};
@@ -1611,8 +1636,24 @@ AVIATION.common.Slide.prototype = {
               data.element.index = slide.activeIndex;
               data.slide = slide;
 
-              console.log("csv ended event");
-              $(slide).trigger("end", data);
+              if(slide.slideContent[slide.activeIndex].advanceWith.action === "pattern"){
+                if(slide.options.minScan <= slide.completedScan){
+                  slide.setStatus("Congratulations, you have completed the scan sucessfully.");
+                  slide.setInstrumentStatus2("The flight has finished.");
+                  console.log("csv ended event");
+                  $(slide).trigger("end", data);
+                } else {
+                  slide.setStatus("Sorry you ddin't compelete the scan in time.");
+                  slide.setInstrumentStatus2("The flight has finished.");
+                  console.log("minScan: " + slide.minScan + " completedScans: " + slide.completedScan);
+
+                  // TODO: show modal to retry or continue?
+                }
+              } else {
+                console.log("csv ended event");
+                $(slide).trigger("end", data);
+              }
+
             }
             
             clearInterval(myFlightIntVar);
@@ -1647,6 +1688,7 @@ AVIATION.common.Slide.prototype = {
         parsed++;
 
         if(parsed === csvs.length){
+          slide.setInstrumentStatus2("Instrument panel ready.");
           callback(csvPlayers);
         }
       };
@@ -2602,7 +2644,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   setStatus: function(action){
-    var status = this.slideElements.statusBar;
+    var slide = this, status = this.slideElements.statusBar;
 
     switch(action){
       case "play":
@@ -2621,8 +2663,10 @@ AVIATION.common.Slide.prototype = {
           status.text("Status is undefined!");
         }
         
-        break;      
+        break;
     }
+    status.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+
   },
 
   activateSlide: function(){
@@ -2733,11 +2777,29 @@ AVIATION.common.Slide.prototype = {
           quizId: "#slideQuiz",
           advanceWith: "audio",
           panelId: "#flightInstruments",
+          instStatusId1: "#instStatus1",
+          instStatusId2: "#instStatus2",
+          minScan: 1,
+          pulseCorrectProp: {
+            borderWidth: '5px',
+            borderColor: 'green',
+            borderRadius: '5px'
+          },
+          pulseWrongProp: {
+            borderWidth: '5px',
+            borderColor: 'red',
+            borderRadius: '5px'
+          },
+          pulseInstrumentSettings: {
+            duration: 500,
+            pulses: 1
+          },
           pulseProperties: {
-            backgroundColor: "blue"
+            backgroundColor: "#D0FAEE",
+            borderRadius: "10px"
           },
           pulseSettings: {
-            duration: 2000,
+            duration: 1000,
             pulses: 3
           },
           instrumentIds: {
@@ -2992,11 +3054,11 @@ AVIATION.common.Slide.prototype = {
     *   The scanning pattern order is:
     *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
     **/
-  checkScanningPattern: function(type, index){
+  checkScanningPattern: function(type, index, element){
     "use strict";
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
-        allowedUnsuccesful, unsuccesfulAttempts, 
+        allowedUnsuccesful, unsuccesfulAttempts, i,
         scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5];
 
     if(slide.overallScanIndex !== undefined){
@@ -3024,20 +3086,30 @@ AVIATION.common.Slide.prototype = {
       slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
       
       if( scanPattern[overallScanIndex+1] === index){
-
+        if(element){
+          //$(element).pulse('destroy');
+          $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+        }
         overallScanIndex++;
 
         if(overallScanIndex === scanPattern.length-1){
           completedScan++;
+          for(i=0; i<slide.slideElements.highlightElements.length; i++){
+            slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);  
+          }
           overallScanIndex = -1;
         }
 
       } else {
         unsuccesfulAttempts++;
-        slide.setStatus("Wrong instrument during scan. Try Again!");
+        if(element){
+          //$(element).pulse('destroy');
+          $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+        }
+        slide.setStatus("Wrong instrument during scan. Try Again!" + " Wrong attempts: " + unsuccesfulAttempts);
 
-        if(unsuccesfulAttempts === allowedUnsuccesful){
-
+        if(unsuccesfulAttempts >= allowedUnsuccesful){
+          // TODO: show modal asking to redo or continue
         }
       }
 
