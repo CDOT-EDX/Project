@@ -353,12 +353,21 @@ AVIATION.common.Slide.prototype = {
     //console.log("no audio and building content! *** " + this.activeIndex);
     console.log(this);
     if(this.options.enablePanel && panelContainer && panelContainer.length < 1){
+      jQuery("<div/>",{
+        id: slide.options.instStatusId1.split("#")[1],
+        class: "row",
+      }).appendTo(slide.container);
+
       panelContainer = jQuery("<div/>", {
         id: slide.options.panelId.split("#")[1],
         class: "instruments " + (this.options.enableSlider ? "col-xs-8" : "col-xs-12"),
-        html: '<div id="'+slide.options.instStatusId1.split("#")[1]+'" class="row"></div><div id="instRow1" class="row">'+
-                '</div><div id="instRow2" class="row"></div><div id="'+
-                  slide.options.instStatusId2.split("#")[1]+'" class="row"></div>'
+        html: '<div id="panelHighlightContainer"></div><div id="instRow1" class="row">'+
+              '</div><div id="instRow2" class="row"></div>'
+      }).appendTo(slide.container);
+
+      jQuery("<div/>",{
+        id: slide.options.instStatusId2.split("#")[1],
+        class: "row",
       }).appendTo(slide.container);
     }
     this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
@@ -994,6 +1003,14 @@ AVIATION.common.Slide.prototype = {
         "elementArray": "highlightElements",
         "container": "highlightsContainer"
       },
+      /*
+      "panelHighlight:":{
+        "enableOption": "enablePanel",
+        "arrayName": "panelHighlights",
+        "elementArray": "panelHighlightElements",
+        "container": "panelHighlightContainer"
+      },
+      */
       "quiz": {
         "enableOption": "enableQuizzes",
         "arrayName": "quizzes",
@@ -1031,13 +1048,21 @@ AVIATION.common.Slide.prototype = {
               break;
 
             case "highlight":
-              $parent = this.options.enablePanel ? $(slide.options.panelId) : $(slide.container + " > .cdot_contentText");
+              $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
               options.element = '<div/>';
               options.classes = "clearClickable ";
               options.dataToggle = "modal";
               options.role = "button";              
               break;
-
+/*
+            case "panelHighlight":
+              $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
+              options.element = '<div/>';
+              options.classes = "clearClickable ";
+              options.dataToggle = "modal";
+              options.role = "button";              
+              break;
+*/
             case "quiz":
 
               break;
@@ -1084,15 +1109,21 @@ AVIATION.common.Slide.prototype = {
     for( act in actions ){
       if(actions.hasOwnProperty(act)){
         if(action === 'highlight'){
-          options.style = "top:" + slide.highlights[act].top + 
-                   ";left:" + this.highlights[act].left +
-                   ";width:" + this.highlights[act].width +
-                   ";height:" + this.highlights[act].height +
-                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") ) + 
-                   ";position:absolute" + 
-                   ";z-index:1;";          
+          options.style = "z-index:1;" +
+                   (slide.highlights[act].top ? ";top:" + slide.highlights[act].top : "") + 
+                   (slide.highlights[act].left ? ";left:" + slide.highlights[act].left : "") + 
+                   (slide.highlights[act].width ? ";width:" + slide.highlights[act].width : "") + 
+                   (slide.highlights[act].height ? ";height:" + slide.highlights[act].height : "") + 
+                   (slide.highlights[act].position? ";position:" + slide.highlights[act].position : "") +
+                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );          
         }
-
+/*
+        if(action === 'panelHighlight'){
+          options.style = "height:"+slide.panelHighlights[act].height +
+          (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") ) + 
+          ";position:absolute;z-index:1;";
+        }
+*/
         $action = $("#" + act + "_" + action);
 
         if( $action || $action.length < 1){
@@ -1144,6 +1175,14 @@ AVIATION.common.Slide.prototype = {
         "elementArray": "highlightElements",
         "container": "highlightsContainer"
       },
+      /*
+      "panelHighlight":{
+        "enableOption": "enablePanel",
+        "arrayName": "panelHighlights",
+        "elementArray": "panelHighlightElements",
+        "container": "panelHighlightContainer"
+      },
+      */
       "quiz": {
         "enableOption": "enableQuizzes",
         "arrayName": "quizzes",
@@ -1444,7 +1483,8 @@ AVIATION.common.Slide.prototype = {
         panelContainer = jQuery("<div/>", {
           id: slide.options.panelId.split("#")[1],
           class: "instruments col-xs-12",
-          html: '<div id="'+slide.options.instStatusId1.split("#")[1]+'" class="row"></div><div id="instRow1" class="row">'+
+          html: '<div id="'+slide.options.instStatusId1.split("#")[1]+'" class="row"></div>'+
+                '<div id="panelHighlightContainer"></div><div id="instRow1" class="row">'+
                 '</div><div id="instRow2" class="row"></div><div id="'+
                   slide.options.instStatusId2.split("#")[1]+'" class="row"></div>'
         }).appendTo(slide.container);
@@ -2777,6 +2817,7 @@ AVIATION.common.Slide.prototype = {
           quizId: "#slideQuiz",
           advanceWith: "audio",
           panelId: "#flightInstruments",
+          panelHighlightsId: "#panelHighlightContainer",
           instStatusId1: "#instStatus1",
           instStatusId2: "#instStatus2",
           minScan: 1,
@@ -2820,8 +2861,24 @@ AVIATION.common.Slide.prototype = {
               close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
             }
           },
-          highlights: 
+          //panelHighlights: { "test": "" },
+          highlights:
           {
+            "asi":{ // #4
+              id: "asi",
+              orderNumber: 3,
+              name: "Airspeed Indicator (ASI)",
+              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
+              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
+              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
+              // top : "3%",
+              // left : "4.5%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
+              border : "7px ridge yellow",                            
+            },
             "ai":{ // #1
               id: "ai",
               orderNumber: 0,
@@ -2829,10 +2886,12 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "3%",
-              left : "36.2%",
-              width : "30%",
-              height: "44%",
+              // top : "3%",
+              // left : "36.2%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",
             }, 
             "alt":{ // #2
@@ -2842,10 +2901,27 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "3%",
-              left : "68%",
-              width : "30%",
-              height: "44%",
+              // top : "3%",
+              // left : "68%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
+              border : "7px ridge yellow",                            
+            },
+            "tc":{ // #6
+              id: "tc",
+              orderNumber: 5,
+              name: "Turn Coordinator (TC)",
+              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
+              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
+              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
+              // top : "53%",
+              // left : "4.5%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
             },
             "hi":{ // #3
@@ -2855,23 +2931,12 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "53%",
-              left : "36.2%",
-              width : "30%",
-              height: "44%",
-              border : "7px ridge yellow",                            
-            },
-            "asi":{ // #4
-              id: "asi",
-              orderNumber: 3,
-              name: "Airspeed Indicator (ASI)",
-              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
-              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
-              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "3%",
-              left : "4.5%",
-              width : "30%",
-              height: "44%",
+              // top : "53%",
+              // left : "36.2%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
             },
             "vsi":{ // #5
@@ -2881,24 +2946,13 @@ AVIATION.common.Slide.prototype = {
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
               //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top: "53%",
-              left: "68%",
-              width: "30%",
-              height: "44%",
+              // top: "53%",
+              // left: "68%",
+              // width: "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",
-            },
-            "tc":{ // #6
-              id: "tc",
-              orderNumber: 5,
-              name: "Turn Coordinator (TC)",
-              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
-              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
-              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "53%",
-              left : "4.5%",
-              width : "30%",
-              height: "44%",
-              border : "7px ridge yellow",                            
             },
           }}, option;
 
@@ -2959,6 +3013,7 @@ AVIATION.common.Slide.prototype = {
     this.slideElements.slideControls = {};
     this.slideElements.courseControls = {};
     this.slideElements.highlightElements = [];
+    this.slideElements.panelHighlightElements = [];
     this.slideElements.buttonElements = [];
     this.slideElements.instrumentElements = [];
     this.slideElements.quizElements = [];
@@ -3054,12 +3109,14 @@ AVIATION.common.Slide.prototype = {
     *   The scanning pattern order is:
     *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
     **/
-  checkScanningPattern: function(type, index, element){
+  checkScanningPattern: function(type, index, element, buildContent){
     "use strict";
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
         allowedUnsuccesful, unsuccesfulAttempts, i,
-        scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5];
+        //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
+        scanPattern = [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3],
+        highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
 
     if(slide.overallScanIndex !== undefined){
       overallScanIndex = slide.overallScanIndex;
@@ -3089,6 +3146,7 @@ AVIATION.common.Slide.prototype = {
         if(element){
           //$(element).pulse('destroy');
           $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+          //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
         }
         overallScanIndex++;
 
@@ -3096,6 +3154,7 @@ AVIATION.common.Slide.prototype = {
           completedScan++;
           for(i=0; i<slide.slideElements.highlightElements.length; i++){
             slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);  
+            //$(".instrument.col-xs-4").pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
           overallScanIndex = -1;
         }
@@ -3105,6 +3164,7 @@ AVIATION.common.Slide.prototype = {
         if(element){
           //$(element).pulse('destroy');
           $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+          //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
         }
         slide.setStatus("Wrong instrument during scan. Try Again!" + " Wrong attempts: " + unsuccesfulAttempts);
 
