@@ -95,17 +95,16 @@ AVIATION.common.Slide.prototype = {
     var events = {}, event, slide = this;
 
     events = {
-      /*
-      started: function(){
-        console.log("!* started event fired");
+      "continuePattern": function(e, data){
+
       },
-      */
       end: function(e, data){
         console.log("!* end event fired");
         console.log(data);
         // check if everything has stopped playing
         // advance with?
-        slide.checkAdvanceWith({ 
+        slide.checkAdvanceWith({
+          event: e,
           data: data
         });
 
@@ -950,7 +949,7 @@ AVIATION.common.Slide.prototype = {
           }
           $(slide).trigger("next");
         } else if(content.advanceWith.action === "pattern"){
-          slide.checkScanningPattern(element.type, element.index, event.target, content.advanceWith.content);
+          slide.checkScanningPattern(element.type, element.index, event, content.advanceWith.content);
         } else {
           slide.setStatus("Nope, that's wrong. Try again");
           console.log("wrong advance index, waiting for correcet input");
@@ -1201,9 +1200,13 @@ AVIATION.common.Slide.prototype = {
     });
     */
 
+    console.log("ELEMENT BUILD!");
+    console.log(content.media.type);
+    console.log(content.media.index);
+
     slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].off();
-    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', function(){
-      $(slide).trigger("end", { callbacks: oldActions,  onSuccess: function(){ slide.buildContent(true, index); },
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', { element: { type: content.media.type, index: content.media.index }, 
+      slide: slide }, function(){ $(slide).trigger("end", { callbacks: oldActions,  onSuccess: function(){ slide.buildContent(true, index); },
         element: { type: content.media.type, index: content.media.index }, slide: slide });
     });
 
@@ -1214,192 +1217,6 @@ AVIATION.common.Slide.prototype = {
     slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].data("action", oldActions);
 
   },
-/**********
-  initButtons: function(){
-    "use strict";
-
-    var button, $button, $parent, actionButton, addOnClick = [], objCount = this.countObjectLength(this.buttons);
-
-    console.log(this.buttons);
-
-    if(this.options.enableButtons && this.buttons && objCount > 0 &&
-        this.slideElements.buttonElements.length !== objCount){
-
-      // create a button container
-      $parent = $(this.buttonContainer);
-
-      if($parent && $parent.length < 1){
-        $parent = jQuery('<div/>',{
-          id: this.buttonContainer.split("#")[1],
-          class: "row",
-        }).appendTo(this.container);
-      }
-
-      for(button in this.buttons){
-        if(this.buttons.hasOwnProperty(button)){
-          $button = $("#" + button + "_button");
-          if( !$button || $button.length < 1){
-            actionButton = jQuery('<a/>',{
-              id: button + "_button",
-              class: "btn btn-default " + (this.buttons[button].classes ? this.buttons[button].classes.join(" ") : ""),
-              html: this.buttons[button].title,
-            }).appendTo($parent);
-
-            console.log(actionButton);
-            console.log(this.slideElements.buttonElements);
-
-            this.slideElements.buttonElements.push(actionButton);
-            addOnClick.push({ id: button, callback: false});
-          }
-        }
-      }
-    }
-
-    console.log("initing buttons");
-
-    return addOnClick;
-    
-  },
-
-  buildButtons: function(index, addOnClick){
-    "use strict";
-    var slide = this, $button, b, button, objCount = this.countObjectLength(this.buttons);
-
-    console.log("building buttons");
-    if(this.options.enableButtons && this.buttons && objCount > 0){
-      if(slide.slideContent[index].buttonElements){
-        // now lets add on clicks on the modals we need them in
-        for(button in slide.slideContent[index].buttonElements){
-          if(slide.slideContent[index].buttonElements.hasOwnProperty(button)){
-            if(typeof slide.slideContent[index].buttonElements[button] === "object" && 
-                slide.slideContent[index].buttonElements[button].onclick &&
-                typeof slide.slideContent[index].buttonElements[button].onclick === "function"){
-              addOnClick[slide.slideContent[index].buttonElements[button].index] = slide.slideContent[index].buttonElements[button].onclick;
-            }            
-          }
-        }
-      }
-
-      for(b=0; b<addOnClick.length; b++){
-        if(addOnClick[b]){
-          console.log("there is an AddOnClick ....");
-          console.log(slide.slideElements.buttonElements[b]);
-          slide.slideElements.buttonElements[b]
-            .off();
-          slide.slideElements.buttonElements[b]
-            .on("click", { 
-                            "onclick": [addOnClick[b].callback, this.buttons[addOnClick[b].id].action], 
-                            "element": { type: "button", index: b}, 
-                            slide: slide 
-                          }, 
-            slide.checkAdvanceWith);
-        } else {
-          console.log("there no AddOnClick but there is action....");
-          console.log(this.buttons[b]);
-          slide.slideElements.buttonElements[b]
-            .off();
-          slide.slideElements.buttonElements[b]
-            .on("click", { 
-                            "onclick": [this.buttons[addOnClick[b].id].action], 
-                            "element": { type: "button", index: b}, 
-                            slide: slide 
-                          }, 
-            slide.checkAdvanceWith);
-        }
-      }
-
-    }
-  },
-  
-  initHighlights: function(){
-    "use strict";
-    
-    var highlight, $highlight, modalInvoker, addOnClick = [], contentContainer = $(this.container + " > .cdot_contentText"), panelContainer = $(this.options.panelId);
-
-    if(this.options.enableHighlights && this.highlights && this.highlights.length > 0 && 
-        this.slideElements.highlightElements.length !== this.highlights.length){
-
-      for(highlight in this.highlights){
-        $highlight = $("#" + highlight + "_highlight");
-        if( !$highlight || $highlight.length < 1 ){
-          modalInvoker = jQuery('<div/>', {
-              id: highlight + "_highlight",
-              href : "#modal_" + highlight,
-              role : "button",
-              "class" : "clearClickable",
-              'data-toggle': "modal",
-              style: "top:" + this.highlights[highlight].top + 
-                     ";left:" + this.highlights[highlight].left +
-                     ";width:" + this.highlights[highlight].width +
-                     ";height:" + this.highlights[highlight].height +
-                     (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
-                     ";position:absolute" + 
-                     ";z-index:1;"
-          });
-
-          if(this.options.enablePanel){
-            console.log("panel container highlight");
-            console.log(panelContainer);
-            modalInvoker.appendTo(panelContainer);
-          } else {
-            console.log("content container highlight");
-            modalInvoker.appendTo(contentContainer);
-          }
-
-          this.slideElements.highlightElements.push(modalInvoker);
-          addOnClick.push({ id: highlight, callback: false});
-        }
-      }
-    }
-
-    return addOnClick;
-
-  },
-
-  buildHighlights: function(index, addOnClick){
-    var slide = this, h;
-
-    if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
-      if(slide.slideContent[index].highlights){
-        // now lets add on clicks on the modals we need them in
-        for(h=0; h<slide.slideContent[index].highlights.length; h++){
-          if(typeof slide.slideContent[index].highlights[h] === "object" && 
-              slide.slideContent[index].highlights[h].onclick &&
-              typeof slide.slideContent[index].highlights[h].onclick === "function"){
-            addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
-          }
-        }
-
-        for(h=0; h<addOnClick.length; h++){
-          if(addOnClick[h]){
-            slide.slideElements.highlightElements[h]
-              .off();
-            slide.slideElements.highlightElements[h]
-              .on("click", { 
-                              "onclick": [addOnClick[h].callback, this.highlights[h].action], 
-                              "element": { type: "highlight", index: h}, 
-                              slide: slide 
-                            }, 
-              slide.checkAdvanceWith);
-          } else {
-            slide.slideElements.highlightElements[h]
-              .off();
-            slide.slideElements.highlightElements[h]
-              .on("click", { 
-                              "onclick": [this.highlights[h].action], 
-                              "element": { type: "highlight", index: h}, 
-                              slide: slide 
-                            }, 
-              slide.checkAdvanceWith);
-          }
-        }
-      }
-    }
-
-  },
-*****/
-
-
 
   initSlider: function(){
     "use strict";
@@ -2274,322 +2091,7 @@ AVIATION.common.Slide.prototype = {
     }
     
   },
-/*
 
-
-  initTimerCueEvents:function(player, content, slide, index){
-
-  },
-
-
-  initTimerEvents: function(player, content, slide, index){
-    "use strict";
-    
-    var callbackAtBeginning = "", contentAtStart = "", hasListened = slide.slideHasListened;
-    
-    if(content.media && content.media.second){
-      player.on("tick", function(second){
-        if(second === content.media.second){
-          slideObject.buildContent(true, i);
-        }
-
-        if(content.callback && typeof content.callback === "function"){
-          content.callback();
-        }
-
-      });
-    } else {
-      if(content.callback && typeof content.callback === "function"){
-        contentAtStart = index;
-        callbackAtBeginning = content.callback;
-      }
-    }
-
-    if( !player.on("start") ){
-      player.on("start", function(){
-        // TODO: global player start event
-        console.log("timer started");
-      });
-    }
-
-    if( !player.on("end") ){
-      player.on("end", function(){
-        // TODO: global player end event
-        console.log("timer ended");
-      });
-    }
-
-    if( !player.on("pause") ){
-      player.on("pause", function(){
-        // TODO: global pause event
-        console.log("timer paused");
-      });
-    }
-
-    // TODO: do we need the onstop event at all?
-    /*
-    ontick  : function(second) {},
-    onstart : function() { console.log('timer started') },
-    onstop  : function() { console.log('timer stop') },
-    onpause : function() { console.log('timer set on pause') },
-    onend   : function() { console.log('timer ended normally') }
-    
-
-
-  },
-
-  initCSVCueEvents: function(player, content, slide, index){
-    console.log("trying to csv cue event");
-    console.log(content.media);
-    if(content.media && content.media.line){
-      player.cueLine(content.media.line, function(){
-        slide.buildContent(true, index);
-
-        if(content.callback && typeof content.callback === "function"){
-          content.callback();
-        }
-      });
-    }
-  },
-
-  initCSVEvents: function(player, content, slide, index){
-    "use strict";
-    var callbackAtBeginning = "", contentAtStart = "";
-
-    if(!content.media || !content.media.line){
-      contentAtStart = index;
-      if(content.callback && typeof content.callback === 'function'){
-        callbackAtBeginning = content.callback;
-      }
-      player.cueLine(1, function(){
-        slide.buildContent(true, contentAtStart);
-        if(callbackAtBeginning){
-          callbackAtBeginning();
-        }
-      });
-    }
-
-  },
-
-  initAudioEvents: function(player, content, slide, index){
-    "use strict";
-    var callbackAtBeginning = "", contentAtStart = "";
-
-    console.log("audio content stuff");
-    console.log(content.media.second);
-    if(!content.media || !content.media.second){
-      contentAtStart = index;
-      if(content.callback && typeof content.callback === "function"){
-        callbackAtBeginning = content.callback;
-      }
-      player.cue("0.01", function(){
-        slide.buildContent(true, contentAtStart);
-        if(callbackAtBeginning){
-          callbackAtBeginning();
-        }
-      });
-    } else {
-      slide.initAudioCueEvents(player, content, slide, index);
-    }
-
-    player.on("ended", function(e){
-      console.log("ended pop");
-      console.log(player);
-      //player.off("ended");
-      var data = {};
-      data.element = {};
-      data.element.type = "audio";
-      data.slide = slide;
-
-      console.log("audio ended event");
-      $(slide).trigger("end", data);
-
-    });
-        
-    player.on("playing", function(e){
-      console.log("playing pop");
-      console.log(player);
-      //player.off("playing");
-      // TODO: check global events for this
-      // fire playing event
-      // something that happens every time we press play (avatar opens mouth?)
-
-      console.log("audio playing event");
-    });
-
-    player.on("pause", function(e){
-      //player.off("pause");
-      // TODO: check global events for this
-      // fire pause event
-      console.log("audio paused event");
-    });
-  },
-
-  initCueEvents: function(player, content, slide, index, type){
-    "use strict";
-    
-    var hasListened = slide.slideHasListened;
-
-    console.log("INIT AUDIO EVENT HERE!!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    console.log(player);
-
-    switch(type){
-      case "csv":
-        if(content.media && content.media.line){
-          player.cue(content.media.second, function(){
-            slide.buildContent(true, index);
-
-            if(content.callback && typeof content.callback === "function"){
-              content.callback();
-            }
-          });  
-        }
-        break;
-      case "timer":
-      case "audio":
-        if(content.media && content.media.second){
-          player.cue(content.media.second, function(){
-            slide.buildContent(true, index);
-
-            if(content.callback && typeof content.callback === "function"){
-              content.callback();
-            }
-          });  
-        }
-        break;
-      default:
-        console.log("unknown media type inside initCueEvents");
-    }
-    
-  },
-**/
-//checkButtonsOnEnd : function(){
-
-      //slideObject.checkSlideControlPlayButtonsState();
-
-      // start the next audio if it exists and autoplay is true
-
-      // TODO: use checkAdvance method here instead?
-      /*
-      if(players[p+1] && slideObject.options.autoplay && slideObject.options.advanceWith === "audio"){
-        slideObject.playNextAudio();
-      } else if (players[p+1] && slideObject.options.advanceWith === "highlight"){
-        slideObject.slideElements.statusBar.html('Click on the next instrument to Continue');
-        slideObject.pauseCurrent();
-      }
-      */
-
-        // if it is last audio and no need for audioFirst
-      /*
-      if(!players[p+1] && !slideObject.options.audioFirst){
-        //slideObject.activeIndex++;
-
-        if(slideObject.options.autoRedirect){
-          // only activate the timer if the autplay is on
-          
-          slideObject.activateTimer(5, true);  
-        } else {
-          slideObject.slideElements.statusBar.html('Click "Continue" when you are ready');
-        }
-        
-        slideObject.checkSlideControlPlayButtons("end");
-      }
-      */
-//}
-
-/*
-  initAudioEvents: function(audioObjects){
-    "use strict";
-
-    var players = audioObjects, content = this.slideContent, hasListened = this.slideHasListened,
-        slideObject = this;
-
-      players.forEach(function(player, p){
-        // TODO: check only type audios?
-        var contentAtStart = "", callbackAtEnd = "";
-
-        content.forEach(function(cont, c){
-          if(content[c].audio === p){
-            if(content[c].second){
-              players[p].cue(content[c].second, function(){
-                slideObject.buildContent(true, c);
-                if(content[c].callback && typeof content[c].callback === 'function'){
-                  // run the callback that should be cued
-                  content[c].callback();
-                }
-              });
-            } else {
-              contentAtStart = c;
-
-              if(content[c].callback && typeof content[c].callback === "function"){
-                callbackAtEnd = content[c].callback;
-                //callbackAtEnd();
-              }
-
-            }
-          }
-        });
-
-        // force it to only happen at the beginning of the audio
-        player.cue("0.01", function(){
-          slideObject.buildContent(true, contentAtStart);
-          if(callbackAtEnd){
-            // run the callback that should be cued
-            callbackAtEnd();
-          }
-        });
-
-        players[p].on("ended", function(e){
-          slideObject.checkSlideControlPlayButtonsState();
-
-          if (callbackAtEnd !== ""){
-            //callbackAtEnd();
-          }
-          
-          // start the next audio if it exists and autoplay is true
-
-          // TODO: use checkAdvance method here instead?
-          if(players[p+1] && slideObject.options.autoplay && slideObject.options.advanceWith === "audio"){
-            slideObject.playNextAudio();
-          } else if (players[p+1] && slideObject.options.advanceWith === "highlight"){
-            slideObject.slideElements.statusBar.html('Click on the next instrument to Continue');
-            slideObject.pauseCurrent();
-          }
-
-          hasListened[p] = true;
-
-          // if it is last audio and no need for audioFirst
-          if(!players[p+1] && !slideObject.options.audioFirst){
-            //slideObject.activeIndex++;
-
-            if(slideObject.options.autoRedirect){
-              // only activate the timer if the autplay is on
-              
-              slideObject.activateTimer(5, true);  
-            } else {
-              slideObject.slideElements.statusBar.html('Click "Continue" when you are ready');
-            }
-            
-            slideObject.checkSlideControlPlayButtons("end");
-          }
-          
-        });
-
-        players[p].on("playing", function(e){
-          // something that happens every time we press play (avatar opens mouth?)
-          console.log("starting playing audio");
-        });
-
-        players[p].on("pause", function(e){
-          console.log("has been paused...");
-        });
-
-      });
-
-    //this.buildFooter();
-
-  },
-*/
   checkSlideControlPlayButtons: function( action ){
     var controls = this.slideElements.slideControls;
 
@@ -2767,11 +2269,21 @@ AVIATION.common.Slide.prototype = {
   buildQuizzes: function(){
     "use strict";
 
-    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement;
+    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement, advancePattern;
 
     console.log("building quizzes");
 
     console.log(quizzes);
+
+    advancePattern = function(oldComplete){
+      console.log("trying to advance on quiz complete!");
+      if(oldComplete && typeof oldComplete === 'function'){
+        oldComplete();
+      }
+
+      //slide.trigger("continuePattern");
+      slide.buildContent(true, slide.activeIndex);
+    };
 
     for(i=0; i<quizzes.length; i++){
       console.log("this is one quiz: " + this.quizId);
@@ -2781,13 +2293,20 @@ AVIATION.common.Slide.prototype = {
         class: "cdot_quiz",
         html: "<h1 class='quizName'><!-- where the quiz name goes --></h1><div class='quizArea'><div class='quizHeader'><!-- where the quiz main copy goes --><a class='button startQuiz' href='#'>Get Started!</a></div><!-- where the quiz gets built --></div><div class='quizResults'><h3 class='quizScore'>You Scored: <span><!-- where the quiz score goes --></span></h3><h3 class='quizLevel'><!--<strong>Ranking:</strong>--> <span><!-- where the quiz ranking level goes --></span></h3><div class='quizResultsCopy'><!-- where the quiz result copy goes --></div></div>",
       }).appendTo(this.options.quizId);
+
       quizzes[i].slide = $.isEmptyObject(slide.parentSlide) ? slide : slide.parentSlide;
+      
+      if(slide.options.enablePanel){
+        quizzes[i].animationCallbacks = {
+          completeQuiz : advancePattern
+        };
+      }
+      
       tempElement.slickQuiz(quizzes[i]);
       console.log("quizzes at " + i);
       console.log(quizzes[i]);
       quizElements.push(tempElement);
       tempElement.hide();
-      //console.log(quizElements[i]);
     }
 
     this.slideElements.quizElements = quizElements;
@@ -3109,14 +2628,20 @@ AVIATION.common.Slide.prototype = {
     *   The scanning pattern order is:
     *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
     **/
-  checkScanningPattern: function(type, index, element, buildContent){
+  checkScanningPattern: function(type, index, event, buildContent){
     "use strict";
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
-        allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex,
+        allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex, element,
         //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
         scanPattern = [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3],
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
+
+    if(event.target){
+      element = event.taget;
+    } else if(type === 'highlight'){
+      element = slide.slideElements.highlightElements[index];
+    }
 
     if(slide.overallScanIndex !== undefined){
       overallScanIndex = slide.overallScanIndex;
@@ -3152,7 +2677,11 @@ AVIATION.common.Slide.prototype = {
         if(element !== undefined){
           //$(element).pulse('destroy');
           $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
-          if(buildContent){
+          if(buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] &&
+              slide.slideContent[slide.activeIndex+innerIndex+1].media.index === index){
+            console.log("index expected: " + slide.slideContent[slide.activeIndex+innerIndex].media.index);
+            console.log("index provided: " + index);
+            console.log("inner index: " + innerIndex);
             innerIndex++;
             slide.buildContent(true, (slide.activeIndex + innerIndex) );
           }
@@ -3192,73 +2721,5 @@ AVIATION.common.Slide.prototype = {
     slide.completedScan = completedScan;
   },
 
-/*
-  checkSlideButtons: function( showButtons, slide ){
-    "use strict";
-    var i, j, toShow = [], button;
-    if(slide.options.enableButtons){ //(showHighlights && showHighlights.length > 0){
-      // check the index/indices of highlights to show from the bank
-      // and hide/show accordingly
-      // console.log("lets manage some highlights!");
-      for(button in slide.buttons){
-        if(slide.buttons.hasOwnProperty(button)){
-          toShow.push(false);
-        }
-      }
-
-      for(j=0; showButtons && j < showButtons.length; j++){
-        console.log("whats the show buttons?");
-        console.log(showButtons);
-        if(typeof showButtons[j] === "object"){
-          toShow[showButtons[j].index] = true;
-        } else {
-          toShow[showButtons[j]] = true;  
-        }
-      }
-
-      for(i=0; i < toShow.length; i++){
-        if(toShow[i]){
-          slide.slideElements.buttonElements[i].show();
-        } else {
-          slide.slideElements.buttonElements[i].hide();
-        }
-      }
-    }
-  },
-
-  // TODO: create the same for buttons
-  checkSlideHighlights: function( showHighlights, slide ){
-    "use strict";
-    var i, j, toShow = [];
-
-    if(slide.options.enableHighlights){ //(showHighlights && showHighlights.length > 0){
-      // check the index/indices of highlights to show from the bank
-      // and hide/show accordingly
-      // console.log("lets manage some highlights!");
-
-
-      for(i=0; slide.highlights && i < slide.highlights.length; i++){
-        toShow.push(false);
-      }
-
-      for(j=0; showHighlights && j < showHighlights.length; j++){
-        if(typeof showHighlights[j] === "object"){
-          toShow[showHighlights[j].index] = true;
-        } else {
-          toShow[showHighlights[j]] = true;  
-        }
-
-      }
-
-      for(i=0; i < toShow.length; i++){
-        if(toShow[i]){
-          slide.slideElements.highlightElements[i].show();
-        } else {
-          slide.slideElements.highlightElements[i].hide();
-        }
-      }
-    }
-  }
-*/
 };
 console.log("testing this class execution");
