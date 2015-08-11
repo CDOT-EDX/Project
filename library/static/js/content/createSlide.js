@@ -950,7 +950,7 @@ AVIATION.common.Slide.prototype = {
           }
           $(slide).trigger("next");
         } else if(content.advanceWith.action === "pattern"){
-          slide.checkScanningPattern(element.type, element.index, event.target);
+          slide.checkScanningPattern(element.type, element.index, event.target, content.advanceWith.content);
         } else {
           slide.setStatus("Nope, that's wrong. Try again");
           console.log("wrong advance index, waiting for correcet input");
@@ -3113,7 +3113,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
-        allowedUnsuccesful, unsuccesfulAttempts, i,
+        allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex,
         //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
         scanPattern = [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3],
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
@@ -3136,6 +3136,12 @@ AVIATION.common.Slide.prototype = {
       unsuccesfulAttempts = 0;
     }
 
+    if(slide.patternInnerIndex !== undefined){
+      innerIndex = slide.patternInnerIndex;
+    } else {
+      innerIndex = 0;
+    }
+
     console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
     if(type === 'highlight' && typeof index !== undefined){
@@ -3143,9 +3149,13 @@ AVIATION.common.Slide.prototype = {
       slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
       
       if( scanPattern[overallScanIndex+1] === index){
-        if(element){
+        if(element !== undefined){
           //$(element).pulse('destroy');
           $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+          if(buildContent){
+            innerIndex++;
+            slide.buildContent(true, (slide.activeIndex + innerIndex) );
+          }
           //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
         }
         overallScanIndex++;
@@ -3161,7 +3171,7 @@ AVIATION.common.Slide.prototype = {
 
       } else {
         unsuccesfulAttempts++;
-        if(element){
+        if(element !== undefined){
           //$(element).pulse('destroy');
           $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
           //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
@@ -3175,6 +3185,7 @@ AVIATION.common.Slide.prototype = {
 
     }
 
+    slide.patternInnerIndex = innerIndex;
     slide.allowedUnsuccesful = allowedUnsuccesful;
     slide.unsuccesfulAttempts = unsuccesfulAttempts;
     slide.overallScanIndex = overallScanIndex;
