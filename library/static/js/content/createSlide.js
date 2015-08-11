@@ -2638,7 +2638,7 @@ AVIATION.common.Slide.prototype = {
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
 
     if(event.target){
-      element = event.taget;
+      element = event.target;
     } else if(type === 'highlight'){
       element = slide.slideElements.highlightElements[index];
     }
