@@ -61,6 +61,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 completionResponseMessaging: false,
                 displayQuestionCount: true, // Deprecate?
                 displayQuestionNumber: true, // Deprecate?
+                //..
                 animationCallbacks: { // only for the methods that have jQuery animations offering callback
                     setupQuiz: function () {},
                     startQuiz: function () {},
@@ -484,9 +485,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     answerLIs = questionLI.find(_answers + ' li'),
                     answerSelects = answerLIs.find('input:checked'),
                     questionIndex = parseInt(questionLI.attr('id').replace(/(question)/, ''), 10),
-                    answers       = questions[questionIndex].a,
-                    selectAny     = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
-                    plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
+                    answers = questions[questionIndex].a,
+                    selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
 
                 answerLIs.addClass(incorrectResponseClass);
 
@@ -494,94 +494,19 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 var trueAnswers = [];
 
                 $(anySlide).trigger("completedQuiz");
-                /*
-                for (i in answers) {
-                    if (answers.hasOwnProperty(i)) {
-                        var answer = answers[i],
-                            index  = parseInt(i, 10);
+         
 
-                        if (answer.correct) {
-                            trueAnswers.push(index);
-                            answerLIs.eq(index).removeClass(incorrectResponseClass).addClass(correctResponseClass);
-                        }
-                    }
-                }
-                */
+                        $(anySlide).on('checkCompleted', function(evt, data){
+                            console.log('Trigger');
+                            var correctResponse = data.quiz_result_id.correct;
 
-/*                $.ajax({
-                    type: 'POST',
-                    dataType: 'json',
-                    url: '/echo/json/',
-                    data: {
-                        json: JSON.stringify(jsonData)
-                    },
-                    success: function (data) {
-
-                        for (i in data.json.questions[questionIndex].a) {
-                            //console.log("How many questions");
-                            if (data.json.questions[questionIndex].a.hasOwnProperty(i)) {
-                                var answer = data.json.questions[questionIndex].a[i],
-                                    index = parseInt(i, 10);
-                                console.log("ANSWER IS B " + answer.correct);
-                                
-                                console.log("Question index IS:: " + questionIndex);
-
-                                //questions[questionIndex].onSuccess = data.json.questions[questionIndex].onSuccess;
-                                //questions[questionIndex].onFail = data.json.questions[questionIndex].onFail;
-
-                                if (answer.correct) {
-                                    trueAnswers.push(index);
-                                    answerLIs.eq(index).removeClass(incorrectResponseClass).addClass(correctResponseClass);
-                                }
-                            }
-                        }
-*/
-                        // TODO: Now that we're marking answer LIs as correct / incorrect, we might be able
-                        // to do all our answer checking at the same time
-
-                        // NOTE: Collecting answer index for comparison aims to ensure that HTML entities
-                        // and HTML elements that may be modified by the browser / other scrips match up
-
-                        // Collect the answers submitted
-                        // var selectedAnswers = [];
-                        // answerSelects.each(function () {
-                        //     var id = $(this).attr('id');
-                        //     selectedAnswers.push(parseInt(id.replace(/(.*\_question\d{1,}_)/, ''), 10));
-                        // });
-                        
-                        // console.log("ELEMENT HERE IS " + _element);
-                        // var str = _element;
-                        // var questionIdFound = str.replace("#quiz_", "");
-
-
-                // Verify all/any true answers (and no false ones) were submitted
-                var correctResponse = plugin.method.compareAnswers(trueAnswers, selectedAnswers, selectAny);
-
-                if (correctResponse) {
-                
-                    if(questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function'){
-                    
-                        //"Firing callback"
-                        questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-                    }
-                
-                
-                    questionLI.addClass(correctClass);
-                } else {
-                
-                    if(questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function'){
-                    
-                        //"Firing callback"
-                        questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
-                    }
-                
-                    questionLI.addClass(incorrectClass);
-                }
+                        if (correctResponse) {
 
                             if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {
 
                                 //"Firing callback"
                                 questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
+                                plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
                             }
 
                             questionLI.addClass(correctClass);
@@ -591,6 +516,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                                 //"Firing callback"
                                 questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
+                                plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
                             }
 
                             questionLI.addClass(incorrectClass);
@@ -637,7 +563,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         
                
             },
-            
 
             // Moves to the next question OR completes the quiz if on last question
             nextQuestion: function (nextButton, options) {
@@ -870,10 +795,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 });
             });
 
-            if(plugin.config.animationCallbacks.disappearOptions && typeof plugin.config.animationCallbacks.disappearOptions === 'function'){
+            if (plugin.config.animationCallbacks.disappearOptions && typeof plugin.config.animationCallbacks.disappearOptions === 'function') {
                 plugin.config.animationCallbacks.disappearOptions();
             }
-            
+
             // Accessibility (WAI-ARIA).
             var _qnid = $element.attr('id') + '-name';
             $quizName.attr('id', _qnid);
