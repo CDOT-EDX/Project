@@ -95,17 +95,16 @@ AVIATION.common.Slide.prototype = {
     var events = {}, event, slide = this;
 
     events = {
-      /*
-      started: function(){
-        console.log("!* started event fired");
+      "continuePattern": function(e, data){
+
       },
-      */
       end: function(e, data){
         console.log("!* end event fired");
         console.log(data);
         // check if everything has stopped playing
         // advance with?
-        slide.checkAdvanceWith({ 
+        slide.checkAdvanceWith({
+          event: e,
           data: data
         });
 
@@ -312,13 +311,13 @@ AVIATION.common.Slide.prototype = {
         }
         
         if(headerElement && headerElement.length > 0){
-          headerElement.replaceWith(newHeader);
+          headerElement.replaceWith(newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings));
           console.log("replace the header");
         } else {
           console.log("append the header");
           console.log(newHeader);
           console.log(parent);
-          newHeader.prependTo(slide.container);
+          newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings).prependTo(slide.container);
         }
       }
 
@@ -353,10 +352,21 @@ AVIATION.common.Slide.prototype = {
     //console.log("no audio and building content! *** " + this.activeIndex);
     console.log(this);
     if(this.options.enablePanel && panelContainer && panelContainer.length < 1){
+      jQuery("<div/>",{
+        id: slide.options.instStatusId1.split("#")[1],
+        class: "row",
+      }).appendTo(slide.container);
+
       panelContainer = jQuery("<div/>", {
         id: slide.options.panelId.split("#")[1],
         class: "instruments " + (this.options.enableSlider ? "col-xs-8" : "col-xs-12"),
-        html: '<div id="instRow1" class="row"></div><div id="instRow2" class="row"></div>'
+        html: '<div id="panelHighlightContainer"></div><div id="instRow1" class="row">'+
+              '</div><div id="instRow2" class="row"></div>'
+      }).appendTo(slide.container);
+
+      jQuery("<div/>",{
+        id: slide.options.instStatusId2.split("#")[1],
+        class: "row",
       }).appendTo(slide.container);
     }
     this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
@@ -628,7 +638,7 @@ AVIATION.common.Slide.prototype = {
           if(innerImage){
             innerImage.appendTo(newSlideInner);
           }
-          newSlideInner.appendTo(contentContainer);
+          newSlideInner.appendTo(contentContainer)/*---------test-------------*/.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
         }
       } else {
         slideInner.children().remove();
@@ -902,13 +912,20 @@ AVIATION.common.Slide.prototype = {
   checkAdvanceWith: function(event){
     "use strict";
 
-    var callback = event.data.onclick, c,
-        element = event.data.element,
+    var onclick = event.data.onclick, callback = event.data.callbacks, c,
+        element = event.data.element, onSuccess = event.data.onSuccess,
         slide = event.data.slide,
         content = slide.slideContent[slide.activeIndex];
 
     console.log("event.data");
     console.log(callback);
+    console.log("CHECKING ADVANCE WITH!");
+
+    for(c=0; onclick && c < onclick.length; c++){
+      if(typeof onclick[c] === 'function'){
+        onclick[c]();
+      }
+    }
 
     for(c=0; callback && c < callback.length; c++){
       if(typeof callback[c] === 'function'){
@@ -916,24 +933,37 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
-    console.log("inside advanceWith: " + content);
+    console.log("inside advanceWith: ");
+
+    console.log("expected advanceWith...");
+    console.log(content.advanceWith);
+    console.log("actual element");
+    console.log(element);
 
     if(content.advanceWith && content.advanceWith.type === element.type){
       // TODO: check if audio has completed
-      if(content.advanceWith.index){
+      if(typeof content.advanceWith.index !== undefined){
         if(content.advanceWith.index === element.index){
+          if(onSuccess && typeof onSuccess === 'function'){
+            onSuccess();
+          }
           $(slide).trigger("next");
+        } else if(content.advanceWith.action === "pattern"){
+          slide.checkScanningPattern(element.type, element.index, event, content.advanceWith.content);
         } else {
           slide.setStatus("Nope, that's wrong. Try again");
+          console.log("wrong advance index, waiting for correcet input");
           // TODO: set status to wrong / retry
         }
       } else {
-        try{
-          $(slide).trigger("next");
-        } catch (err){
-          $(slide).trigger("play");
-        }
+        console.log("no index on advance with, advancing...");
+        $(slide).trigger("next");
       }
+    } else if (content.advanceWith) {
+      //$(slide).trigger("next");
+
+
+      console.log("wrong advanceWith, waiting for correcet input");
     } else {
       $(slide).trigger("next");
     }
@@ -960,18 +990,26 @@ AVIATION.common.Slide.prototype = {
     var slide = this, action, $parent, objCount, possibleActions = {}, options = {};
 
     possibleActions = {
-      "buttons": {
+      "button": {
         "enableOption": "enableButtons",
         "arrayName": "buttons",
         "elementArray": "buttonElements",
         "container": "buttonContainer"
       },
-      "highlights":{
+      "highlight":{
         "enableOption": "enableHighlights",
         "arrayName": "highlights",
         "elementArray": "highlightElements",
         "container": "highlightsContainer"
       },
+      /*
+      "panelHighlight:":{
+        "enableOption": "enablePanel",
+        "arrayName": "panelHighlights",
+        "elementArray": "panelHighlightElements",
+        "container": "panelHighlightContainer"
+      },
+      */
       "quiz": {
         "enableOption": "enableQuizzes",
         "arrayName": "quizzes",
@@ -998,7 +1036,7 @@ AVIATION.common.Slide.prototype = {
           console.log(action);
           switch(action){
 
-            case "buttons":
+            case "button":
 
               $parent = $(slide[possibleActions[action].container]);
               options.element = '<a/>';
@@ -1008,14 +1046,22 @@ AVIATION.common.Slide.prototype = {
               options.role = "";
               break;
 
-            case "highlights":
-              $parent = this.options.enablePanel ? $(slide.options.panelId) : $(slide.container + " > .cdot_contentText");
+            case "highlight":
+              $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
               options.element = '<div/>';
               options.classes = "clearClickable ";
               options.dataToggle = "modal";
               options.role = "button";              
               break;
-
+/*
+            case "panelHighlight":
+              $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
+              options.element = '<div/>';
+              options.classes = "clearClickable ";
+              options.dataToggle = "modal";
+              options.role = "button";              
+              break;
+*/
             case "quiz":
 
               break;
@@ -1061,16 +1107,22 @@ AVIATION.common.Slide.prototype = {
     console.log(action);
     for( act in actions ){
       if(actions.hasOwnProperty(act)){
-        if(action === 'highlights'){
-          options.style = "top:" + slide.highlights[act].top + 
-                   ";left:" + this.highlights[act].left +
-                   ";width:" + this.highlights[act].width +
-                   ";height:" + this.highlights[act].height +
-                   (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[act].border + ";cursor:pointer") ) + 
-                   ";position:absolute" + 
-                   ";z-index:1;";          
+        if(action === 'highlight'){
+          options.style = "z-index:1;" +
+                   (slide.highlights[act].top ? ";top:" + slide.highlights[act].top : "") + 
+                   (slide.highlights[act].left ? ";left:" + slide.highlights[act].left : "") + 
+                   (slide.highlights[act].width ? ";width:" + slide.highlights[act].width : "") + 
+                   (slide.highlights[act].height ? ";height:" + slide.highlights[act].height : "") + 
+                   (slide.highlights[act].position? ";position:" + slide.highlights[act].position : "") +
+                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );          
         }
-
+/*
+        if(action === 'panelHighlight'){
+          options.style = "height:"+slide.panelHighlights[act].height +
+          (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") ) + 
+          ";position:absolute;z-index:1;";
+        }
+*/
         $action = $("#" + act + "_" + action);
 
         if( $action || $action.length < 1){
@@ -1084,213 +1136,87 @@ AVIATION.common.Slide.prototype = {
           }).appendTo(parent);
 
           if(actions[act].action){
-            callback = [actions[act].action];  
+            callback = [actions[act].action];
           } else {
             callback = [];
           }
 
 
-          if(callback && callback.length > 0){
-            $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide[obj.elementArray]), slide: slide } }, 
-                          slide.checkAdvanceWith );
-          }
+
+
+          //if(callback && callback.length > 0){
+          $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]) }, slide: slide }, 
+                        slide.checkAdvanceWith );
+          //}
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
           slide.slideElements[obj.elementArray].push($action);
         }
+
       }
     }
 
   },
 
-
-/**********
-  initButtons: function(){
+  attachActionableEvent: function(content, slide, index){
     "use strict";
-
-    var button, $button, $parent, actionButton, addOnClick = [], objCount = this.countObjectLength(this.buttons);
-
-    console.log(this.buttons);
-
-    if(this.options.enableButtons && this.buttons && objCount > 0 &&
-        this.slideElements.buttonElements.length !== objCount){
-
-      // create a button container
-      $parent = $(this.buttonContainer);
-
-      if($parent && $parent.length < 1){
-        $parent = jQuery('<div/>',{
-          id: this.buttonContainer.split("#")[1],
-          class: "row",
-        }).appendTo(this.container);
+    var oldActions, possibleActions = {
+      "button": {
+        "enableOption": "enableButtons",
+        "arrayName": "buttons",
+        "elementArray": "buttonElements",
+        "container": "buttonContainer"
+      },
+      "highlight":{
+        "enableOption": "enableHighlights",
+        "arrayName": "highlights",
+        "elementArray": "highlightElements",
+        "container": "highlightsContainer"
+      },
+      /*
+      "panelHighlight":{
+        "enableOption": "enablePanel",
+        "arrayName": "panelHighlights",
+        "elementArray": "panelHighlightElements",
+        "container": "panelHighlightContainer"
+      },
+      */
+      "quiz": {
+        "enableOption": "enableQuizzes",
+        "arrayName": "quizzes",
+        "elementArray": "quizElements",
+        "container": "quizId"
       }
+    };
 
-      for(button in this.buttons){
-        if(this.buttons.hasOwnProperty(button)){
-          $button = $("#" + button + "_button");
-          if( !$button || $button.length < 1){
-            actionButton = jQuery('<a/>',{
-              id: button + "_button",
-              class: "btn btn-default " + (this.buttons[button].classes ? this.buttons[button].classes.join(" ") : ""),
-              html: this.buttons[button].title,
-            }).appendTo($parent);
+    oldActions = slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].data('action');
+    console.log(oldActions);
+    /*
+    oldActions.push(function(){
+      slide.buildContent(true, index);
+      $(slide).trigger("end", { callbacks: oldActions, 
+        element: { type: content.media.type, index: content.media.index }, slide: slide });
+    });
+    */
 
-            console.log(actionButton);
-            console.log(this.slideElements.buttonElements);
+    console.log("ELEMENT BUILD!");
+    console.log(content.media.type);
+    console.log(content.media.index);
 
-            this.slideElements.buttonElements.push(actionButton);
-            addOnClick.push({ id: button, callback: false});
-          }
-        }
-      }
-    }
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].off();
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', { element: { type: content.media.type, index: content.media.index }, 
+      slide: slide }, function(){ $(slide).trigger("end", { callbacks: oldActions,  onSuccess: function(){ slide.buildContent(true, index); },
+        element: { type: content.media.type, index: content.media.index }, slide: slide });
+    });
 
-    console.log("initing buttons");
+    console.log("assigning EVENTS to ACTS: ");
+    console.log("type: "+ content.media.type + " index: " + content.media.index);
+    console.log(slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index]);
 
-    return addOnClick;
-    
-  },
-
-  buildButtons: function(index, addOnClick){
-    "use strict";
-    var slide = this, $button, b, button, objCount = this.countObjectLength(this.buttons);
-
-    console.log("building buttons");
-    if(this.options.enableButtons && this.buttons && objCount > 0){
-      if(slide.slideContent[index].buttonElements){
-        // now lets add on clicks on the modals we need them in
-        for(button in slide.slideContent[index].buttonElements){
-          if(slide.slideContent[index].buttonElements.hasOwnProperty(button)){
-            if(typeof slide.slideContent[index].buttonElements[button] === "object" && 
-                slide.slideContent[index].buttonElements[button].onclick &&
-                typeof slide.slideContent[index].buttonElements[button].onclick === "function"){
-              addOnClick[slide.slideContent[index].buttonElements[button].index] = slide.slideContent[index].buttonElements[button].onclick;
-            }            
-          }
-        }
-      }
-
-      for(b=0; b<addOnClick.length; b++){
-        if(addOnClick[b]){
-          console.log("there is an AddOnClick ....");
-          console.log(slide.slideElements.buttonElements[b]);
-          slide.slideElements.buttonElements[b]
-            .off();
-          slide.slideElements.buttonElements[b]
-            .on("click", { 
-                            "onclick": [addOnClick[b].callback, this.buttons[addOnClick[b].id].action], 
-                            "element": { type: "button", index: b}, 
-                            slide: slide 
-                          }, 
-            slide.checkAdvanceWith);
-        } else {
-          console.log("there no AddOnClick but there is action....");
-          console.log(this.buttons[b]);
-          slide.slideElements.buttonElements[b]
-            .off();
-          slide.slideElements.buttonElements[b]
-            .on("click", { 
-                            "onclick": [this.buttons[addOnClick[b].id].action], 
-                            "element": { type: "button", index: b}, 
-                            slide: slide 
-                          }, 
-            slide.checkAdvanceWith);
-        }
-      }
-
-    }
-  },
-  
-  initHighlights: function(){
-    "use strict";
-    
-    var highlight, $highlight, modalInvoker, addOnClick = [], contentContainer = $(this.container + " > .cdot_contentText"), panelContainer = $(this.options.panelId);
-
-    if(this.options.enableHighlights && this.highlights && this.highlights.length > 0 && 
-        this.slideElements.highlightElements.length !== this.highlights.length){
-
-      for(highlight in this.highlights){
-        $highlight = $("#" + highlight + "_highlight");
-        if( !$highlight || $highlight.length < 1 ){
-          modalInvoker = jQuery('<div/>', {
-              id: highlight + "_highlight",
-              href : "#modal_" + highlight,
-              role : "button",
-              "class" : "clearClickable",
-              'data-toggle': "modal",
-              style: "top:" + this.highlights[highlight].top + 
-                     ";left:" + this.highlights[highlight].left +
-                     ";width:" + this.highlights[highlight].width +
-                     ";height:" + this.highlights[highlight].height +
-                     (this.options.hiddenHighlights ? ";cursor:default" : (";border:" + this.highlights[highlight].border + ";cursor:pointer") ) + 
-                     ";position:absolute" + 
-                     ";z-index:1;"
-          });
-
-          if(this.options.enablePanel){
-            console.log("panel container highlight");
-            console.log(panelContainer);
-            modalInvoker.appendTo(panelContainer);
-          } else {
-            console.log("content container highlight");
-            modalInvoker.appendTo(contentContainer);
-          }
-
-          this.slideElements.highlightElements.push(modalInvoker);
-          addOnClick.push({ id: highlight, callback: false});
-        }
-      }
-    }
-
-    return addOnClick;
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].data("action", oldActions);
 
   },
-
-  buildHighlights: function(index, addOnClick){
-    var slide = this, h;
-
-    if(this.options.enableHighlights && this.highlights && this.highlights.length > 0){
-      if(slide.slideContent[index].highlights){
-        // now lets add on clicks on the modals we need them in
-        for(h=0; h<slide.slideContent[index].highlights.length; h++){
-          if(typeof slide.slideContent[index].highlights[h] === "object" && 
-              slide.slideContent[index].highlights[h].onclick &&
-              typeof slide.slideContent[index].highlights[h].onclick === "function"){
-            addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
-          }
-        }
-
-        for(h=0; h<addOnClick.length; h++){
-          if(addOnClick[h]){
-            slide.slideElements.highlightElements[h]
-              .off();
-            slide.slideElements.highlightElements[h]
-              .on("click", { 
-                              "onclick": [addOnClick[h].callback, this.highlights[h].action], 
-                              "element": { type: "highlight", index: h}, 
-                              slide: slide 
-                            }, 
-              slide.checkAdvanceWith);
-          } else {
-            slide.slideElements.highlightElements[h]
-              .off();
-            slide.slideElements.highlightElements[h]
-              .on("click", { 
-                              "onclick": [this.highlights[h].action], 
-                              "element": { type: "highlight", index: h}, 
-                              slide: slide 
-                            }, 
-              slide.checkAdvanceWith);
-          }
-        }
-      }
-    }
-
-  },
-*****/
-
-
 
   initSlider: function(){
     "use strict";
@@ -1366,6 +1292,7 @@ AVIATION.common.Slide.prototype = {
         size: 200,
         showBox: false,
         showScrews: true,
+        bootstrapFriendly: true,
         img_directory : slide.options.development ? '/c4x/CDOT/AV101/asset/' : '/c4x/Seneca_College/M01S01_Test/asset/'
       };
 
@@ -1373,7 +1300,10 @@ AVIATION.common.Slide.prototype = {
         panelContainer = jQuery("<div/>", {
           id: slide.options.panelId.split("#")[1],
           class: "instruments col-xs-12",
-          html: '<div id="instRow1" class="row"></div><div id="instRow2" class="row"></div>'
+          html: '<div id="'+slide.options.instStatusId1.split("#")[1]+'" class="row"></div>'+
+                '<div id="panelHighlightContainer"></div><div id="instRow1" class="row">'+
+                '</div><div id="instRow2" class="row"></div><div id="'+
+                  slide.options.instStatusId2.split("#")[1]+'" class="row"></div>'
         }).appendTo(slide.container);
       }
 
@@ -1405,6 +1335,29 @@ AVIATION.common.Slide.prototype = {
 
         }
       }
+
+      slide.slideElements.instrumentStatus1 = $(slide.options.instStatusId1);
+      slide.slideElements.instrumentStatus2 = $(slide.options.instStatusId2);
+    }
+  },
+
+  setInstrumentStatus1: function(status){
+    "use strict";
+
+    var slide = this;
+
+    if(slide.slideElements.instrumentStatus1 && slide.slideElements.instrumentStatus1.length > 0){
+      slide.slideElements.instrumentStatus1.text(status);
+    }
+  },
+
+  setInstrumentStatus2: function(status){
+    "use strict";
+
+    var slide = this;
+
+    if(slide.slideElements.instrumentStatus2 && slide.slideElements.instrumentStatus2.length > 0){
+      slide.slideElements.instrumentStatus2.text(status);
     }
   },
 
@@ -1492,8 +1445,12 @@ AVIATION.common.Slide.prototype = {
         i = index || slide.pausedPanelIndex || 0;
 
         myFlightIntVar = setInterval(function(){
+          slide.setInstrumentStatus2("Instrument panel PLAYING...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
+
+//            console.log("i: "+i + " flight: "+flight.length );
+            console.log("pressure: " + flight[i][19] + " alt: " + flight[i][41]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
@@ -1504,7 +1461,7 @@ AVIATION.common.Slide.prototype = {
               },
               altimeter: {
                 altitude: flight[i][41],//allFlight[i].altitude
-                pressure: flight[i][12]
+                pressure: flight[i][19]
               },
               airspeed: {
                 airSpeed: flight[i][7]//allFlight[i].airSpeed
@@ -1514,7 +1471,7 @@ AVIATION.common.Slide.prototype = {
                 yaw: ( parseFloat( flight[i][29] || 0 ) + 0.5 )
               },
               variometer: {
-                vario: (parseFloat(flight[i][15]) / 1000)//allFlight[i].vario
+                vario: (parseFloat(flight[i][15]) / 100)//allFlight[i].vario
               }
             };
 
@@ -1528,19 +1485,37 @@ AVIATION.common.Slide.prototype = {
           } else {
             if(i < flight.length){
               slide.pausedPanelIndex = i;
+              slide.setInstrumentStatus2("Instrument panel PAUSED.");
             } else {
               i = 0;
               data.element = {};
               data.element.type = "csv";
+              data.element.index = slide.activeIndex;
               data.slide = slide;
 
-              console.log("csv ended event");
-              $(slide).trigger("end", data);
+              if(slide.slideContent[slide.activeIndex].advanceWith.action === "pattern"){
+                if(slide.options.minScan <= slide.completedScan){
+                  slide.setStatus("Congratulations, you have completed the scan sucessfully.");
+                  slide.setInstrumentStatus2("The flight has finished.");
+                  console.log("csv ended event");
+                  $(slide).trigger("end", data);
+                } else {
+                  slide.setStatus("Sorry you ddin't compelete the scan in time.");
+                  slide.setInstrumentStatus2("The flight has finished.");
+                  console.log("minScan: " + slide.minScan + " completedScans: " + slide.completedScan);
+
+                  // TODO: show modal to retry or continue?
+                }
+              } else {
+                console.log("csv ended event");
+                $(slide).trigger("end", data);
+              }
+
             }
             
             clearInterval(myFlightIntVar);
           }
-        },50);
+        },75);
 
       };
 
@@ -1570,6 +1545,7 @@ AVIATION.common.Slide.prototype = {
         parsed++;
 
         if(parsed === csvs.length){
+          slide.setInstrumentStatus2("Instrument panel ready.");
           callback(csvPlayers);
         }
       };
@@ -1943,6 +1919,7 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+
   initMediaEvents : function () {
       "use strict";
 
@@ -1959,7 +1936,9 @@ AVIATION.common.Slide.prototype = {
       console.log(content);
 
       for(i = 0; i < content.length; i++){
-        if(content[i].media && content[i].media.type){
+        if(content[i].media && content[i].media.type && 
+            (content[i].media.type !== "button" && content[i].media.type !== "highlight") ){
+          // case for audio, csv, timer
           if(!playerInitted[content[i].media.index]){
             slide.initGenericEvents(players[content[i].media.index].player, content[i], slide, i);
             slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
@@ -1967,6 +1946,16 @@ AVIATION.common.Slide.prototype = {
           } else {
             slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
           }
+
+        } else if(content[i].media && content[i].media.type){
+          // case for btn, hlight
+          console.log("the media event should be a btn/hlight");
+          slide.attachActionableEvent(content[i], slide, i);
+          // for content.media.type
+          // get the proper array of slideElements 
+          // attach the buildContent callback to be added to their array of onclicks/callbacks
+          // and add it to the existing data("action") of the element
+          //
         }
       }
   },
@@ -2102,322 +2091,7 @@ AVIATION.common.Slide.prototype = {
     }
     
   },
-/*
 
-
-  initTimerCueEvents:function(player, content, slide, index){
-
-  },
-
-
-  initTimerEvents: function(player, content, slide, index){
-    "use strict";
-    
-    var callbackAtBeginning = "", contentAtStart = "", hasListened = slide.slideHasListened;
-    
-    if(content.media && content.media.second){
-      player.on("tick", function(second){
-        if(second === content.media.second){
-          slideObject.buildContent(true, i);
-        }
-
-        if(content.callback && typeof content.callback === "function"){
-          content.callback();
-        }
-
-      });
-    } else {
-      if(content.callback && typeof content.callback === "function"){
-        contentAtStart = index;
-        callbackAtBeginning = content.callback;
-      }
-    }
-
-    if( !player.on("start") ){
-      player.on("start", function(){
-        // TODO: global player start event
-        console.log("timer started");
-      });
-    }
-
-    if( !player.on("end") ){
-      player.on("end", function(){
-        // TODO: global player end event
-        console.log("timer ended");
-      });
-    }
-
-    if( !player.on("pause") ){
-      player.on("pause", function(){
-        // TODO: global pause event
-        console.log("timer paused");
-      });
-    }
-
-    // TODO: do we need the onstop event at all?
-    /*
-    ontick  : function(second) {},
-    onstart : function() { console.log('timer started') },
-    onstop  : function() { console.log('timer stop') },
-    onpause : function() { console.log('timer set on pause') },
-    onend   : function() { console.log('timer ended normally') }
-    
-
-
-  },
-
-  initCSVCueEvents: function(player, content, slide, index){
-    console.log("trying to csv cue event");
-    console.log(content.media);
-    if(content.media && content.media.line){
-      player.cueLine(content.media.line, function(){
-        slide.buildContent(true, index);
-
-        if(content.callback && typeof content.callback === "function"){
-          content.callback();
-        }
-      });
-    }
-  },
-
-  initCSVEvents: function(player, content, slide, index){
-    "use strict";
-    var callbackAtBeginning = "", contentAtStart = "";
-
-    if(!content.media || !content.media.line){
-      contentAtStart = index;
-      if(content.callback && typeof content.callback === 'function'){
-        callbackAtBeginning = content.callback;
-      }
-      player.cueLine(1, function(){
-        slide.buildContent(true, contentAtStart);
-        if(callbackAtBeginning){
-          callbackAtBeginning();
-        }
-      });
-    }
-
-  },
-
-  initAudioEvents: function(player, content, slide, index){
-    "use strict";
-    var callbackAtBeginning = "", contentAtStart = "";
-
-    console.log("audio content stuff");
-    console.log(content.media.second);
-    if(!content.media || !content.media.second){
-      contentAtStart = index;
-      if(content.callback && typeof content.callback === "function"){
-        callbackAtBeginning = content.callback;
-      }
-      player.cue("0.01", function(){
-        slide.buildContent(true, contentAtStart);
-        if(callbackAtBeginning){
-          callbackAtBeginning();
-        }
-      });
-    } else {
-      slide.initAudioCueEvents(player, content, slide, index);
-    }
-
-    player.on("ended", function(e){
-      console.log("ended pop");
-      console.log(player);
-      //player.off("ended");
-      var data = {};
-      data.element = {};
-      data.element.type = "audio";
-      data.slide = slide;
-
-      console.log("audio ended event");
-      $(slide).trigger("end", data);
-
-    });
-        
-    player.on("playing", function(e){
-      console.log("playing pop");
-      console.log(player);
-      //player.off("playing");
-      // TODO: check global events for this
-      // fire playing event
-      // something that happens every time we press play (avatar opens mouth?)
-
-      console.log("audio playing event");
-    });
-
-    player.on("pause", function(e){
-      //player.off("pause");
-      // TODO: check global events for this
-      // fire pause event
-      console.log("audio paused event");
-    });
-  },
-
-  initCueEvents: function(player, content, slide, index, type){
-    "use strict";
-    
-    var hasListened = slide.slideHasListened;
-
-    console.log("INIT AUDIO EVENT HERE!!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    console.log(player);
-
-    switch(type){
-      case "csv":
-        if(content.media && content.media.line){
-          player.cue(content.media.second, function(){
-            slide.buildContent(true, index);
-
-            if(content.callback && typeof content.callback === "function"){
-              content.callback();
-            }
-          });  
-        }
-        break;
-      case "timer":
-      case "audio":
-        if(content.media && content.media.second){
-          player.cue(content.media.second, function(){
-            slide.buildContent(true, index);
-
-            if(content.callback && typeof content.callback === "function"){
-              content.callback();
-            }
-          });  
-        }
-        break;
-      default:
-        console.log("unknown media type inside initCueEvents");
-    }
-    
-  },
-**/
-//checkButtonsOnEnd : function(){
-
-      //slideObject.checkSlideControlPlayButtonsState();
-
-      // start the next audio if it exists and autoplay is true
-
-      // TODO: use checkAdvance method here instead?
-      /*
-      if(players[p+1] && slideObject.options.autoplay && slideObject.options.advanceWith === "audio"){
-        slideObject.playNextAudio();
-      } else if (players[p+1] && slideObject.options.advanceWith === "highlight"){
-        slideObject.slideElements.statusBar.html('Click on the next instrument to Continue');
-        slideObject.pauseCurrent();
-      }
-      */
-
-        // if it is last audio and no need for audioFirst
-      /*
-      if(!players[p+1] && !slideObject.options.audioFirst){
-        //slideObject.activeIndex++;
-
-        if(slideObject.options.autoRedirect){
-          // only activate the timer if the autplay is on
-          
-          slideObject.activateTimer(5, true);  
-        } else {
-          slideObject.slideElements.statusBar.html('Click "Continue" when you are ready');
-        }
-        
-        slideObject.checkSlideControlPlayButtons("end");
-      }
-      */
-//}
-
-/*
-  initAudioEvents: function(audioObjects){
-    "use strict";
-
-    var players = audioObjects, content = this.slideContent, hasListened = this.slideHasListened,
-        slideObject = this;
-
-      players.forEach(function(player, p){
-        // TODO: check only type audios?
-        var contentAtStart = "", callbackAtEnd = "";
-
-        content.forEach(function(cont, c){
-          if(content[c].audio === p){
-            if(content[c].second){
-              players[p].cue(content[c].second, function(){
-                slideObject.buildContent(true, c);
-                if(content[c].callback && typeof content[c].callback === 'function'){
-                  // run the callback that should be cued
-                  content[c].callback();
-                }
-              });
-            } else {
-              contentAtStart = c;
-
-              if(content[c].callback && typeof content[c].callback === "function"){
-                callbackAtEnd = content[c].callback;
-                //callbackAtEnd();
-              }
-
-            }
-          }
-        });
-
-        // force it to only happen at the beginning of the audio
-        player.cue("0.01", function(){
-          slideObject.buildContent(true, contentAtStart);
-          if(callbackAtEnd){
-            // run the callback that should be cued
-            callbackAtEnd();
-          }
-        });
-
-        players[p].on("ended", function(e){
-          slideObject.checkSlideControlPlayButtonsState();
-
-          if (callbackAtEnd !== ""){
-            //callbackAtEnd();
-          }
-          
-          // start the next audio if it exists and autoplay is true
-
-          // TODO: use checkAdvance method here instead?
-          if(players[p+1] && slideObject.options.autoplay && slideObject.options.advanceWith === "audio"){
-            slideObject.playNextAudio();
-          } else if (players[p+1] && slideObject.options.advanceWith === "highlight"){
-            slideObject.slideElements.statusBar.html('Click on the next instrument to Continue');
-            slideObject.pauseCurrent();
-          }
-
-          hasListened[p] = true;
-
-          // if it is last audio and no need for audioFirst
-          if(!players[p+1] && !slideObject.options.audioFirst){
-            //slideObject.activeIndex++;
-
-            if(slideObject.options.autoRedirect){
-              // only activate the timer if the autplay is on
-              
-              slideObject.activateTimer(5, true);  
-            } else {
-              slideObject.slideElements.statusBar.html('Click "Continue" when you are ready');
-            }
-            
-            slideObject.checkSlideControlPlayButtons("end");
-          }
-          
-        });
-
-        players[p].on("playing", function(e){
-          // something that happens every time we press play (avatar opens mouth?)
-          console.log("starting playing audio");
-        });
-
-        players[p].on("pause", function(e){
-          console.log("has been paused...");
-        });
-
-      });
-
-    //this.buildFooter();
-
-  },
-*/
   checkSlideControlPlayButtons: function( action ){
     var controls = this.slideElements.slideControls;
 
@@ -2512,7 +2186,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   setStatus: function(action){
-    var status = this.slideElements.statusBar;
+    var slide = this, status = this.slideElements.statusBar;
 
     switch(action){
       case "play":
@@ -2531,8 +2205,10 @@ AVIATION.common.Slide.prototype = {
           status.text("Status is undefined!");
         }
         
-        break;      
+        break;
     }
+    status.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+
   },
 
   activateSlide: function(){
@@ -2593,11 +2269,21 @@ AVIATION.common.Slide.prototype = {
   buildQuizzes: function(){
     "use strict";
 
-    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement;
+    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement, advancePattern;
 
     console.log("building quizzes");
 
     console.log(quizzes);
+
+    advancePattern = function(oldComplete){
+      console.log("trying to advance on quiz complete!");
+      if(oldComplete && typeof oldComplete === 'function'){
+        oldComplete();
+      }
+
+      //slide.trigger("continuePattern");
+      slide.buildContent(true, slide.activeIndex);
+    };
 
     for(i=0; i<quizzes.length; i++){
       console.log("this is one quiz: " + this.quizId);
@@ -2607,13 +2293,20 @@ AVIATION.common.Slide.prototype = {
         class: "cdot_quiz",
         html: "<h1 class='quizName'><!-- where the quiz name goes --></h1><div class='quizArea'><div class='quizHeader'><!-- where the quiz main copy goes --><a class='button startQuiz' href='#'>Get Started!</a></div><!-- where the quiz gets built --></div><div class='quizResults'><h3 class='quizScore'>You Scored: <span><!-- where the quiz score goes --></span></h3><h3 class='quizLevel'><!--<strong>Ranking:</strong>--> <span><!-- where the quiz ranking level goes --></span></h3><div class='quizResultsCopy'><!-- where the quiz result copy goes --></div></div>",
       }).appendTo(this.options.quizId);
+
       quizzes[i].slide = $.isEmptyObject(slide.parentSlide) ? slide : slide.parentSlide;
+      
+      if(slide.options.enablePanel){
+        quizzes[i].animationCallbacks = {
+          completeQuiz : advancePattern
+        };
+      }
+      
       tempElement.slickQuiz(quizzes[i]);
       console.log("quizzes at " + i);
       console.log(quizzes[i]);
       quizElements.push(tempElement);
       tempElement.hide();
-      //console.log(quizElements[i]);
     }
 
     this.slideElements.quizElements = quizElements;
@@ -2643,6 +2336,32 @@ AVIATION.common.Slide.prototype = {
           quizId: "#slideQuiz",
           advanceWith: "audio",
           panelId: "#flightInstruments",
+          panelHighlightsId: "#panelHighlightContainer",
+          instStatusId1: "#instStatus1",
+          instStatusId2: "#instStatus2",
+          minScan: 1,
+          pulseCorrectProp: {
+            borderWidth: '5px',
+            borderColor: 'green',
+            borderRadius: '5px'
+          },
+          pulseWrongProp: {
+            borderWidth: '5px',
+            borderColor: 'red',
+            borderRadius: '5px'
+          },
+          pulseInstrumentSettings: {
+            duration: 500,
+            pulses: 1
+          },
+          pulseProperties: {
+            backgroundColor: "#D0FAEE",
+            borderRadius: "10px"
+          },
+          pulseSettings: {
+            duration: 1000,
+            pulses: 3
+          },
           instrumentIds: {
             airspeed: "airspeed",
             attitude: "attitude",
@@ -2661,8 +2380,24 @@ AVIATION.common.Slide.prototype = {
               close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
             }
           },
-          highlights: 
+          //panelHighlights: { "test": "" },
+          highlights:
           {
+            "asi":{ // #4
+              id: "asi",
+              orderNumber: 3,
+              name: "Airspeed Indicator (ASI)",
+              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
+              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
+              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
+              // top : "3%",
+              // left : "4.5%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
+              border : "7px ridge yellow",                            
+            },
             "ai":{ // #1
               id: "ai",
               orderNumber: 0,
@@ -2670,10 +2405,12 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "3%",
-              left : "36.2%",
-              width : "30%",
-              height: "44%",
+              // top : "3%",
+              // left : "36.2%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",
             }, 
             "alt":{ // #2
@@ -2683,10 +2420,27 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "3%",
-              left : "68%",
-              width : "30%",
-              height: "44%",
+              // top : "3%",
+              // left : "68%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
+              border : "7px ridge yellow",                            
+            },
+            "tc":{ // #6
+              id: "tc",
+              orderNumber: 5,
+              name: "Turn Coordinator (TC)",
+              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
+              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
+              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
+              // top : "53%",
+              // left : "4.5%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
             },
             "hi":{ // #3
@@ -2696,23 +2450,12 @@ AVIATION.common.Slide.prototype = {
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
               // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top : "53%",
-              left : "36.2%",
-              width : "30%",
-              height: "44%",
-              border : "7px ridge yellow",                            
-            },
-            "asi":{ // #4
-              id: "asi",
-              orderNumber: 3,
-              name: "Airspeed Indicator (ASI)",
-              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
-              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
-              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "3%",
-              left : "4.5%",
-              width : "30%",
-              height: "44%",
+              // top : "53%",
+              // left : "36.2%",
+              // width : "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
             },
             "vsi":{ // #5
@@ -2722,24 +2465,13 @@ AVIATION.common.Slide.prototype = {
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
               //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              top: "53%",
-              left: "68%",
-              width: "30%",
-              height: "44%",
+              // top: "53%",
+              // left: "68%",
+              // width: "30%",
+              // height: "44%",
+              height: "50%",
+              classes: ["col-xs-4"],
               border : "7px ridge yellow",
-            },
-            "tc":{ // #6
-              id: "tc",
-              orderNumber: 5,
-              name: "Turn Coordinator (TC)",
-              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
-              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
-              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              top : "53%",
-              left : "4.5%",
-              width : "30%",
-              height: "44%",
-              border : "7px ridge yellow",                            
             },
           }}, option;
 
@@ -2782,7 +2514,7 @@ AVIATION.common.Slide.prototype = {
 
     this.slideTimer = -1;
 
-    this.elementsToShow = { "buttons": [], "highlights": [], "quiz": [] };
+    this.elementsToShow = { "button": [], "highlight": [], "quiz": [] };
 
     this.slideContent = this.options.slideContent ||  [
                                                         { 
@@ -2800,6 +2532,7 @@ AVIATION.common.Slide.prototype = {
     this.slideElements.slideControls = {};
     this.slideElements.courseControls = {};
     this.slideElements.highlightElements = [];
+    this.slideElements.panelHighlightElements = [];
     this.slideElements.buttonElements = [];
     this.slideElements.instrumentElements = [];
     this.slideElements.quizElements = [];
@@ -2840,36 +2573,34 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var possibleActions = { 
-          "buttons": "buttonElements", 
-          "highlights": "highlightElements", 
-          "quiz":"quizElements" 
+          "button": {
+            "elements": "buttonElements",
+            "mult": "buttons"
+          }, 
+          "highlight": {
+            "elements" : "highlightElements",
+            "mult" : "highlights"
+          }, 
+          "quiz": {
+            "elements" : "quizElements",
+            "mult": "quiz"
+          } 
         }, action, toShowBtn = [], toShowHighlights = [], toShowQuiz = [], i;
 
     for(action in possibleActions){
       if( possibleActions.hasOwnProperty(action) ){
-        for(i=0; i < slide.slideElements[possibleActions[action]].length; i++){
+        for(i=0; i < slide.slideElements[possibleActions[action].elements].length; i++){
           slide.elementsToShow[action][i] = false;
         }
       }
       
-      if(slideContent.hasOwnProperty(action) && possibleActions.hasOwnProperty(action)){
-        for(i = 0; slideContent[action] &&  i < slideContent[action].length; i++){
-          switch(action){
-            case "buttons":
-
-              break;
-            case "highlights":
-              break;
-            case "quiz":
-              break;
-            default:
-              console.log("another slideContent action we are ignoring inside checkHideShowActions");
-          }
-          if(typeof slideContent[action][i] === "object" ){
-            slide.elementsToShow[action][slideContent[action][i].index] = true;
+      if(slideContent.hasOwnProperty(possibleActions[action].mult) && possibleActions.hasOwnProperty(action)){
+        for(i = 0; slideContent[possibleActions[action].mult] &&  i < slideContent[possibleActions[action].mult].length; i++){
+          if(typeof slideContent[possibleActions[action].mult][i] === "object" ){
+            slide.elementsToShow[action][slideContent[possibleActions[action].mult].index] = true;
             //toShow[showButtons[j].index] = true;
           } else {
-            slide.elementsToShow[action][slideContent[action][i]] = true;
+            slide.elementsToShow[action][slideContent[possibleActions[action].mult][i]] = true;
             //toShow[showButtons[j]] = true;  
           }
         }
@@ -2881,98 +2612,114 @@ AVIATION.common.Slide.prototype = {
         for(i=0; i < slide.elementsToShow[action].length; i++){
           if(slide.elementsToShow[action][i]){
             //show this one
-            slide.slideElements[possibleActions[action]][i].show();
+            slide.slideElements[possibleActions[action].elements][i].show();
           } else {
             //hide this one
-            slide.slideElements[possibleActions[action]][i].hide();
+            slide.slideElements[possibleActions[action].elements][i].hide();
           }
         }
       }
     }
   },
 
-  /*
-  quizElements
-        "button": {
-        "enableOption": "enableButtons",
-        "arrayName": "buttons",
-        "elementArray": "buttonElements",
-        "container": "buttonContainer"
-      },
-      "highlight":{
-        "enableOption": "enableHighlights",
-        "arrayName": "highlights",
-        "elementArray": "highlightElements",
-        "container": "highlightsContainer"
-      }
-  */
 
-  checkSlideButtons: function( showButtons, slide ){
+  /***
+    *   Function for checking if the student is performing the correct scanning pattern
+    *   The scanning pattern order is:
+    *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
+    **/
+  checkScanningPattern: function(type, index, event, buildContent){
     "use strict";
-    var i, j, toShow = [], button;
-    if(slide.options.enableButtons){ //(showHighlights && showHighlights.length > 0){
-      // check the index/indices of highlights to show from the bank
-      // and hide/show accordingly
-      // console.log("lets manage some highlights!");
-      for(button in slide.buttons){
-        if(slide.buttons.hasOwnProperty(button)){
-          toShow.push(false);
-        }
-      }
 
-      for(j=0; showButtons && j < showButtons.length; j++){
-        console.log("whats the show buttons?");
-        console.log(showButtons);
-        if(typeof showButtons[j] === "object"){
-          toShow[showButtons[j].index] = true;
-        } else {
-          toShow[showButtons[j]] = true;  
-        }
-      }
+    var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
+        allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex, element,
+        //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
+        scanPattern = [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3],
+        highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
 
-      for(i=0; i < toShow.length; i++){
-        if(toShow[i]){
-          slide.slideElements.buttonElements[i].show();
-        } else {
-          slide.slideElements.buttonElements[i].hide();
-        }
-      }
+    if(event.target){
+      element = event.target;
+    } else if(type === 'highlight'){
+      element = slide.slideElements.highlightElements[index];
     }
+
+    if(slide.overallScanIndex !== undefined){
+      overallScanIndex = slide.overallScanIndex;
+    } else {
+      overallScanIndex = -1;
+    }
+
+    if(slide.allowedUnsuccesful !== undefined){
+      allowedUnsuccesful = slide.allowedUnsuccesful;
+    } else {
+      allowedUnsuccesful = 3;
+    }
+    
+    if(slide.unsuccesfulAttempts !== undefined){
+      unsuccesfulAttempts = slide.unsuccesfulAttempts;
+    } else {
+      unsuccesfulAttempts = 0;
+    }
+
+    if(slide.patternInnerIndex !== undefined){
+      innerIndex = slide.patternInnerIndex;
+    } else {
+      innerIndex = 0;
+    }
+
+    console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
+
+    if(type === 'highlight' && typeof index !== undefined){
+      
+      slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
+      
+      if( scanPattern[overallScanIndex+1] === index){
+        if(element !== undefined){
+          //$(element).pulse('destroy');
+          $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+          if(buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] &&
+              slide.slideContent[slide.activeIndex+innerIndex+1].media.index === index){
+            console.log("index expected: " + slide.slideContent[slide.activeIndex+innerIndex].media.index);
+            console.log("index provided: " + index);
+            console.log("inner index: " + innerIndex);
+            innerIndex++;
+            slide.buildContent(true, (slide.activeIndex + innerIndex) );
+          }
+          //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+        }
+        overallScanIndex++;
+
+        if(overallScanIndex === scanPattern.length-1){
+          completedScan++;
+          for(i=0; i<slide.slideElements.highlightElements.length; i++){
+            slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);  
+            //$(".instrument.col-xs-4").pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+          }
+          overallScanIndex = -1;
+        }
+
+      } else {
+        unsuccesfulAttempts++;
+        if(element !== undefined){
+          //$(element).pulse('destroy');
+          $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+          //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+        }
+        slide.setStatus("Wrong instrument during scan. Try Again!" + " Wrong attempts: " + unsuccesfulAttempts);
+
+        if(unsuccesfulAttempts >= allowedUnsuccesful){
+          // TODO: show modal asking to redo or continue
+        }
+      }
+
+    }
+
+    slide.patternInnerIndex = innerIndex;
+    slide.allowedUnsuccesful = allowedUnsuccesful;
+    slide.unsuccesfulAttempts = unsuccesfulAttempts;
+    slide.overallScanIndex = overallScanIndex;
+    slide.completedScan = completedScan;
   },
-
-  // TODO: create the same for buttons
-  checkSlideHighlights: function( showHighlights, slide ){
-    "use strict";
-    var i, j, toShow = [];
-
-    if(slide.options.enableHighlights){ //(showHighlights && showHighlights.length > 0){
-      // check the index/indices of highlights to show from the bank
-      // and hide/show accordingly
-      // console.log("lets manage some highlights!");
-
-
-      for(i=0; slide.highlights && i < slide.highlights.length; i++){
-        toShow.push(false);
-      }
-
-      for(j=0; showHighlights && j < showHighlights.length; j++){
-        if(typeof showHighlights[j] === "object"){
-          toShow[showHighlights[j].index] = true;
-        } else {
-          toShow[showHighlights[j]] = true;  
-        }
-
-      }
-
-      for(i=0; i < toShow.length; i++){
-        if(toShow[i]){
-          slide.slideElements.highlightElements[i].show();
-        } else {
-          slide.slideElements.highlightElements[i].hide();
-        }
-      }
-    }
-  }
 
 };
 console.log("testing this class execution");
