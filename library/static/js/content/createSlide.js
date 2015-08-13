@@ -311,13 +311,17 @@ AVIATION.common.Slide.prototype = {
         }
         
         if(headerElement && headerElement.length > 0){
-          headerElement.replaceWith(newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings));
+          if($().pulse){
+            headerElement.replaceWith(newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings));
+          }
           console.log("replace the header");
         } else {
           console.log("append the header");
           console.log(newHeader);
           console.log(parent);
-          newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings).prependTo(slide.container);
+          if($().pulse){
+            newHeader.pulse(slide.options.pulseProperties, slide.options.pulseSettings).prependTo(slide.container);
+          }
         }
       }
 
@@ -371,7 +375,7 @@ AVIATION.common.Slide.prototype = {
     }
     this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
 
-    slide.initPanel();
+    slide.initPanel(slide.options.panelType);
     
     callback = function(){
       slide.buildQuizContainer();
@@ -388,6 +392,12 @@ AVIATION.common.Slide.prototype = {
     slide.initMedia(callback);
     
   },
+
+  buildRetryModal: function(){
+    "use strict";
+
+
+  },  
 
   // method for building avatars into the slide
   buildAvatars: function(parent, avatar, callback){
@@ -638,7 +648,9 @@ AVIATION.common.Slide.prototype = {
           if(innerImage){
             innerImage.appendTo(newSlideInner);
           }
-          newSlideInner.appendTo(contentContainer)/*---------test-------------*/.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+          if($().pulse){
+            newSlideInner.appendTo(contentContainer)/*---------test-------------*/.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+          }
         }
       } else {
         slideInner.children().remove();
@@ -1279,13 +1291,18 @@ AVIATION.common.Slide.prototype = {
   },
 
   // create the instrument dashboard
-  initPanel: function(options){
+  initPanel: function(instruments){
     "use strict";
     // extend to support a single instrument!
     var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), 
         instIds = slide.options.instrumentIds, instrumentObject = {}, options = {}, i=0;
 
     if(slide.options.enablePanel){
+
+      if(instruments === undefined){
+        instruments = slide.options.instrumentIds;
+      }
+
       console.log("initing panel!");
 
       options = {
@@ -1293,7 +1310,7 @@ AVIATION.common.Slide.prototype = {
         showBox: false,
         showScrews: true,
         bootstrapFriendly: true,
-        img_directory : slide.options.development ? '/c4x/CDOT/AV101/asset/' : '/c4x/Seneca_College/M01S01_Test/asset/'
+        img_directory : slide.options.development ? 'https://online.cdot.senecacollege.ca:25080/Project/library/static/img/instruments/' : '/c4x/Seneca_College/M01S01_Test/asset/'
       };
 
       if(panelContainer && panelContainer.length < 1){
@@ -1307,8 +1324,13 @@ AVIATION.common.Slide.prototype = {
         }).appendTo(slide.container);
       }
 
-      for (instrument in instIds){
-        if(instIds.hasOwnProperty(instrument)){
+      console.log("instruments: ");
+      console.log(instruments);
+
+      for (instrument in instruments){
+        console.log("instrument: ");
+        console.log(instrument);
+        if(instruments.hasOwnProperty(instrument) && instIds.hasOwnProperty(instrument)){
 
           instrumentSpan = $("#" + instIds[instrument]);
 
@@ -1401,7 +1423,7 @@ AVIATION.common.Slide.prototype = {
   setAllInstruments: function( options ){
     "use strict";
 
-    var slide = this, instruments = slide.instruments, instrumentFunctions = {}, instrument, i;
+    var slide = this, instrumentFunctions = {}, instruments = slide.instruments, instrument, i;
 
     instrumentFunctions = {
       airspeed          : [ "setAirSpeed" ],
@@ -1436,7 +1458,7 @@ AVIATION.common.Slide.prototype = {
     if(slide.options.enablePanel){
 
       var papaComplete = function(index) {
-        var data = {}, flight = this.result.data, i = this.index || 0;
+        var data = {}, flight = this.result.data, i = this.index || 0, toggle = true;
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
@@ -1450,11 +1472,11 @@ AVIATION.common.Slide.prototype = {
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
 
 //            console.log("i: "+i + " flight: "+flight.length );
-            console.log("pressure: " + flight[i][19] + " alt: " + flight[i][41]);
+//            console.log("pressure: " + flight[i][19] + " alt: " + flight[i][41]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
-                roll: ( -( flight[i][31] ) ) //( -(allFlight[i].roll) ) 
+                roll: ( -( flight[i][31] ) ), //( -(allFlight[i].roll) ) 
               },
               heading: {
                 heading: flight[i][33]
@@ -2207,7 +2229,9 @@ AVIATION.common.Slide.prototype = {
         
         break;
     }
-    status.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+    if($().pulse){
+      status.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+    }
 
   },
 
@@ -2676,7 +2700,11 @@ AVIATION.common.Slide.prototype = {
       if( scanPattern[overallScanIndex+1] === index){
         if(element !== undefined){
           //$(element).pulse('destroy');
-          $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+
+          if($().pulse){
+            $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+          }
+
           if(buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] &&
               slide.slideContent[slide.activeIndex+innerIndex+1].media.index === index){
             console.log("index expected: " + slide.slideContent[slide.activeIndex+innerIndex].media.index);
@@ -2684,6 +2712,10 @@ AVIATION.common.Slide.prototype = {
             console.log("inner index: " + innerIndex);
             innerIndex++;
             slide.buildContent(true, (slide.activeIndex + innerIndex) );
+          } else if (buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] && 
+              slide.slideContent[slide.activeIndex+innerIndex+1].media.type !== 'highlight'){
+            console.log("finished a scan and all its content....");
+            slide.activeIndex = slide.activeIndex + innerIndex + 1;
           }
           //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
         }
@@ -2692,7 +2724,9 @@ AVIATION.common.Slide.prototype = {
         if(overallScanIndex === scanPattern.length-1){
           completedScan++;
           for(i=0; i<slide.slideElements.highlightElements.length; i++){
-            slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);  
+            if($().pulse){
+              slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);  
+            }
             //$(".instrument.col-xs-4").pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
           overallScanIndex = -1;
@@ -2702,7 +2736,9 @@ AVIATION.common.Slide.prototype = {
         unsuccesfulAttempts++;
         if(element !== undefined){
           //$(element).pulse('destroy');
-          $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+          if($().pulse){
+            $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+          }
           //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
         }
         slide.setStatus("Wrong instrument during scan. Try Again!" + " Wrong attempts: " + unsuccesfulAttempts);
