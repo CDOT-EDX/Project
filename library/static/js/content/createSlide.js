@@ -973,6 +973,10 @@ AVIATION.common.Slide.prototype = {
       }
     } else if (content.advanceWith) {
       //$(slide).trigger("next");
+      console.log("completed scans: ");
+      console.log(slide.completedScan);
+      console.log("min scan:");
+      console.log(slide.minScan);
       if(slide.completedScan === slide.minScan){
         slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
         $(slide).trigger("next");
