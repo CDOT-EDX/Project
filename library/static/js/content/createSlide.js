@@ -973,9 +973,13 @@ AVIATION.common.Slide.prototype = {
       }
     } else if (content.advanceWith) {
       //$(slide).trigger("next");
+      if(slide.completedScan === slide.minScan){
+        slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
+        $(slide).trigger("next");
+      } else {
+        console.log("wrong advanceWith, waiting for correcet input");
+      }
 
-
-      console.log("wrong advanceWith, waiting for correcet input");
     } else {
       $(slide).trigger("next");
     }
