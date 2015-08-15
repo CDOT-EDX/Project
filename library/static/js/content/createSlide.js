@@ -978,7 +978,7 @@ AVIATION.common.Slide.prototype = {
       console.log("min scan:");
       console.log(slide.minScan);
       if(slide.completedScan === slide.options.minScan){
-        slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
+        //slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
         $(slide).trigger("next");
       } else {
         console.log("wrong advanceWith, waiting for correcet input");
