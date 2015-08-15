@@ -979,7 +979,7 @@ AVIATION.common.Slide.prototype = {
       console.log(slide.minScan);
       if(slide.completedScan === slide.options.minScan){
         //slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
-        $(slide).trigger("next");
+        slide.buildContent(true, slide.activeIndex + slide.patternInnerIndex);
       } else {
         console.log("wrong advanceWith, waiting for correcet input");
       }
