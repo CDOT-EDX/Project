@@ -2167,7 +2167,7 @@ AVIATION.common.Slide.prototype = {
   // constrols the state of the Previous/Next 'player' buttons
   checkSlideControlPlayButtonsState: function(){
     var controls = this.slideElements.slideControls, active = this.activeIndex,
-        players = this.slideAudios;
+        players = this.slideAudios, slide = this;
 
     if(this.options.showSlideControls){
 
