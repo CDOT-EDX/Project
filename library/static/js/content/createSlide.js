@@ -952,7 +952,10 @@ AVIATION.common.Slide.prototype = {
     console.log("actual element");
     console.log(element);
 
-    if(content.advanceWith && content.advanceWith.type === element.type){
+
+    if(content.advanceWith && content.advanceWith.override){
+      //$(slide).trigger("playIndex", )
+    } else if (content.advanceWith && content.advanceWith.type === element.type){
       // TODO: check if audio has completed
       if(typeof content.advanceWith.index !== undefined){
         if(content.advanceWith.index === element.index){
@@ -979,7 +982,7 @@ AVIATION.common.Slide.prototype = {
       console.log(slide.minScan);
       if(slide.completedScan === slide.options.minScan){
         //slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
-        slide.buildContent(true, slide.activeIndex + slide.patternInnerIndex + 1);
+        //slide.buildContent(true, slide.activeIndex + slide.patternInnerIndex + 1);
       } else {
         console.log("wrong advanceWith, waiting for correcet input");
       }
@@ -2194,13 +2197,14 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if(active > players.length){
+          if(active > players.length -1){
             controls.pause.hide();
             controls.play.hide();
             controls.replay.show(); 
           }
           controls.next.attr("disabled", true);
           controls.next.prop("disabled", true);
+
         } else {
           console.log("error: active is greater then players length? not doing anything");
         }
