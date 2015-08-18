@@ -2193,6 +2193,8 @@ AVIATION.common.Slide.prototype = {
           }
         } else if (active >= players.length - 1){
           console.log("active is the last players length");
+          console.log("active: " + active);
+          console.log("playerslength: " + players.length);
           if(active > 0){
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
@@ -2201,6 +2203,7 @@ AVIATION.common.Slide.prototype = {
             controls.pause.hide();
             controls.play.hide();
             controls.replay.show(); 
+            slide.activateTimer(5, slide.options.autoRedirect);
           }
           controls.next.attr("disabled", true);
           controls.next.prop("disabled", true);
