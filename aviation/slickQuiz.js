@@ -435,8 +435,9 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
             },
+
             buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr){
-                var remidiation = [];
+                var remidiation = [], i;
                 var singleRemidiation = '';
                                 
                 for (i in answersPr) {
@@ -489,7 +490,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
 
                 answerLIs.addClass(incorrectResponseClass);
-
+                console.log("incRClass");
+                console.log(incorrectResponseClass);
                 // Collect the true answers needed for a correct response
                 var trueAnswers = [];
 
@@ -506,22 +508,24 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     if (correctResponse && correctResponse === "true") {
                         console.log("this was a correct response");
                         console.log(data);
+                        console.log(correctClass);
                         if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {
 
                             //"Firing callback"
                             questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
                         }
 
                         questionLI.addClass(correctClass);
                     } else {
                         console.log("this was an incorrect response");
                         console.log(data);
+                        console.log(incorrectClass);
                         if (questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function') {
 
                             //"Firing callback"
                             questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
-                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
                         }
 
                         questionLI.addClass(incorrectClass);
