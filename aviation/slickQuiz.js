@@ -494,11 +494,16 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 var trueAnswers = [];
 
                 $(anySlide).trigger("completedQuiz");
-         
+                console.log("after completedQuizTrig");
 
                         $(anySlide).on('checkCompleted', function(evt, data){
                             console.log('Trigger');
+                            console.log('WWWWW');
                             var correctResponse = data.quiz_result_id.correct;
+                            console.log("answer");
+                            console.log(correctResponse);
+                            console.log("data: ");
+                            console.log(data);
 
                         if (correctResponse) {
 

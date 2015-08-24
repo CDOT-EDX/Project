@@ -133,6 +133,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
         // Reassign user-submitted deprecated options
         var depMsg = '';
+        console.log('WOWOWOW');
 
         if (options && typeof options.disableNext != 'undefined') {
             if (typeof options.preventUnanswered == 'undefined') {
@@ -494,12 +495,15 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 var trueAnswers = [];
 
                 $(anySlide).trigger("completedQuiz");
-         
+                console.log ("Within");
 
                         $(anySlide).on('checkCompleted', function(evt, data){
-                            console.log('Trigger');
-                            var correctResponse = data.quiz_result_id.correct;
-
+                            //console.log('Trigger');
+                            console.log('Hello');
+                            var correctResponse = false;//data.quiz_result_id.correct;
+                            console.log('chk');
+                                        console.log(correctResponse);
+                            console.log("End");
                         if (correctResponse) {
 
                             if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {

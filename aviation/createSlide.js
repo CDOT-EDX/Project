@@ -869,7 +869,7 @@ AVIATION.common.Slide.prototype = {
       statusBar = jQuery('<div/>', {
         "class": "row",
         html: '<a id="' + this.statusId.split("#")[1] + '"' + 
-              'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
+              'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 text-center" ' +
               'role="button">Slide Loading...</a>'
       }).appendTo(parent);
 
@@ -952,7 +952,10 @@ AVIATION.common.Slide.prototype = {
     console.log("actual element");
     console.log(element);
 
-    if(content.advanceWith && content.advanceWith.type === element.type){
+
+    if(content.advanceWith && content.advanceWith.override){
+      //$(slide).trigger("playIndex", )
+    } else if (content.advanceWith && content.advanceWith.type === element.type){
       // TODO: check if audio has completed
       if(typeof content.advanceWith.index !== undefined){
         if(content.advanceWith.index === element.index){
@@ -973,9 +976,17 @@ AVIATION.common.Slide.prototype = {
       }
     } else if (content.advanceWith) {
       //$(slide).trigger("next");
+      console.log("completed scans: ");
+      console.log(slide.completedScan);
+      console.log("min scan:");
+      console.log(slide.minScan);
+      if(slide.completedScan === slide.options.minScan){
+        //slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
+        //slide.buildContent(true, slide.activeIndex + slide.patternInnerIndex + 1);
+      } else {
+        console.log("wrong advanceWith, waiting for correcet input");
+      }
 
-
-      console.log("wrong advanceWith, waiting for correcet input");
     } else {
       $(slide).trigger("next");
     }
@@ -2156,7 +2167,7 @@ AVIATION.common.Slide.prototype = {
   // constrols the state of the Previous/Next 'player' buttons
   checkSlideControlPlayButtonsState: function(){
     var controls = this.slideElements.slideControls, active = this.activeIndex,
-        players = this.slideAudios;
+        players = this.slideAudios, slide = this;
 
     if(this.options.showSlideControls){
 
@@ -2182,17 +2193,21 @@ AVIATION.common.Slide.prototype = {
           }
         } else if (active >= players.length - 1){
           console.log("active is the last players length");
+          console.log("active: " + active);
+          console.log("playerslength: " + players.length);
           if(active > 0){
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if(active > players.length){
+          if(active > players.length -1){
             controls.pause.hide();
             controls.play.hide();
             controls.replay.show(); 
+            slide.activateTimer(5, slide.options.autoRedirect);
           }
           controls.next.attr("disabled", true);
           controls.next.prop("disabled", true);
+
         } else {
           console.log("error: active is greater then players length? not doing anything");
         }
