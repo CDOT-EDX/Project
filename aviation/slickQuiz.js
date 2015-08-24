@@ -503,7 +503,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     console.log("data: ");
                     console.log(data);
 
-                    if (correctResponse) {
+                    if (correctResponse && correctResponse === "true") {
                         console.log("this was a correct response");
                         console.log(data);
                         if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {
