@@ -493,79 +493,80 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 // Collect the true answers needed for a correct response
                 var trueAnswers = [];
 
+                $(anySlide).off('checkCompleted');
+                $(anySlide).on('checkCompleted', function(evt, data){
+                    console.log('Trigger');
+                    console.log('WWWWW');
+                    var correctResponse = data.quiz_result_id.correct;
+                    console.log("answer");
+                    console.log(correctResponse);
+                    console.log("data: ");
+                    console.log(data);
+
+                    if (correctResponse) {
+                        console.log("this was a correct response");
+                        console.log(data);
+                        if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {
+
+                            //"Firing callback"
+                            questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
+                        }
+
+                        questionLI.addClass(correctClass);
+                    } else {
+                        console.log("this was an incorrect response");
+                        console.log(data);
+                        if (questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function') {
+
+                            //"Firing callback"
+                            questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
+                        }
+
+                        questionLI.addClass(incorrectClass);
+                    }
+
+                    // Toggle appropriate response (either for display now and / or on completion)
+                    questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
+
+                    // If perQuestionResponseMessaging is enabled, toggle response and navigation now
+                    if (plugin.config.perQuestionResponseMessaging) {
+                        $(checkButton).hide();
+                        if (!plugin.config.perQuestionResponseAnswers) {
+                            // Make sure answers don't highlight for a split second before they hide
+                            questionLI.find(_answers).hide({
+                                duration: 0,
+                                complete: function () {
+                                    questionLI.addClass(completeClass);
+                                }
+                            });
+                        } else {
+                            questionLI.addClass(completeClass);
+                        }
+                        questionLI.find('input').prop('disabled', true);
+                        questionLI.find(_responses).show();
+                        questionLI.find(_nextQuestionBtn).fadeIn(300, kN(key, 1));
+                        questionLI.find(_prevQuestionBtn).fadeIn(300, kN(key, 2));
+                        if (!questionLI.find(_prevQuestionBtn).length) kN(key, 2).apply(null, []); // 2nd notch on key must be passed even if there's no "back" button
+                    } else {
+                        kN(key, 1).apply(null, []); // 1st notch on key must be on both sides of if/else, otherwise key won't turn
+                        kN(key, 2).apply(null, []); // 2nd notch on key must be on both sides of if/else, otherwise key won't turn
+                    }
+                    
+
+                    internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});    
+
+
+                });
+                    //checkCorrectAnswer(questionIdFound, questionIndex, selectedAnswers);
+                    ///////////////////////////////////////////////////////////////////////checkCorrectAnswer
+                    //passing the array of selected answers
+
+
+                    // Verify all/any true answers (and no false ones) were submitted
                 $(anySlide).trigger("completedQuiz");
-                console.log("after completedQuizTrig");
-
-                        $(anySlide).on('checkCompleted', function(evt, data){
-                            console.log('Trigger');
-                            console.log('WWWWW');
-                            var correctResponse = data.quiz_result_id.correct;
-                            console.log("answer");
-                            console.log(correctResponse);
-                            console.log("data: ");
-                            console.log(data);
-
-                        if (correctResponse) {
-
-                            if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {
-
-                                //"Firing callback"
-                                questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-                                plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
-                            }
-
-                            questionLI.addClass(correctClass);
-                        } else {
-
-                            if (questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function') {
-
-                                //"Firing callback"
-                                questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
-                                plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass)
-                            }
-
-                            questionLI.addClass(incorrectClass);
-                        }
-
-                        // Toggle appropriate response (either for display now and / or on completion)
-                        questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
-
-                        // If perQuestionResponseMessaging is enabled, toggle response and navigation now
-                        if (plugin.config.perQuestionResponseMessaging) {
-                            $(checkButton).hide();
-                            if (!plugin.config.perQuestionResponseAnswers) {
-                                // Make sure answers don't highlight for a split second before they hide
-                                questionLI.find(_answers).hide({
-                                    duration: 0,
-                                    complete: function () {
-                                        questionLI.addClass(completeClass);
-                                    }
-                                });
-                            } else {
-                                questionLI.addClass(completeClass);
-                            }
-                            questionLI.find('input').prop('disabled', true);
-                            questionLI.find(_responses).show();
-                            questionLI.find(_nextQuestionBtn).fadeIn(300, kN(key, 1));
-                            questionLI.find(_prevQuestionBtn).fadeIn(300, kN(key, 2));
-                            if (!questionLI.find(_prevQuestionBtn).length) kN(key, 2).apply(null, []); // 2nd notch on key must be passed even if there's no "back" button
-                        } else {
-                            kN(key, 1).apply(null, []); // 1st notch on key must be on both sides of if/else, otherwise key won't turn
-                            kN(key, 2).apply(null, []); // 2nd notch on key must be on both sides of if/else, otherwise key won't turn
-                        }
-                        
-
-                        internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});    
-
-
-                        })
-                        //checkCorrectAnswer(questionIdFound, questionIndex, selectedAnswers);
-                        ///////////////////////////////////////////////////////////////////////checkCorrectAnswer
-                        //passing the array of selected answers
-
-
-                        // Verify all/any true answers (and no false ones) were submitted
-                        
+                console.log("after completedQuizTrig");  
                
             },
 
