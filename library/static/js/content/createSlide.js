@@ -869,7 +869,7 @@ AVIATION.common.Slide.prototype = {
       statusBar = jQuery('<div/>', {
         "class": "row",
         html: '<a id="' + this.statusId.split("#")[1] + '"' + 
-              'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8 text-center" ' +
+              'class="btn btn-default col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 text-center" ' +
               'role="button">Slide Loading...</a>'
       }).appendTo(parent);
 
