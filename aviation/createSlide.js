@@ -1305,13 +1305,21 @@ AVIATION.common.Slide.prototype = {
   initPanel: function(instruments){
     "use strict";
     // extend to support a single instrument!
-    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), 
-        instIds = slide.options.instrumentIds, instrumentObject = {}, options = {}, i=0;
+    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), bootCol = 12,
+        instIds = slide.options.instrumentIds, instrumentObject = {}, options = {}, i=0, numberOfInstrments = 0;
 
     if(slide.options.enablePanel){
 
       if(instruments === undefined){
         instruments = slide.options.instrumentIds;
+      }
+
+      numberOfInstrments = slide.countObjectLength(instruments);
+
+      if(numberOfInstrments<3){
+        bootCol = (numberOfInstrments * 4);
+      } else {
+        bootCol = 12;
       }
 
       console.log("initing panel!");
@@ -1327,7 +1335,7 @@ AVIATION.common.Slide.prototype = {
       if(panelContainer && panelContainer.length < 1){
         panelContainer = jQuery("<div/>", {
           id: slide.options.panelId.split("#")[1],
-          class: "instruments col-xs-12",
+          class: "instruments col-xs-" + bootCol,
           html: '<div id="'+slide.options.instStatusId1.split("#")[1]+'" class="row"></div>'+
                 '<div id="panelHighlightContainer"></div><div id="instRow1" class="row">'+
                 '</div><div id="instRow2" class="row"></div><div id="'+
@@ -1482,8 +1490,6 @@ AVIATION.common.Slide.prototype = {
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
 
-//            console.log("i: "+i + " flight: "+flight.length );
-//            console.log("pressure: " + flight[i][19] + " alt: " + flight[i][41]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
@@ -2200,9 +2206,10 @@ AVIATION.common.Slide.prototype = {
             controls.previous.removeAttr("disabled");
           }
           if(active > players.length -1){
+            slide.setStatus('Click "Continue" to proceed to the next slide');
             controls.pause.hide();
             controls.play.hide();
-            controls.replay.show(); 
+            controls.replay.show();
             slide.activateTimer(5, slide.options.autoRedirect);
           }
           controls.next.attr("disabled", true);
