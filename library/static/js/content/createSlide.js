@@ -1148,7 +1148,7 @@ AVIATION.common.Slide.prototype = {
 */
         $action = $("#" + act + "_" + action);
 
-        if( $action || $action.length < 1){
+        if( !$action || $action.length < 1){
           $action = jQuery(options.element,{
             id: act + "_" + action,
             class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
@@ -1333,8 +1333,10 @@ AVIATION.common.Slide.prototype = {
         showBox: false,
         showScrews: true,
         bootstrapFriendly: true,
-        img_directory : slide.options.development ? 'https://online.cdot.senecacollege.ca:25080/Project/library/static/img/instruments/' : '/c4x/Seneca_College/M01S01_Test/asset/'
+        img_directory: 'https://online.cdot.senecacollege.ca:25080/Project/library/static/img/instruments/'
       };
+
+      // /c4x/Seneca_College/M01S01_Test/asset/
 
       if(panelContainer && panelContainer.length < 1){
         panelContainer = jQuery("<div/>", {
