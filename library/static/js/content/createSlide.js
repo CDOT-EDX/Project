@@ -1425,7 +1425,9 @@ AVIATION.common.Slide.prototype = {
       divider = 3;
     }
 
-    console.log("resizing to: " + (bodySize/divider) );
+    size = bodySize / divider;
+
+    console.log("resizing to: " + size );
 
     for (instrument in instIds){
       if(instIds.hasOwnProperty(instrument)){
