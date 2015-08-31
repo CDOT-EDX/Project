@@ -1070,11 +1070,7 @@ AVIATION.common.Slide.prototype = {
               break;
 
             case "highlight":
-              if(slide.options.highlightsParent){
-                $parent = $(slide.options.highlightsParent);
-              } else {
-                $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
-              }
+              $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
               options.element = '<div/>';
               options.classes = "clearClickable ";
               options.dataToggle = "modal";
