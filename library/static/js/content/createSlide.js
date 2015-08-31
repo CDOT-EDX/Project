@@ -526,7 +526,7 @@ AVIATION.common.Slide.prototype = {
         console.log("resetting slider height!!");
         $sliderContainer.height( $body.height() );
         $slider.height( $body.height() - 22 );
-        slide.instrumentResizer( $body.width() / 3);
+        slide.instrumentResizer( $body.width() );
         console.log($slider.height() );
         console.log($sliderContainer.height() );
         console.log($body.height() );
@@ -1414,12 +1414,18 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  instrumentResizer: function(size){
+  instrumentResizer: function(bodySize){
     "use strict";
 
-    var slide = this, instrument, instIds = slide.options.instrumentIds;
+    var slide = this, instrument, instIds = slide.options.instrumentIds, numberOfInstrments = slide.countObjectLength( slide.options.panelType ), divider;
 
-    console.log("resizing to: " + size);
+    if(numberOfInstrments && numberOfInstrments < 3){
+      divider = numberOfInstrments;
+    } else {
+      divider = 3;
+    }
+
+    console.log("resizing to: " + (bodySize/divider) );
 
     for (instrument in instIds){
       if(instIds.hasOwnProperty(instrument)){

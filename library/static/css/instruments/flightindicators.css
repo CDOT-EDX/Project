@@ -10,9 +10,9 @@ Published under GPLv3 License.
 
 /* Global block of an indicator*/
 div.instrument {
-  position: relative;
+  position: inherit;
   display: inline-block;
-  overflow: hidden;
+  /*overflow: hidden;*/
 }
 
 .instruments {
