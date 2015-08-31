@@ -25,7 +25,7 @@ In order to have this version of the createSlide library working you will need t
     CDOT-EDX/Project/library/statis/js/*
     CDOT-EDX/Project/library/statis/css/*
 
-createSlide now supports one options object being passed on versus multiples...
+createSlide now supports one options object being passed versus multiples...
 
 therefore use: `var anySlide = new AVIATION.Slide( options )`
 
@@ -40,13 +40,15 @@ Acceptable options and defaults are as follows:
     autoplay:           true, // proceeds to the next AUDIO automatically after current is finished
     autoRedirect:       false, // proceeds to the next SLIDE automatically after current is finished
     noAudio:            false,
+    noCSV:              false, // indicates that the instrument panel should build even if a csv file isn't specified in media object
     enableModals:       false,
     enableHighlights:   false,
     hiddenHighlights:   false,
     enableButtons:      true,
     hiddenButtons:      false, // am I using this yet?
     enableSlider:       false,
-    enablePanel:        false, // should it be panel or dashboard or each instrument separately?
+    enablePanel:        false, // enable full panel unless "panelType" option is set
+    panelType:          { "attitude": "attitude" }, // object that lists 1 or more instruments to display (if not set, full panel)
     readOnlySlider:     true,
     container:          "#slideContainer",
     statusId:           "#statusBar",

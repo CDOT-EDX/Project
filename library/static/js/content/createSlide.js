@@ -1305,7 +1305,7 @@ AVIATION.common.Slide.prototype = {
   initPanel: function(instruments){
     "use strict";
     // extend to support a single instrument!
-    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), bootCol = 12,
+    var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), bootCol = 12, bootOffset=0, 
         instIds = slide.options.instrumentIds, instrumentObject = {}, options = {}, i=0, numberOfInstrments = 0;
 
     if(slide.options.enablePanel){
@@ -1318,8 +1318,12 @@ AVIATION.common.Slide.prototype = {
 
       if(numberOfInstrments<3){
         bootCol = (numberOfInstrments * 4);
+        bootOffset = (12 - bootCol) / 2;
       } else {
-        bootCol = 12;
+        if(!this.options.enableSlider)
+          bootCol = 12;
+        else
+          bootCol = 8;
       }
 
       console.log("initing panel!");
@@ -1341,6 +1345,14 @@ AVIATION.common.Slide.prototype = {
                 '</div><div id="instRow2" class="row"></div><div id="'+
                   slide.options.instStatusId2.split("#")[1]+'" class="row"></div>'
         }).appendTo(slide.container);
+      } else {
+        $(slide.options.panelId)
+          .removeClass((this.options.enableSlider ? "col-xs-8" : "col-xs-12"))
+          .addClass("col-xs-" + bootCol);
+
+        if(bootOffset){
+          $(slide.options.panelId).addClass("col-xs-offset-" + bootOffset);  
+        }
       }
 
       console.log("instruments: ");
@@ -1474,7 +1486,7 @@ AVIATION.common.Slide.prototype = {
 
     var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [], myFlightIntVar, instrumentOptions = {}, csvPlayers = [], parsed = 0, c;
 
-    if(slide.options.enablePanel){
+    if(slide.options.enablePanel && !slide.options.noCSV){
 
       var papaComplete = function(index) {
         var data = {}, flight = this.result.data, i = this.index || 0, toggle = true;
@@ -1539,7 +1551,7 @@ AVIATION.common.Slide.prototype = {
                   console.log("csv ended event");
                   $(slide).trigger("end", data);
                 } else {
-                  slide.setStatus("Sorry you ddin't compelete the scan in time.");
+                  slide.setStatus("Sorry you didn't compelete the scan in time.");
                   slide.setInstrumentStatus2("The flight has finished.");
                   console.log("minScan: " + slide.minScan + " completedScans: " + slide.completedScan);
 
@@ -1559,12 +1571,13 @@ AVIATION.common.Slide.prototype = {
       };
 
       var papaPause = function(){
+        console.log("attempting to pause csv");
         slide.panelPause = true;
       };
 
       var papaCurrentLine = function(index){
         this.index = index || 0;
-
+        console.log("setting current line of csv");
         return this.index;
       };
 
@@ -2205,7 +2218,7 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if(active > players.length -1){
+          if(active > players.length - 1){
             slide.setStatus('Click "Continue" to proceed to the next slide');
             controls.pause.hide();
             controls.play.hide();
@@ -2378,6 +2391,7 @@ AVIATION.common.Slide.prototype = {
           enableHighlights: false,
           hiddenHighlights: false,
           readOnlySlider: true,
+          noCSV: false,
           headerId: "#slideHeader",
           footerId: "#slideFooter",
           quizId: "#slideQuiz",
