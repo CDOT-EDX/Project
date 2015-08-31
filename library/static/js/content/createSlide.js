@@ -1417,7 +1417,7 @@ AVIATION.common.Slide.prototype = {
   instrumentResizer: function(bodySize){
     "use strict";
 
-    var slide = this, instrument, instIds = slide.options.instrumentIds, numberOfInstrments = slide.countObjectLength( slide.options.panelType ), divider;
+    var slide = this, instrument, instIds = slide.options.instrumentIds, numberOfInstrments = slide.countObjectLength( slide.options.panelType ), divider, size;
 
     if(numberOfInstrments && numberOfInstrments < 3){
       divider = numberOfInstrments;
