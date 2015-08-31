@@ -69,7 +69,7 @@ AVIATION.common.Slide = function (options, slideContent, mediaFiles, parentSlide
 };
 
 AVIATION.common.Slide.prototype = {
-
+  version: "0.1",
   // constructor which initiates the building process
   constructor: function(options){
     "use strict";
@@ -508,7 +508,7 @@ AVIATION.common.Slide.prototype = {
 
     var $body = $(this.bodyId), $sliderContainer = $(this.throttleContainer), $slider = $(this.throttleId), slide = this;
 
-    if(this.options.enableSlider){
+    if(this.options.enableSlider || this.options.enablePanel){
 
       console.log("body and slider... : ");
 
