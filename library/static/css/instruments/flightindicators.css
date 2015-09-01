@@ -10,13 +10,13 @@ Published under GPLv3 License.
 
 /* Global block of an indicator*/
 div.instrument {
-  position: inherit;
+  position: relative;
   display: inline-block;
   /*overflow: hidden;*/
 }
 
 .instruments {
-    background-color: #444547;
+  background-color: #444547;
 }
 
 /* The box containing any element of an indicator */
