@@ -684,6 +684,7 @@ AVIATION.common.Slide.prototype = {
     if(!quiz || quiz.length < 1){
       quiz = jQuery('<div/>', {
         id: this.options.quizId.split("#")[1],
+        class: this.options.quizContainerClass
       });
 
       if(this.options.isModal){
@@ -1174,6 +1175,8 @@ AVIATION.common.Slide.prototype = {
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
+          console.log("pusshign onto " + obj.elementArray);
+          console.log($action);
           slide.slideElements[obj.elementArray].push($action);
         }
 
@@ -2405,11 +2408,13 @@ AVIATION.common.Slide.prototype = {
           headerId: "#slideHeader",
           footerId: "#slideFooter",
           quizId: "#slideQuiz",
+          quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
           panelHighlightsId: "#panelHighlightContainer",
           instStatusId1: "#instStatus1",
           instStatusId2: "#instStatus2",
+          scanningPatternArray: [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3 ],
           minScan: 1,
           pulseCorrectProp: {
             borderWidth: '5px',
@@ -2705,9 +2710,17 @@ AVIATION.common.Slide.prototype = {
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
         allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex, element,
         //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
-        scanPattern = [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3],
+        scanPattern = slide.options.scanningPatternArray,
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
 
+//$(this).trigger("click");
+
+/*
+    $(this).on("checkScanningPattern", function(e, evt){
+
+    });
+*/
+    
     if(event.target){
       element = event.target;
     } else if(type === 'highlight'){

@@ -497,7 +497,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                 $(anySlide).off('checkCompleted');
                 $(anySlide).on('checkCompleted', function(evt, data){
-                    console.log('Trigger');
                     console.log('WWWWW');
                     var correctResponse = data.quiz_result_id.correct;
                     console.log("answer");
@@ -505,7 +504,13 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     console.log("data: ");
                     console.log(data);
 
-                    if (correctResponse && correctResponse === "true") {
+                    if(correctResponse && correctResponse === "true"){
+                        correctResponse = true;
+                    } else {
+                        correctResponse = false;
+                    }
+
+                    if (correctResponse) {
                         console.log("this was a correct response");
                         console.log(data);
                         console.log(correctClass);
