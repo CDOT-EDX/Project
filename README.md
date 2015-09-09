@@ -45,22 +45,25 @@ Acceptable options and defaults are as follows:
     enableHighlights:   false,
     hiddenHighlights:   false,
     enableButtons:      true,
-    hiddenButtons:      false, // am I using this yet?
     enableSlider:       false,
     enablePanel:        false, // enable full panel unless "panelType" option is set
     panelType:          { "attitude": "attitude" }, // object that lists 1 or more instruments to display (if not set, full panel)
     readOnlySlider:     true,
-    container:          "#slideContainer",
-    statusId:           "#statusBar",
+    container:          "#slideContainer", // where should we look for the slideContainer?
+    statusId:           "#statusBar", // whats the id that we should create for statusBar?
     headerId:           "#header",
     footerId:           "#footer",
     bodyId:             "#body",
     headerId:           "#slideHeader",
     footerId:           "#slideFooter",
-    quizId:             "#slideQuiz",
+    quizId:             "#slideQuiz",   // id of div that contains all quizzes
+    quizContainerClass: "cdot_quiz_container", // class thats appended to each individual quiz
+    advanceWith:        "audio", // other options -> "highlight", "timer", "button", "instruments"
+
+
     continueId:         "", // string specifying the next id to redirect to
     backId:             "", // string specifying the previous id to redirect to
-    advanceWith:        "audio", // other options -> "highlight", "timer", "button", "instruments"
+    
     panelOptions: { // options passed on to flightInstruments library
         size : 200,             // Sets the size in pixels of the indicator (square)
         showBox : true,         // Sets the visibility of the box behind the instruments
@@ -81,41 +84,42 @@ Acceptable options and defaults are as follows:
         vario: 0,               // Variometer in 1000 feets/min for the variometer indicator
         img_directory : 'img/'  // The directory where the images are saved to
     },
-    quizzes: [{json: // options passed on to the slickQuiz library
-      {
-        "info": {
-          "name":    "Answer the following questions to the best of your ability.",
-          "main":    "",
-          "results": "",
-          "level1":  "",
-          "level2":  "",
-          "level3":  "",
-          "level4":  "",
-          "level5":  "" // no comma here
-        },
-        "questions": [
-          { // Question 1 - Multiple Choice, Single True Answer
-            "q": "Now speak the correct clearance: >>AS12, I read back",
-            "a": [
-              {"option": "Climb on runway heading to 3000 ft, turning right onto 125 degrees", "correct": "", "reason": ""},
-              {"option": "Climb on 135 degrees to 1500 ft, then climb to 3000 ft", "correct": "",  "reason": ""},
-              {"option": "Climb on runway heading to 1500 ft, turning right onto 125 degrees", "correct": "",  "reason": ""},
-              {"option": "Climb on runway heading to 1500 ft, turning right onto 135 degrees. Continue climb to 3000 feet to complete the correct read back.",  "correct": "",  "reason": ""} // no comma here
-            ],
-            "correct": "<p><span>Control, correct, AS12 is clear to take-off</span></p>",
-            "incorrect": "<p><span>That's not correct.  Ask for the clearance to be repeated.</span></p>" // no comma here
-          }
 
-        ],
-        
-      },
-      "animationCallbacks": {
-        "checkAnswer": function(){
-          console.log("do something");
-          $(anySlide).trigger("completedQuiz");
+    quizzes: [ // options passed on to the slickQuiz library
+      {
+        json: {
+          "info": {
+            "name":    "Answer the following questions to the best of your ability.",
+            "main":    "",
+            "results": "",
+            "level1":  "",
+            "level2":  "",
+            "level3":  "",
+            "level4":  "",
+            "level5":  "" // no comma here
+          },
+          "questions": [
+            { // Question 1 - Multiple Choice, Single True Answer
+              "q": "Now speak the correct clearance: >>AS12, I read back",
+              "a": [
+                {"option": "Climb on runway heading to 3000 ft, turning right onto 125 degrees", "correct": "", "reason": ""},
+                {"option": "Climb on 135 degrees to 1500 ft, then climb to 3000 ft", "correct": "",  "reason": ""},
+                {"option": "Climb on runway heading to 1500 ft, turning right onto 125 degrees", "correct": "",  "reason": ""},
+                {"option": "Climb on runway heading to 1500 ft, turning right onto 135 degrees. Continue climb to 3000 feet to complete the correct read back.",  "correct": "",  "reason": ""} // no comma here
+              ],
+              "correct": "<p><span>Control, correct, AS12 is clear to take-off</span></p>",
+              "incorrect": "<p><span>That's not correct.  Ask for the clearance to be repeated.</span></p>" // no comma here
+            }
+          ],
+        },
+        "animationCallbacks": {
+          "checkAnswer": function(){
+            console.log("do something");
+            $(anySlide).trigger("completedQuiz");
+          }
         }
       }
-    }],
+    ],
     avatars: 
     {
       tom: {
@@ -127,68 +131,72 @@ Acceptable options and defaults are as follows:
         close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
       }
     },
-    highlights: {
-      ai: { // #1
+    
+    highlights:
+    [
+      {
+        id: "asi",
         orderNumber: 0,
-        top : "5%",
-        left : "36.2%",
-        width : "26%",
-        height: "41%",
+        name: "Airspeed Indicator (ASI)",
+        height: "50%",
+        classes: ["col-xs-4"],
+        border : "7px ridge yellow",
+      },
+      {
+        id: "ai",
+        orderNumber: 1,
+        name: "Attitude Indicator (AI)",
+        height: "50%",
+        classes: ["col-xs-4"],
         border : "7px ridge yellow",
       }, 
-      alt: { // #2
-        orderNumber: 1,
-        top : "5%",
-        left : "62%",
-        width : "26%",
-        height: "41%",
-        border : "7px ridge yellow",                            
-      },
-      hi: { // #3
+      {
+        id: "alt",
         orderNumber: 2,
-        top : "50%",
-        left : "36.2%",
-        width : "26%",
-        height: "41%",
+        name: "Altimeter (ALT)",
+        height: "50%",
+        classes: ["col-xs-4"],
         border : "7px ridge yellow",                            
       },
-      asi: { // #4
+      {
+        id: "tc",
         orderNumber: 3,
-        top : "5%",
-        left : "10.5%",
-        width : "26%",
-        height: "41%",
+        name: "Turn Coordinator (TC)",
+        height: "50%",
+        classes: ["col-xs-4"],
         border : "7px ridge yellow",                            
       },
-      vsi: { // #5
+      {
+        id: "hi",
         orderNumber: 4,
-        top: "50%",
-        left: "62%",
-        width: "26%",
-        height: "41%",
+        name: "Heading Indicator (HI)",
+        height: "50%",
+        classes: ["col-xs-4"],
+        border : "7px ridge yellow",                            
+      },
+      {
+        id: "vsi",
+        orderNumber: 5,
+        name: "Vertical Speed Indicator (VSI)",
+        height: "50%",
+        classes: ["col-xs-4"],
         border : "7px ridge yellow",
       },
-      tc: { // #6
-        orderNumber: 5,
-        top : "50%",
-        left : "10.5%",
-        width : "26%",
-        height: "41%",
-        border : "7px ridge yellow",                            
-      },
+    ],
     },
-    // This is for default buttons that we will be reusing over and over (if any)
-    buttons: {
-        someId: {
-            title: 'I am a button',
-            classes: ["btn", "btn-default"],
-            action: function(){ console.log("button of someId is executing"); }
+    // This is for buttons that we want to use on the slide
+    buttons: [
+        {
+          "id": "btn0",
+          title: 'I am a button',
+          classes: ["btn", "btn-default"],
+          action: function(){ console.log("button of someId is executing"); }
         },
-        anotherId: {
-            title: 'another button',
-            action: function(){}
+        {
+          "id": "btn1",
+          title: 'another button',
         }
-    },
+    ],
     slideContent: [{
         title: {html: "No content provided", classes: ["col-md-12"] }, 
         content: {html: "<p<Check your <b>slideContent</b> object</p>", classes: ["text-center"] },
@@ -238,19 +246,6 @@ The rest of this README is being edited at this moment
 **More options and capabilities are being added all the time**
 **Everything below is just notes of the developer for the developer**
 
-    // these audio files are extras (audios for quizzes and interactions)
-    extraAudioFiles: [
-        "someURL/toAudioFile",
-        "anotherURL/toOtherFile"
-    ],
-    // these audio files are for modals
-    <!-- 
-        modalAudioFiles: [
-        "someURL/toAudioFile",
-        "anotherURL/toOtherFile"
-        ],
-     -->  
-
 ## Syntax and actions available for content
     content - can include any custom html if needed
         html (string/html)
@@ -275,19 +270,6 @@ The rest of this README is being edited at this moment
 
     replay
 
-
-## Global States available for checking
-
-    started
-    playing
-    ended
-    paused
-    //replayed?
-    //stopped?
-
-The rest of this README is being edited at this moment
-**More options and capabilities are being added all the time**
-**Everything below is just notes of the developer for the developer**
 
     Slide class methods:
         
@@ -472,129 +454,3 @@ The rest of this README is being edited at this moment
           highlights: [
 
           ]
-
-
-    In order to initialize a slide, the following syntax can be used:
-
-        var anySlide = new AVIATION.common.Slide();
-        // this uses all of the defaults and should be used for testing purposes only
-        // defaults are given below
-
-
-    or
-
-        <!-- SLIDE HTML TEMPLATE FOR TWO AVATAR -->
-        <script src="/static/popcorn-complete.min.js"></script>
-        <script src="/static/mobile-detect.min.js"></script>
-        <script src="/static/createSlide.js"></script>
-        <link rel="stylesheet" type="text/css" href="/static/custom.css">
-
-        <!-- START SLIDE HTML -->
-        <div id="slideContainer" class="cdot_bg container-fluid">
-        </div>
-
-        <script>
-    	$( document ).ready(function() {
-              var anySlide = new AVIATION.common.Slide({
-                     showAvatars: true,
-                     showSlideControls: true,
-                     showStatus: true,
-                     showControls: true,
-                     development: true,
-                   },
-                   [{
-                     avatar: 
-                     [{
-                       type: "close",
-                       position: "left",
-                       character: "jane",
-                     },
-                     {
-                       type: "open",
-                       position: "right",
-                       character: "tom"
-                     }],
-                     title: { html: "This is the first title that appears" },
-                     content: { html: "This is the html inside the slide <b>that can be used</b>" },
-                     audio: 0, // reference to which audio it should be init with
-                     second: 1, // which second of the audio should trigger this to appear,
-                     callback: function(){ console.log("callback executed for first one!"); return 0;}// a piece of custom code that you want to execute possibly
-                     // we can use this for animating the svgs or any other actions that require code
-                     // it will be executed on that second of that audio
-                   },
-                   {
-                     title: { html: "This title is at the beginning of second audio"},
-                     content: { html: "This is also the content for the beginning" },
-                     // notice that we have no content... will it be erased?
-                     audio: 1,
-                     // notice no seconds.. should change content at beginning of audio
-                     // and run callback at end
-                     callback: function(){ console.log("this callback is at the end of 2nd audio");}
-                   },
-                   {
-                     title: {html: "This title is beginning of third audio"},
-                     audio: 2
-                   },
-                   {
-                     content: { html: "Add this content to that title in 2nd second"},
-                     audio: 2,
-                     second: 2
-                   },
-                   {
-                     content: {html: "And change to this content on the 5th second"},
-                     audio: 2,
-                     second: 5
-                   },
-                   {
-                     content: {html: "And add this content on the 10th second", action: "append" },
-                     audio: 2,
-                     second: 10,
-                     image: { src: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png"}
-                   }],
-                   [ 
-                     "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3",
-                     "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3",
-                     "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" // no extension necessary
-                                   // all of the possible extensions will be created automatically
-                   ]);
-          
-          	console.log("trying to create new slide");
-          	console.log(anySlide);
-          	anySlide.constructor();
-            });
-        </script>
-
-
-    Example with highlights:
-
-        $( document ).ready(function() {
-          var anySlide = new AVIATION.common.Slide({
-                     showAvatars: false,
-                     showSlideControls: true,
-                     showStatus: true,
-                     showControls: true,
-                     development: true,
-                     enableHighlights: true,
-                     hiddenHighlights: false,
-                   },
-                   [{
-                     title: { html: "This slide has highlights (hopefully)" },
-                     image: { src: "/static/cessna_dashboardAll.png" },
-                     highlights: [0,1,{ index: 2, onclick: function(){ console.log("highlight onclick");} },{ index: 5, onclick: function(){ console.log("highlight callback");}}],
-                     audio: 0,
-                     callback: function(){ console.log("callback executed for first one!"); return 0;}
-                   },
-                   {
-                     title: { html: "This slide has less highlights" },
-                     image: { src: "/static/cessna_dashboardAll.png" },
-                     highlights: [0,{ index: 2, onclick: function(){ console.log("highlight onclick");} },5],
-                     audio: 0,
-                     second: 10,
-                     callback: function(){ console.log("callback executed for first one!"); return 0;}
-                   }],
-                   ["//online.cdot.senecacollege.ca:25080/aviation/audios/PlaceHolderTomLong.mp3"]);
-          
-          	console.log("trying to create new slide");
-          	console.log(anySlide);
-          	anySlide.constructor();
-        });

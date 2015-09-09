@@ -1052,6 +1052,10 @@ AVIATION.common.Slide.prototype = {
         console.log(objCount);
         console.log(slide.slideElements[possibleActions[action].elementArray].length);
 
+        if(slide[possibleActions[action].arrayName]){
+          slide[possibleActions[action].arrayName].sort(slide.sortActionables);
+        }
+        //slide.slideElements[possibleActions[action].elementArray].sort = slide.sortActionables;
         //slide.elementsToShow[action] = slide.elementsToShow[action] || [];
 
         if( slide.options[possibleActions[action].enableOption] && slide[possibleActions[action].arrayName] && 
@@ -1101,8 +1105,9 @@ AVIATION.common.Slide.prototype = {
             }).appendTo(slide.container);
           }
   
-
           slide.buildActionables(action, possibleActions[action], $parent, options);
+
+          //slide.slideElements[possibleActions[action].elementArray].sort(slide.sortActionables);
         }
       }
     }
@@ -1147,14 +1152,18 @@ AVIATION.common.Slide.prototype = {
           ";position:absolute;z-index:1;";
         }
 */
+        //options.data.orderNumber = slide.options[possibleActions[action].arrayName].orderNumber || "";
+
+
         $action = $("#" + act + "_" + action);
 
         if( !$action || $action.length < 1){
           $action = jQuery(options.element,{
-            id: act + "_" + action,
+            id: actions[act].id,
             class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
             html: actions[act].title,
             "data-toggle": options.dataToggle,
+            "data-orderNumber": actions[act].orderNumber,
             role: options.role,
             style: options.style
           }).appendTo(parent);
@@ -1165,24 +1174,29 @@ AVIATION.common.Slide.prototype = {
             callback = [];
           }
 
-
-
-
-          //if(callback && callback.length > 0){
           $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]) }, slide: slide }, 
                         slide.checkAdvanceWith );
-          //}
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
           console.log("pusshign onto " + obj.elementArray);
           console.log($action);
           slide.slideElements[obj.elementArray].push($action);
-        }
 
+        }
       }
     }
 
+  },
+
+  sortActionables: function(a,b){
+    "use strict";
+
+    console.log("trying to sort actionables");
+    console.log(a.orderNumber);
+    console.log(b.orderNumber);
+
+    return a.orderNumber - b.orderNumber;
   },
 
   attachActionableEvent: function(content, slide, index){
@@ -2435,8 +2449,8 @@ AVIATION.common.Slide.prototype = {
             borderRadius: "10px"
           },
           pulseSettings: {
-            duration: 1000,
-            pulses: 3
+            duration: 3000,
+            pulses: 1
           },
           instrumentIds: {
             airspeed: "airspeed",
@@ -2456,12 +2470,11 @@ AVIATION.common.Slide.prototype = {
               close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
             }
           },
-          //panelHighlights: { "test": "" },
           highlights:
-          {
-            "asi":{ // #4
+          [
+            { // #4
               id: "asi",
-              orderNumber: 3,
+              orderNumber: 0,
               name: "Airspeed Indicator (ASI)",
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
@@ -2472,11 +2485,11 @@ AVIATION.common.Slide.prototype = {
               // height: "44%",
               height: "50%",
               classes: ["col-xs-4"],
-              border : "7px ridge yellow",                            
+              border : "7px ridge yellow",
             },
-            "ai":{ // #1
+            { // #1
               id: "ai",
-              orderNumber: 0,
+              orderNumber: 1,
               name: "Attitude Indicator (AI)",
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
@@ -2489,9 +2502,9 @@ AVIATION.common.Slide.prototype = {
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
             }, 
-            "alt":{ // #2
+            { // #2
               id: "alt",
-              orderNumber: 1,
+              orderNumber: 2,
               name: "Altimeter (ALT)",
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
@@ -2504,9 +2517,9 @@ AVIATION.common.Slide.prototype = {
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
             },
-            "tc":{ // #6
+            { // #6
               id: "tc",
-              orderNumber: 5,
+              orderNumber: 3,
               name: "Turn Coordinator (TC)",
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
@@ -2519,9 +2532,9 @@ AVIATION.common.Slide.prototype = {
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
             },
-            "hi":{ // #3
+            { // #3
               id: "hi",
-              orderNumber: 2,
+              orderNumber: 4,
               name: "Heading Indicator (HI)",
               // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
               // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
@@ -2534,9 +2547,9 @@ AVIATION.common.Slide.prototype = {
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
             },
-            "vsi":{ // #5
+            { // #5
               id: "vsi",
-              orderNumber: 4,
+              orderNumber: 5,
               name: "Vertical Speed Indicator (VSI)",
               //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
               //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
@@ -2549,7 +2562,7 @@ AVIATION.common.Slide.prototype = {
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
             },
-          }}, option;
+          ]}, option;
 
     if(!options){
       options = this.options || {};
