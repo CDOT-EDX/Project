@@ -445,29 +445,26 @@ AVIATION.common.Slide.prototype = {
                 tempImg = $("#" + avatars[i].character + "_" + avatarElement);
 
                 if(!tempImg || tempImg.length < 1){
-                  if(slide.options.development){
-                    filename = "https:" + slide.avatars[avatars[i].character][avatarElement];
+                  filename = slide.options.apacheServerBaseUrl + slide.avatars[avatars[i].character][avatarElement];
+
+                  if(avatarElement === avatars[i].type){
+                    // make this one visible
+                    jQuery('<img/>',{
+                      id: avatars[i].character + "_" + avatarElement,
+                      "class": "img-responsive avatar" + avatarSide,
+                      src: filename
+                    }).appendTo(avatarDiv);
                   } else {
-                    filename = slide.avatars[avatars[i].character][avatarElement];
+                    // make the rest hidden
+                    jQuery('<img/>',{
+                      id: avatars[i].character + "_" + avatarElement,
+                      "class": "img-responsive avatar" + avatarSide,
+                      "css" : {
+                        "display" : "none"
+                      },
+                      src: filename
+                    }).appendTo(avatarDiv);
                   }
-                    if(avatarElement === avatars[i].type){
-                      // make this one visible
-                      jQuery('<img/>',{
-                        id: avatars[i].character + "_" + avatarElement,
-                        "class": "img-responsive avatar" + avatarSide,
-                        src: filename
-                      }).appendTo(avatarDiv);
-                    } else {
-                      // make the rest hidden
-                      jQuery('<img/>',{
-                        id: avatars[i].character + "_" + avatarElement,
-                        "class": "img-responsive avatar" + avatarSide,
-                        "css" : {
-                          "display" : "none"
-                        },
-                        src: filename
-                      }).appendTo(avatarDiv);
-                    }
                 } else {
                   // switch between hiding/showing the proper avatar type
                   if(avatarElement === avatars[i].type){
@@ -842,7 +839,7 @@ AVIATION.common.Slide.prototype = {
 
           for(i=0; i<extensions.length; i++){
             source = jQuery('<source/>', {
-              src: filename + extensions[i],
+              src: slide.options.apacheServerBaseUrl + filename + extensions[i],
               type: types[i]
             }).appendTo(addedSlideAudio);
           }
@@ -1631,7 +1628,7 @@ AVIATION.common.Slide.prototype = {
 
       for(c=0; csvs && c < csvs.length; c++){
         console.log("parsing: " + csvs[c].src);
-        Papa.parse(csvs[c].src, {
+        Papa.parse(slide.options.apacheServerBaseUrl + csvs[c].src, {
           config: {
             delimiter: "|",
             skipEmptyLines: true,
@@ -1929,7 +1926,7 @@ AVIATION.common.Slide.prototype = {
             csvFiles.push(mediaFiles[i]);
             break;
           case "timer":
-            timers.push( mediaFiles[i].duration );
+            timers.push(mediaFiles[i].duration);
             break;
           default:
             audioFiles.push({ "type": "audio", "src" : mediaFiles[i] });
@@ -2404,6 +2401,8 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     var avatars, content = [], audio = [],
         defaults = {
+          serverBaseUrl: window.location.protocol + "//" + window.location.host + "/",
+          apacheServerBaseUrl: window.location.protocol + "//" + window.location.host + ":25080/",
           parentSlide: {},
           showAvatars: false,
           showSlideControls: true,
@@ -2462,12 +2461,12 @@ AVIATION.common.Slide.prototype = {
           },
           avatars: {
             tom: {
-              open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
-              close: "//online.cdot.senecacollege.ca:25080/aviation/img/tomClose.png"
+              open: "aviation/img/tomOpen.png",
+              close: "aviation/img/tomClose.png"
             },
             jane: {
-              open: "//online.cdot.senecacollege.ca:25080/aviation/img/janeOpen.png",
-              close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
+              open: "aviation/img/janeOpen.png",
+              close: "aviation/img/janeClose.png"
             }
           },
           highlights:
@@ -2476,13 +2475,6 @@ AVIATION.common.Slide.prototype = {
               id: "asi",
               orderNumber: 0,
               name: "Airspeed Indicator (ASI)",
-              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/airspeedIndicator_wBg.png",
-              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide9_Jane.mp3" ],
-              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              // top : "3%",
-              // left : "4.5%",
-              // width : "30%",
-              // height: "44%",
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
@@ -2491,13 +2483,6 @@ AVIATION.common.Slide.prototype = {
               id: "ai",
               orderNumber: 1,
               name: "Attitude Indicator (AI)",
-              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/attitudeIndicator_wBg.png",
-              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide2_Tom.mp3" ],
-              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              // top : "3%",
-              // left : "36.2%",
-              // width : "30%",
-              // height: "44%",
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
@@ -2506,13 +2491,6 @@ AVIATION.common.Slide.prototype = {
               id: "alt",
               orderNumber: 2,
               name: "Altimeter (ALT)",
-              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/altimeter_wBg.png",
-              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide4_Jane.mp3" ],
-              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              // top : "3%",
-              // left : "68%",
-              // width : "30%",
-              // height: "44%",
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
@@ -2521,13 +2499,6 @@ AVIATION.common.Slide.prototype = {
               id: "tc",
               orderNumber: 3,
               name: "Turn Coordinator (TC)",
-              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/turnCoordinator_wBg.png",
-              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide14_Jane.mp3" ],
-              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Jane.mp3"],
-              // top : "53%",
-              // left : "4.5%",
-              // width : "30%",
-              // height: "44%",
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
@@ -2536,13 +2507,6 @@ AVIATION.common.Slide.prototype = {
               id: "hi",
               orderNumber: 4,
               name: "Heading Indicator (HI)",
-              // image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/headingIndicator_wBg.png",
-              // audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide7_Tom.mp3" ],
-              // modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              // top : "53%",
-              // left : "36.2%",
-              // width : "30%",
-              // height: "44%",
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
@@ -2551,13 +2515,6 @@ AVIATION.common.Slide.prototype = {
               id: "vsi",
               orderNumber: 5,
               name: "Vertical Speed Indicator (VSI)",
-              //image: "//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/verticalSpeedIndicator_wBg.png",
-              //audio: [ "//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_Slide11_Tom.mp3" ],
-              //modalAudio: ["//online.cdot.senecacollege.ca:25080/aviation/audios/M01S02_ClickHighlights_Tom.mp3"],
-              // top: "53%",
-              // left: "68%",
-              // width: "30%",
-              // height: "44%",
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
