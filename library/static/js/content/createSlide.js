@@ -839,7 +839,7 @@ AVIATION.common.Slide.prototype = {
 
           for(i=0; i<extensions.length; i++){
             source = jQuery('<source/>', {
-              src: slide.options.apacheServerBaseUrl + filename + extensions[i],
+              src: slideObject.options.apacheServerBaseUrl + filename + extensions[i],
               type: types[i]
             }).appendTo(addedSlideAudio);
           }
