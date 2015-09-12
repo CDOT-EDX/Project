@@ -21,16 +21,17 @@ This branch is for combining front-end libraries and features used in the edX/Av
 ## Slide Creation Library for the internal use of the edX team at CDOT
 
 In order to have this version of the createSlide library working you will need the following files: (these files should be already organized inside Project/aviation/)
-    CDOT-EDX/Project/library/createSlide.js
+
+    CDOT-EDX/Project/library/static/js/content/createSlide.js
     CDOT-EDX/Project/library/statis/js/*
     CDOT-EDX/Project/library/statis/css/*
 
 createSlide now supports one options object being passed versus multiples...
 
-therefore use: `var anySlide = new AVIATION.Slide( options )`
+therefore use: `var anySlide = new AVIATION.Slide( options )` (if ComplexHTML xblock isn't being used)
 
 **NOTE: The example below doesn't use a properly formatted JSON, make sure to use proper JSON
-**      This can be validated easily using a tool such as: http://jsonlint.com/
+**This can be validated easily using a tool such as: http://jsonlint.com/
 
 Acceptable options and defaults are as follows:
 
@@ -42,7 +43,7 @@ Acceptable options and defaults are as follows:
     showBorder:         true, // this applies to the border around the content
     autoplay:           true, // proceeds to the next AUDIO automatically after current is finished
     autoRedirect:       false, // proceeds to the next SLIDE automatically after current is finished
-    noAudio:            false,
+    noAudio:            false, // in case the slide doesn't have any audio content to control the content creation
     noCSV:              false, // indicates that the instrument panel should build even if a csv file isn't specified in media object
     enableModals:       false,
     enableHighlights:   false,
@@ -228,7 +229,20 @@ Acceptable options and defaults are as follows:
         slider: 2,
         audio: 0,
         second: 10,
-        callback: function(){ console.log("this is a callback function"); }
+        callback: function(){ console.log("this is a callback function"); },
+        "advanceWith": {
+            "action": "pattern",
+            "onSuccess": { ** optional if needed and currently under development
+                "status": "Good job, let's move on...",
+                "index": 3 // optional, which index should we jump to if not in order of slideContent,
+                "callback": "function(){ console.log('You did smth right'); }" // optional
+            },
+            "onFail": { ** optional if needed and currently under development
+                "index": 2, // which altMediaFile should be played (currently sound only)
+                "status": "That's not correct. Let's try this again", // what msg should we display in the status bar?
+                "resetIndex": 0 // which slideContent index do we need to replay?
+            }
+        }
     },
     {
         //... another slide content can go here to be triggered at a different time of the audio
@@ -236,7 +250,12 @@ Acceptable options and defaults are as follows:
         slider: 3,
         audio: 1,
         "advanceWith": {
-            
+            "type": "button", // highlight, audio, csv
+            "index": 0,
+            "onFail": {
+                "index": 0,
+                "resetIndex": 1
+            }
         }
     }],
     // default models that we want to be set-up in the background
