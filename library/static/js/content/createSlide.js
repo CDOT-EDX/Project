@@ -931,6 +931,7 @@ AVIATION.common.Slide.prototype = {
     console.log(callback);
     console.log("CHECKING ADVANCE WITH!");
 
+    // Running custom callbacks/onclicks
     for(c=0; onclick && c < onclick.length; c++){
       if(typeof onclick[c] === 'function'){
         onclick[c]();
@@ -949,8 +950,7 @@ AVIATION.common.Slide.prototype = {
     console.log(content.advanceWith);
     console.log("actual element");
     console.log(element);
-
-
+/*
     if(content.advanceWith && content.advanceWith.override){
       //$(slide).trigger("playIndex", )
     } else if (content.advanceWith && content.advanceWith.type === element.type){
@@ -988,6 +988,7 @@ AVIATION.common.Slide.prototype = {
     } else {
       $(slide).trigger("next");
     }
+*/
   },
 
   countObjectLength: function(obj){

@@ -20,7 +20,7 @@ This branch is for combining front-end libraries and features used in the edX/Av
 
 ## Slide Creation Library for the internal use of the edX team at CDOT
 
-In order to have this version of the createSlide library working you will need the following files:
+In order to have this version of the createSlide library working you will need the following files: (these files should be already organized inside Project/aviation/)
     CDOT-EDX/Project/library/createSlide.js
     CDOT-EDX/Project/library/statis/js/*
     CDOT-EDX/Project/library/statis/css/*
@@ -28,6 +28,9 @@ In order to have this version of the createSlide library working you will need t
 createSlide now supports one options object being passed versus multiples...
 
 therefore use: `var anySlide = new AVIATION.Slide( options )`
+
+**NOTE: The example below doesn't use a properly formatted JSON, make sure to use proper JSON
+**      This can be validated easily using a tool such as: http://jsonlint.com/
 
 Acceptable options and defaults are as follows:
 
@@ -58,8 +61,13 @@ Acceptable options and defaults are as follows:
     footerId:           "#slideFooter",
     quizId:             "#slideQuiz",   // id of div that contains all quizzes
     quizContainerClass: "cdot_quiz_container", // class thats appended to each individual quiz
-    advanceWith:        "audio", // other options -> "highlight", "timer", "button", "instruments"
 
+    // both options below are used to pull audio/images/csvs from the correct server without running into cross-origin restrictions
+    serverBaseUrl: window.location.protocol + "//" + window.location.host + "/", //can be overwritten by a string of the host url
+    apacheServerBaseUrl: window.location.protocol + "//" + window.location.host + ":25080/",
+
+    **possibly deprecated and moved inside slideContent:
+    **  advanceWith:        "audio", // other options -> "highlight", "timer", "button", "instruments"
 
     continueId:         "", // string specifying the next id to redirect to
     backId:             "", // string specifying the previous id to redirect to
@@ -86,6 +94,7 @@ Acceptable options and defaults are as follows:
     },
 
     quizzes: [ // options passed on to the slickQuiz library
+    // most explanations to these can be found at: https://github.com/jewlofthelotus/SlickQuiz
       {
         json: {
           "info": {
@@ -123,12 +132,15 @@ Acceptable options and defaults are as follows:
     avatars: 
     {
       tom: {
-        open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",
-        close: "//online.cdot.senecacollege.ca:25080/aviation/img/tomClose.png"
+        ~~open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",~~
+        ~~close: "//online.cdot.senecacollege.ca:25080/aviation/img/tomClose.png"~~
+        // since server url options have been added, we can give relative locations to resources
+        open: "aviation/img/tomOpen.png",
+        close: "aviation/img/tomClose.png"
       },
       jane: {
-        open: "//online.cdot.senecacollege.ca:25080/aviation/img/janeOpen.png",
-        close: "//online.cdot.senecacollege.ca:25080/aviation/img/janeClose.png"
+        open: "aviation/img/janeOpen.png",
+        close: "aviation/img/janeClose.png"
       }
     },
     
@@ -222,7 +234,10 @@ Acceptable options and defaults are as follows:
         //... another slide content can go here to be triggered at a different time of the audio
         title: {html: "This is a different title / slide"},
         slider: 3,
-        audio: 1
+        audio: 1,
+        "advanceWith": {
+            
+        }
     }],
     // default models that we want to be set-up in the background
     modals: [{ 
@@ -237,9 +252,14 @@ Acceptable options and defaults are as follows:
     ],
     // these audioFiles are for the slide only
     mediaFiles: [ 
-        {type: "audio", src: "someURL/toAudioFile"},
+        // since server url options have been added, we can give relative locations to resources omitting the https://online...../
+        {type: "audio", src: "someRelativeURL/toAudioFile"},
         {type: "audio", src: "anotherURL/toOtherFile"},
         {type: "csv", src: "someURL/flightData"},
+    ],
+    altMediaFiles: [ // media files that will be used in alternative content (in case a student answered a question wrong)
+        {type: "audio", src: "someURL/toAudioFile"},
+        {type: "audio", src: "anotherURL/toOtherFile"},
     ]
 
 The rest of this README is being edited at this moment
