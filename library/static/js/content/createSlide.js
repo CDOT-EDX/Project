@@ -924,8 +924,9 @@ AVIATION.common.Slide.prototype = {
 
     var onclick = event.data.onclick, callback = event.data.callbacks, c,
         element = event.data.element, onSuccess = event.data.onSuccess,
-        slide = event.data.slide,
-        content = slide.slideContent[slide.activeIndex];
+        slide = event.data.slide, advance,
+        content = slide.slideContent[slide.activeIndex],
+        availableAdvances = ["action", "type"];
 
     console.log("event.data");
     console.log(callback);
@@ -950,7 +951,37 @@ AVIATION.common.Slide.prototype = {
     console.log(content.advanceWith);
     console.log("actual element");
     console.log(element);
-/*
+
+    if(content.advanceWith){
+      for(advance in content.advanceWith){
+        if(content.advanceWith.hasOwnProperty(advance)){
+          switch(content.advanceWith[advance]){
+            case "pattern":
+              slide.checkScanningPattern(element.type, element.index, event, content.advanceWith);
+              console.log("advanceWith: pattern case");
+              break;
+
+            case "highlight":
+            case "button":
+
+              console.log("advanceWith: high/btn case");            
+              break;
+
+            case "quiz":
+              console.log("advanceWith: quiz case");
+              break;
+
+            default:
+              console.log("advanceWith: default case");
+              break;
+          }
+        }
+      }
+    }
+
+/***
+  **  old advance with below
+  **
     if(content.advanceWith && content.advanceWith.override){
       //$(slide).trigger("playIndex", )
     } else if (content.advanceWith && content.advanceWith.type === element.type){
@@ -988,7 +1019,8 @@ AVIATION.common.Slide.prototype = {
     } else {
       $(slide).trigger("next");
     }
-*/
+  ***  end old advanceWith
+*****/
   },
 
   countObjectLength: function(obj){
@@ -2675,7 +2707,7 @@ AVIATION.common.Slide.prototype = {
     *   The scanning pattern order is:
     *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
     **/
-  checkScanningPattern: function(type, index, event, buildContent){
+  checkScanningPattern: function(type, index, event, advanceWith){
     "use strict";
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
@@ -2684,14 +2716,14 @@ AVIATION.common.Slide.prototype = {
         scanPattern = slide.options.scanningPatternArray,
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
 
-//$(this).trigger("click");
+//  $(this).trigger("click");
 
 /*
     $(this).on("checkScanningPattern", function(e, evt){
 
     });
 */
-    
+    // init defaults
     if(event.target){
       element = event.target;
     } else if(type === 'highlight'){
@@ -2724,6 +2756,7 @@ AVIATION.common.Slide.prototype = {
 
     console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
+    // check the logic
     if(type === 'highlight' && typeof index !== undefined){
       
       slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
@@ -2761,6 +2794,7 @@ AVIATION.common.Slide.prototype = {
             //$(".instrument.col-xs-4").pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
           overallScanIndex = -1;
+          slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
         }
 
       } else {
