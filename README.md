@@ -34,7 +34,9 @@ therefore use: `var anySlide = new AVIATION.Slide( options )` (if ComplexHTML xb
 **This can be validated easily using a tool such as: http://jsonlint.com/
 
 Acceptable options and defaults are as follows:
-
+    serverBaseUrl:      window.location.protocol + "//" + window.location.host + "/",
+    apacheServerBaseUrl:window.location.protocol + "//" + window.location.host + ":25080/",
+    parentSlide:        {},
     development         false, // if running inside a devstack set to true
     showAvatars:        false,
     showSlideControls:  true,
@@ -63,6 +65,36 @@ Acceptable options and defaults are as follows:
     quizId:             "#slideQuiz",   // id of div that contains all quizzes
     quizContainerClass: "cdot_quiz_container", // class thats appended to each individual quiz
 
+    // new optinal+experimental additions below
+    panelId: "#flightInstruments",
+    panelHighlightsId: "#panelHighlightContainer",
+    instStatusId1: "#instStatus1",
+    instStatusId2: "#instStatus2",
+    scanningPatternArray: [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3 ],
+    minScan: 1,
+    pulseCorrectProp: {
+      borderWidth: '5px',
+      borderColor: 'green',
+      borderRadius: '5px'
+    },
+    pulseWrongProp: {
+      borderWidth: '5px',
+      borderColor: 'red',
+      borderRadius: '5px'
+    },
+    pulseInstrumentSettings: {
+      duration: 500,
+      pulses: 1
+    },
+    pulseProperties: {
+      backgroundColor: "#D0FAEE",
+      borderRadius: "10px"
+    },
+    pulseSettings: {
+      duration: 3000,
+      pulses: 1
+    },
+    
     // both options below are used to pull audio/images/csvs from the correct server without running into cross-origin restrictions
     serverBaseUrl: window.location.protocol + "//" + window.location.host + "/", //can be overwritten by a string of the host url
     apacheServerBaseUrl: window.location.protocol + "//" + window.location.host + ":25080/",
