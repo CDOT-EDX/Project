@@ -992,6 +992,9 @@ AVIATION.common.Slide.prototype = {
       for(advance in content.advanceWith){
         if(content.advanceWith.hasOwnProperty(advance)){
           slide.checkActionables(element.type, element.index, event, content.advanceWith);
+          // TODO: better solution over a break?
+          break;
+
           // switch(content.advanceWith[advance]){
           //   case "pattern":
           //     slide.checkScanningPattern(element.type, element.index, event, content.advanceWith);
@@ -1587,14 +1590,17 @@ AVIATION.common.Slide.prototype = {
 
     if(slide.options.enablePanel && !slide.options.noCSV){
 
-      var papaComplete = function(index) {
+      var papaComplete = function() {
         var data = {}, flight = this.result.data, i = this.index || 0, toggle = true;
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
         slide.panelPause = false;
-        
-        i = index || slide.pausedPanelIndex || 0;
+        slide.panelEnd = false;
+
+        i = this.index || slide.pausedPanelIndex || 0;
+
+        console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
 
         myFlightIntVar = setInterval(function(){
           slide.setInstrumentStatus2("Instrument panel PLAYING...");
@@ -1648,7 +1654,7 @@ AVIATION.common.Slide.prototype = {
                   slide.setStatus("Congratulations, you have completed the scan sucessfully.");
                   slide.setInstrumentStatus2("The flight has finished.");
                   console.log("csv ended event");
-                  $(slide).trigger("end", data);
+                  $(slide).trigger("next");
                 } else {
                   slide.setStatus("Sorry you didn't compelete the scan in time.");
                   slide.setInstrumentStatus2("The flight has finished.");
@@ -1658,6 +1664,7 @@ AVIATION.common.Slide.prototype = {
                 }
               } else {
                 console.log("csv ended event");
+                slide.panelEnd = true;
                 $(slide).trigger("end", data);
               }
 
@@ -1677,7 +1684,7 @@ AVIATION.common.Slide.prototype = {
       var papaCurrentLine = function(index){
         this.index = index || 0;
         console.log("setting current line of csv");
-        return this.index;
+        //return this.index;
       };
 
       var papaCueLine = function(line, callback){
@@ -2674,6 +2681,7 @@ AVIATION.common.Slide.prototype = {
     this.throttleId = options.throttleId || "#slider";
     this.throttleContainer = options.throttleContainer || "#sliderContainer";
 
+    this.panelEnd = false;
     /* error handling example
     try {
       // if smth might cause an error....
@@ -2835,17 +2843,22 @@ AVIATION.common.Slide.prototype = {
             $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
 
-          if(buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] &&
+          if(advanceWith.buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] &&
               slide.slideContent[slide.activeIndex+innerIndex+1].media.index === index){
+            
             console.log("index expected: " + slide.slideContent[slide.activeIndex+innerIndex].media.index);
             console.log("index provided: " + index);
             console.log("inner index: " + innerIndex);
             innerIndex++;
             slide.buildContent(true, (slide.activeIndex + innerIndex) );
-          } else if (buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] && 
+
+          } else if (advanceWith.buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] && 
               slide.slideContent[slide.activeIndex+innerIndex+1].media.type !== 'highlight'){
-            console.log("finished a scan and all its content....");
-            slide.activeIndex = slide.activeIndex + innerIndex + 1;
+
+            console.log("finished a scans content....");
+            // reset active index to the content after pattern content
+            slide.activeIndex = slide.activeIndex + innerIndex;
+
           }
           //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
         }
@@ -2862,7 +2875,7 @@ AVIATION.common.Slide.prototype = {
           overallScanIndex = -1;
           slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
           
-          if(completedScan >= slide.options.minScan){
+          if(completedScan >= slide.options.minScan && slide.panelEnd){
             $(slide).trigger("correctAdvance");
           }
         }
