@@ -98,6 +98,26 @@ AVIATION.common.Slide.prototype = {
       "continuePattern": function(e, data){
 
       },
+      "correctAdvance": function(e, data){
+        console.log("!* correctAdvance triggered");
+        $(slide).trigger("next");
+      },
+      "wrongAdvance": function(e, data){
+        console.log("!* wrong advance triggered");
+        $(slide).trigger("pause");
+        $(slide).trigger("reset");
+        $(slide).trigger("playAltIndex", data);
+      },
+      "playAltIndex": function(e, data){
+        var index = data.index, altPlayer = slide.altPlayers;
+
+        console.log("!* playAltIndex triggered");
+
+        slide.checkSlideControlPlayButtons("play");
+        if(altPlayer[index] && altPlayer[index].player){
+          altPlayer[index].player.play();          
+        }
+      }
       end: function(e, data){
         console.log("!* end event fired");
         console.log(data);
@@ -107,7 +127,10 @@ AVIATION.common.Slide.prototype = {
           event: e,
           data: data
         });
-
+      },
+      altEnd: function(e, data){
+        console.log("!* altEnd event fired");
+        console.log(data);
       },
       play: function(e){
         console.log("!* play event fired");
@@ -179,10 +202,10 @@ AVIATION.common.Slide.prototype = {
         console.log("!* reset event fired");
 
         if(slide.players[slide.activeIndex] && slide.players[slide.activeIndex].player){
-          slide.players[slide.activeIndex].player.currentTime(0);
-          if(slide.panelPause){
-            slide.panelPause = false;
+          if(!slide.panelPause){
+            slide.panelPause = true;
           }
+          slide.players[slide.activeIndex].player.currentTime(0);
         }
       }
     };
@@ -955,28 +978,31 @@ AVIATION.common.Slide.prototype = {
     if(content.advanceWith){
       for(advance in content.advanceWith){
         if(content.advanceWith.hasOwnProperty(advance)){
-          switch(content.advanceWith[advance]){
-            case "pattern":
-              slide.checkScanningPattern(element.type, element.index, event, content.advanceWith);
-              console.log("advanceWith: pattern case");
-              break;
+          slide.checkActionables(element.type, element.index, event, content.advanceWith);
+          // switch(content.advanceWith[advance]){
+          //   case "pattern":
+          //     slide.checkScanningPattern(element.type, element.index, event, content.advanceWith);
+          //     console.log("advanceWith: pattern case");
+          //     break;
 
-            case "highlight":
-            case "button":
+          //   case "highlight":
+          //   case "button":
+          //     slide.checkActionable(element.type, element.index, event, content.advanceWith);
+          //     console.log("advanceWith: high/btn case");            
+          //     break;
 
-              console.log("advanceWith: high/btn case");            
-              break;
+          //   case "quiz":
+          //     console.log("advanceWith: quiz case");
+          //     break;
 
-            case "quiz":
-              console.log("advanceWith: quiz case");
-              break;
-
-            default:
-              console.log("advanceWith: default case");
-              break;
-          }
+          //   default:
+          //     console.log("advanceWith: default case");
+          //     break;
+          // }
         }
       }
+    } else {
+      $(slide).trigger("next");
     }
 
 /***
@@ -1353,7 +1379,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     // extend to support a single instrument!
     var slide = this, instrument, instrumentSpan, panelContainer = $(slide.options.panelId), bootCol = 12, bootOffset=0, 
-        instIds = slide.options.instrumentIds, instrumentObject = {}, options = {}, i=0, numberOfInstrments = 0;
+        instIds = slide.options.instrumentIds, instrumentObject = {}, options = {}, i=0, numberOfInstrments = 0, instBootCol=12;
 
     if(slide.options.enablePanel){
 
@@ -1366,7 +1392,9 @@ AVIATION.common.Slide.prototype = {
       if(numberOfInstrments<3){
         bootCol = (numberOfInstrments * 4);
         bootOffset = (12 - bootCol) / 2;
+        instBootCol = (12/numberOfInstrments);
       } else {
+        instBootCol = 12;
         if(!this.options.enableSlider)
           bootCol = 12;
         else
@@ -1380,6 +1408,7 @@ AVIATION.common.Slide.prototype = {
         showBox: false,
         showScrews: true,
         bootstrapFriendly: true,
+        bootstrapClass: "col-xs-" + instBootCol,
         img_directory: 'https://online.cdot.senecacollege.ca:25080/Project/library/static/img/instruments/'
       };
 
@@ -2707,7 +2736,8 @@ AVIATION.common.Slide.prototype = {
     *   The scanning pattern order is:
     *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
     **/
-  checkScanningPattern: function(type, index, event, advanceWith){
+  // oldName : checkScanningPattern
+  checkActionables: function(type, index, event, advanceWith){
     "use strict";
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
@@ -2723,11 +2753,18 @@ AVIATION.common.Slide.prototype = {
 
     });
 */
+
+    console.log("type inside checkActionabels" + type);
+
     // init defaults
     if(event.target){
       element = event.target;
     } else if(type === 'highlight'){
       element = slide.slideElements.highlightElements[index];
+    } else if(type === 'button'){
+      element = slide.slideElements.buttonElements[index];
+    } else if(type === 'quiz'){
+      element = slide.slideElements.quizElements[index];
     }
 
     if(slide.overallScanIndex !== undefined){
@@ -2757,7 +2794,23 @@ AVIATION.common.Slide.prototype = {
     console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
     // check the logic
-    if(type === 'highlight' && typeof index !== undefined){
+    if(type && !index){
+      if(type === advanceWith.type)
+        $(slide).trigger("correctAdvance");
+      else
+        $(slide).trigger("wrongAdvance");
+    }
+
+    if(type === 'highlight' && typeof index !== undefined && typeof advanceWith.action === undefined ){
+      if(type === advanceWith.type && index === advanceWith.index)
+        $(slide).trigger("correctAdvance");
+      else
+        $(slide).trigger("wrongAdvance");
+    }
+
+    if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
+      //TODO: put into separate function?
+      //slide.checkScanningPattern();
       
       slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
       
@@ -2795,6 +2848,10 @@ AVIATION.common.Slide.prototype = {
           }
           overallScanIndex = -1;
           slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
+          
+          if(completedScan >= slide.options.minScan){
+            $(slide).trigger("correctAdvance");
+          }
         }
 
       } else {

@@ -36,6 +36,7 @@ Published under GPLv3 License.
             beacontwoshow : false,
             vario : 0,
             bootstrapFriendly: false,
+            bootstrapClass: "",
             img_directory : 'img/'
             }, options 
         ),
@@ -313,7 +314,7 @@ Published under GPLv3 License.
             }
 
             if(settings.bootstrapFriendly){
-                $(this).find('div.instrument').parent().addClass("col-xs-4");
+                $(this).find('div.instrument').parent().addClass(settings.bootstrapClass);
                 var width = $(this).find('div.instrument').parent().width();
                 $(this).find('div.instrument').css({height : width, width : width});
             } else {
