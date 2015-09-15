@@ -1394,7 +1394,7 @@ AVIATION.common.Slide.prototype = {
         bootOffset = (12 - bootCol) / 2;
         instBootCol = (12/numberOfInstrments);
       } else {
-        instBootCol = 12;
+        instBootCol = 4;
         if(!this.options.enableSlider)
           bootCol = 12;
         else
