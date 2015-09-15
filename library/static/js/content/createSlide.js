@@ -117,7 +117,7 @@ AVIATION.common.Slide.prototype = {
         if(altPlayer[index] && altPlayer[index].player){
           altPlayer[index].player.play();          
         }
-      }
+      },
       end: function(e, data){
         console.log("!* end event fired");
         console.log(data);
