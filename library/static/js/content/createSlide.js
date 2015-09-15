@@ -70,6 +70,9 @@ AVIATION.common.Slide = function (options, slideContent, mediaFiles, parentSlide
 
 AVIATION.common.Slide.prototype = {
   version: "0.1",
+  // 0.1.1 changed bootstrap approach to instruments
+  // working on advanceWith
+
   // constructor which initiates the building process
   constructor: function(options){
     "use strict";
@@ -100,13 +103,18 @@ AVIATION.common.Slide.prototype = {
       },
       "correctAdvance": function(e, data){
         console.log("!* correctAdvance triggered");
+        if(data && data.onSuccess){
+
+        }
         $(slide).trigger("next");
       },
       "wrongAdvance": function(e, data){
         console.log("!* wrong advance triggered");
-        $(slide).trigger("pause");
-        $(slide).trigger("reset");
-        $(slide).trigger("playAltIndex", data);
+        if(data && data.index && typeof data.index !== undefined){
+          $(slide).trigger("pause");
+          $(slide).trigger("reset");
+          $(slide).trigger("playAltIndex", data);
+        }
       },
       "playAltIndex": function(e, data){
         var index = data.index, altPlayer = slide.altPlayers;
@@ -114,8 +122,13 @@ AVIATION.common.Slide.prototype = {
         console.log("!* playAltIndex triggered");
 
         slide.checkSlideControlPlayButtons("play");
+
         if(altPlayer[index] && altPlayer[index].player){
           altPlayer[index].player.play();          
+        }
+
+        if(data.resetIndex){
+          slide.activeIndex = data.resetIndex;
         }
       },
       end: function(e, data){
@@ -2272,7 +2285,7 @@ AVIATION.common.Slide.prototype = {
   // constrols the state of the Previous/Next 'player' buttons
   checkSlideControlPlayButtonsState: function(){
     var controls = this.slideElements.slideControls, active = this.activeIndex,
-        players = this.slideAudios, slide = this;
+        players = this.players, slide = this;
 
     if(this.options.showSlideControls){
 
@@ -2794,19 +2807,19 @@ AVIATION.common.Slide.prototype = {
     console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
     // check the logic
-    if(type && !index){
+    if(type && index===undefined && advanceWith.action===undefined){
       if(type === advanceWith.type)
         $(slide).trigger("correctAdvance");
       else
         $(slide).trigger("wrongAdvance");
-    }
+    } else
 
-    if(type === 'highlight' && typeof index !== undefined && typeof advanceWith.action === undefined ){
+    if(type === advanceWith.type && index !== undefined && advanceWith.action === undefined ){
       if(type === advanceWith.type && index === advanceWith.index)
         $(slide).trigger("correctAdvance");
       else
         $(slide).trigger("wrongAdvance");
-    }
+    } else
 
     if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
       //TODO: put into separate function?
@@ -2870,6 +2883,8 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
+    } else {
+      $(slide).trigger("wrongAdvance");
     }
 
     slide.patternInnerIndex = innerIndex;

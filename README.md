@@ -34,6 +34,7 @@ therefore use: `var anySlide = new AVIATION.Slide( options )` (if ComplexHTML xb
 **This can be validated easily using a tool such as: http://jsonlint.com/
 
 Acceptable options and defaults are as follows:
+
     serverBaseUrl:      window.location.protocol + "//" + window.location.host + "/",
     apacheServerBaseUrl:window.location.protocol + "//" + window.location.host + ":25080/",
     parentSlide:        {},
