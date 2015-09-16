@@ -1,3 +1,6 @@
+** last updated at 15:44 on Sept 16/2015
+** advanceWith and media inside slideContent has been updated
+
 # Aviation Project
 
 This branch is for combining front-end libraries and features used in the edX/Aviation project at CDOT
@@ -234,13 +237,15 @@ Acceptable options and defaults are as follows:
     buttons: [
         {
           "id": "btn0",
-          title: 'I am a button',
-          classes: ["btn", "btn-default"],
-          action: function(){ console.log("button of someId is executing"); }
+          "title": 'I am a button',
+          "classes": ["btn", "btn-default"],
+          "orderNumber": 0,
+          "action": function(){ console.log("button of someId is executing"); }
         },
         {
           "id": "btn1",
           title: 'another button',
+          "orderNumber": 1
         }
     ],
     slideContent: [{
@@ -260,8 +265,11 @@ Acceptable options and defaults are as follows:
         ],
         // set slider to any throttle possition from 0-4
         slider: 2,
-        audio: 0,
-        second: 10,
+        "media":{
+            "type": "audio", // could be csv/button/highlight/quiz
+            "index": 0,
+            "second" 10
+        },
         callback: function(){ console.log("this is a callback function"); },
         "advanceWith": {
             "action": "pattern",
@@ -282,7 +290,11 @@ Acceptable options and defaults are as follows:
         //... another slide content can go here to be triggered at a different time of the audio
         title: {html: "This is a different title / slide"},
         slider: 3,
-        audio: 1,
+        "media": {
+            "type": "csv",
+            "line": 100,
+            "index": 2
+        }
         "advanceWith": {
             "type": "button", // highlight, audio, csv
             "index": 0,
