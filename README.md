@@ -1,7 +1,7 @@
-* last updated at 17:10 on Sept 16/2015
-* advanceWith with explanations added along with mediaIndex + contentIndex
-* I am separating control over media and content. There was a flaw in my logic.
-* will update this note when finished
+*last updated at 17:10 on Sept 16/2015*
+*advanceWith with explanations added along with mediaIndex + contentIndex*
+*I am separating control over media and content. There was a flaw in my logic.*
+*will update this note when finished*
 
 # Aviation Project
 
@@ -35,8 +35,8 @@ createSlide now supports one options object being passed versus multiples...
 
 therefore use: `var anySlide = new AVIATION.Slide( options )` (if ComplexHTML xblock isn't being used)
 
-*NOTE: The example below doesn't use a properly formatted JSON, make sure to use proper JSON
-*This can be validated easily using a tool such as: http://jsonlint.com/
+*NOTE: The example below doesn't use a properly formatted JSON, make sure to use proper JSON*
+*This can be validated easily using a tool such as: http://jsonlint.com/*
 
 Acceptable options and defaults are as follows:
 
