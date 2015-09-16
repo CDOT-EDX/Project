@@ -274,7 +274,8 @@ Acceptable options and defaults are as follows:
                 "index": 2, // which altMediaFile should be played (currently sound only)
                 "status": "That's not correct. Let's try this again", // what msg should we display in the status bar?
                 "resetIndex": 0 // which slideContent index do we need to replay?
-            }
+            },
+            "content": true // if there is content to that should be triggered during the scanning pattern
         }
     },
     {

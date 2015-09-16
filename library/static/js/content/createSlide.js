@@ -2843,7 +2843,7 @@ AVIATION.common.Slide.prototype = {
             $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
 
-          if(advanceWith.buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] &&
+          if(advanceWith.content && slide.slideContent[slide.activeIndex+innerIndex+1] &&
               slide.slideContent[slide.activeIndex+innerIndex+1].media.index === index){
             
             console.log("index expected: " + slide.slideContent[slide.activeIndex+innerIndex].media.index);
@@ -2852,7 +2852,7 @@ AVIATION.common.Slide.prototype = {
             innerIndex++;
             slide.buildContent(true, (slide.activeIndex + innerIndex) );
 
-          } else if (advanceWith.buildContent && slide.slideContent[slide.activeIndex+innerIndex+1] && 
+          } else if (advanceWith.content && slide.slideContent[slide.activeIndex+innerIndex+1] && 
               slide.slideContent[slide.activeIndex+innerIndex+1].media.type !== 'highlight'){
 
             console.log("finished a scans content....");
