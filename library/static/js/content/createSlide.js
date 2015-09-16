@@ -413,7 +413,7 @@ AVIATION.common.Slide.prototype = {
         class: "row",
       }).appendTo(slide.container);
     }
-    this.buildContent(true, this.mediaActiveIndex, this.mediaActiveIndex, false, null, true);
+    this.buildContent(true, this.contentActiveIndex, this.contentActiveIndex, false, null, true);
 
     slide.initPanel(slide.options.panelType);
     
@@ -577,9 +577,9 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     var outerSlideContent = this.slideContent, /*checkSlideHighlights = this.checkSlideHighlights*/ slide = this,
         highlightsAddOnClick = [], buttonsAddOnClick = [], /*checkSlideButtons = this.checkSlideButtons*/ localClass,
-        mediaActiveIndex = index || this.mediaActiveIndex, contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
+        contentActiveIndex = index || this.contentActiveIndex, contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
-    outerIndex = this.mediaActiveIndex || 0;
+    outerIndex = this.contentActiveIndex || 0;
 
     // console.log("whats the container here?");
     // console.log(contentContainer);
@@ -588,7 +588,7 @@ AVIATION.common.Slide.prototype = {
 
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
 
-      this.initSlider(mediaActiveIndex);
+      this.initSlider(contentActiveIndex);
 
       contentContainer = jQuery('<div/>', {
         id: this.bodyId.split("#")[1],
@@ -616,7 +616,7 @@ AVIATION.common.Slide.prototype = {
     // this.buildButtons(mediaActiveIndex, buttonsAddOnClick);
 
     setupInnerContent = function(classSize, callback){
-      var slideContent = outerSlideContent[mediaActiveIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
+      var slideContent = outerSlideContent[contentActiveIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
           action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
           newSlideInner;// callback = c;b
 
@@ -647,7 +647,7 @@ AVIATION.common.Slide.prototype = {
           }
 
           innerContent = jQuery('<div/>',{
-            id: "innerContent_" + outerIndex + "_" + mediaActiveIndex,
+            id: "innerContent_" + outerIndex + "_" + contentActiveIndex,
             "class": contentClasses,
             html: slideContent.content.html || ""
           });
@@ -661,7 +661,7 @@ AVIATION.common.Slide.prototype = {
           }
 
           innerImage = jQuery('<img/>',{
-            id: "innerImage_" + outerIndex + "_" + mediaActiveIndex,
+            id: "innerImage_" + outerIndex + "_" + contentActiveIndex,
             "class": imageClasses,
             src: slideContent.image.src || ""
           });

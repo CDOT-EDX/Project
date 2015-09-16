@@ -347,6 +347,7 @@ The rest of this README is being edited at this moment
 **Everything below is just notes of the developer for the developer**
 
 ## Syntax and actions available for content
+
     content - can include any custom html if needed
         html (string/html)
         classes (string array)
