@@ -127,8 +127,12 @@ AVIATION.common.Slide.prototype = {
           altPlayer[index].player.play();          
         }
 
-        if(data.resetIndex){
-          slide.activeIndex = data.resetIndex;
+        if(data.resetMediaIndex){
+          slide.mediaActiveIndex = data.resetMediaIndex;
+        }
+
+        if(data.resetContentIndex){
+          slide.contentActiveIndex = data.resetContentIndex;
         }
       },
       end: function(e, data){
@@ -148,7 +152,7 @@ AVIATION.common.Slide.prototype = {
       play: function(e){
         console.log("!* play event fired");
 
-        var active = this.activeIndex, players = slide.players;
+        var active = this.mediaActiveIndex, players = slide.players;
 
         slide.checkSlideControlPlayButtons("play");
         console.log(players[active]);
@@ -161,7 +165,7 @@ AVIATION.common.Slide.prototype = {
       pause: function(e){
         console.log("!* pause event fired");
 
-        var active = slide.activeIndex, players = slide.players;
+        var active = slide.mediaActiveIndex, players = slide.players;
         slide.checkSlideControlPlayButtons("pause");
 
         console.log(players[active]);
@@ -183,7 +187,7 @@ AVIATION.common.Slide.prototype = {
 
         $(slide).trigger("reset");
 
-        slide.activeIndex++;
+        slide.mediaActiveIndex++;
         $(slide).trigger("play");
       },
       previous: function(e){
@@ -195,7 +199,7 @@ AVIATION.common.Slide.prototype = {
 
         $(slide).trigger("reset");
 
-        slide.activeIndex--;
+        slide.mediaActiveIndex--;
 
         $(slide).trigger("play");
       },
@@ -214,11 +218,11 @@ AVIATION.common.Slide.prototype = {
       reset: function(e){
         console.log("!* reset event fired");
 
-        if(slide.players[slide.activeIndex] && slide.players[slide.activeIndex].player){
+        if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
           if(!slide.panelPause){
             slide.panelPause = true;
           }
-          slide.players[slide.activeIndex].player.currentTime(0);
+          slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
       }
     };
@@ -389,7 +393,7 @@ AVIATION.common.Slide.prototype = {
     this.attachEvents();
     this.attachStates();
 
-    //console.log("no audio and building content! *** " + this.activeIndex);
+    //console.log("no audio and building content! *** " + this.mediaActiveIndex);
     console.log(this);
     if(this.options.enablePanel && panelContainer && panelContainer.length < 1){
       jQuery("<div/>",{
@@ -409,7 +413,7 @@ AVIATION.common.Slide.prototype = {
         class: "row",
       }).appendTo(slide.container);
     }
-    this.buildContent(true, this.activeIndex, this.activeIndex, false, null, true);
+    this.buildContent(true, this.mediaActiveIndex, this.mediaActiveIndex, false, null, true);
 
     slide.initPanel(slide.options.panelType);
     
@@ -573,9 +577,9 @@ AVIATION.common.Slide.prototype = {
     "use strict";
     var outerSlideContent = this.slideContent, /*checkSlideHighlights = this.checkSlideHighlights*/ slide = this,
         highlightsAddOnClick = [], buttonsAddOnClick = [], /*checkSlideButtons = this.checkSlideButtons*/ localClass,
-        activeIndex = index || this.activeIndex, contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
+        mediaActiveIndex = index || this.mediaActiveIndex, contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
-    outerIndex = this.activeIndex || 0;
+    outerIndex = this.mediaActiveIndex || 0;
 
     // console.log("whats the container here?");
     // console.log(contentContainer);
@@ -584,7 +588,7 @@ AVIATION.common.Slide.prototype = {
 
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
 
-      this.initSlider(activeIndex);
+      this.initSlider(mediaActiveIndex);
 
       contentContainer = jQuery('<div/>', {
         id: this.bodyId.split("#")[1],
@@ -604,15 +608,15 @@ AVIATION.common.Slide.prototype = {
     // console.log("and the contentainer after?");
     // console.log(contentContainer);
     // highlightsAddOnClick = this.initHighlights();
-    // this.buildHighlights(activeIndex, highlightsAddOnClick);
+    // this.buildHighlights(mediaActiveIndex, highlightsAddOnClick);
     slide.initActionables();
     // buttonsAddOnClick = this.initButtons();
     // console.log("buttons ADD ON CLICK!");
     // console.log(buttonsAddOnClick);
-    // this.buildButtons(activeIndex, buttonsAddOnClick);
+    // this.buildButtons(mediaActiveIndex, buttonsAddOnClick);
 
     setupInnerContent = function(classSize, callback){
-      var slideContent = outerSlideContent[activeIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
+      var slideContent = outerSlideContent[mediaActiveIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
           action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
           newSlideInner;// callback = c;b
 
@@ -643,7 +647,7 @@ AVIATION.common.Slide.prototype = {
           }
 
           innerContent = jQuery('<div/>',{
-            id: "innerContent_" + outerIndex + "_" + activeIndex,
+            id: "innerContent_" + outerIndex + "_" + mediaActiveIndex,
             "class": contentClasses,
             html: slideContent.content.html || ""
           });
@@ -657,7 +661,7 @@ AVIATION.common.Slide.prototype = {
           }
 
           innerImage = jQuery('<img/>',{
-            id: "innerImage_" + outerIndex + "_" + activeIndex,
+            id: "innerImage_" + outerIndex + "_" + mediaActiveIndex,
             "class": imageClasses,
             src: slideContent.image.src || ""
           });
@@ -701,10 +705,10 @@ AVIATION.common.Slide.prototype = {
 
     };
 
-    if ( (!this.slideContent[activeIndex].second && !this.slideContent[activeIndex].audio) || correctAudio ){
-      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, false, triggerCallback);
+    if ( (!this.slideContent[mediaActiveIndex].second && !this.slideContent[mediaActiveIndex].audio) || correctAudio ){
+      this.buildHeader( contentContainer, this.slideContent[mediaActiveIndex], setupInnerContent, false, triggerCallback);
     } else if ( clearContent ){
-      this.buildHeader( contentContainer, this.slideContent[activeIndex], setupInnerContent, clearContent, triggerCallback);
+      this.buildHeader( contentContainer, this.slideContent[mediaActiveIndex], setupInnerContent, clearContent, triggerCallback);
     }
     
   },
@@ -961,7 +965,7 @@ AVIATION.common.Slide.prototype = {
     var onclick = event.data.onclick, callback = event.data.callbacks, c,
         element = event.data.element, onSuccess = event.data.onSuccess,
         slide = event.data.slide, advance,
-        content = slide.slideContent[slide.activeIndex],
+        content = slide.slideContent[slide.mediaActiveIndex],
         availableAdvances = ["action", "type"];
 
     console.log("event.data");
@@ -1052,8 +1056,8 @@ AVIATION.common.Slide.prototype = {
       console.log("min scan:");
       console.log(slide.minScan);
       if(slide.completedScan === slide.options.minScan){
-        //slide.activeIndex = slide.activeIndex + slide.patternInnerIndex;
-        //slide.buildContent(true, slide.activeIndex + slide.patternInnerIndex + 1);
+        //slide.mediaActiveIndex = slide.mediaActiveIndex + slide.patternInnerIndex;
+        //slide.buildContent(true, slide.mediaActiveIndex + slide.patternInnerIndex + 1);
       } else {
         console.log("wrong advanceWith, waiting for correcet input");
       }
@@ -1191,7 +1195,7 @@ AVIATION.common.Slide.prototype = {
     var callbacks = event.data.callbacks, i,
         element = event.data.element,
         slide = event.data.slide;
-        //content = slide.slideContent[slide.activeIndex];
+        //content = slide.slideContent[slide.mediaActiveIndex];
 
     for(i = 0; i < callbacks.length; i++){
       if(callbacks[i] && typeof callbacks[i] === 'function'){
@@ -1425,7 +1429,7 @@ AVIATION.common.Slide.prototype = {
         showScrews: true,
         bootstrapFriendly: true,
         bootstrapClass: "col-xs-" + instBootCol,
-        img_directory: 'https://online.cdot.senecacollege.ca:25080/Project/library/static/img/instruments/'
+        img_directory: slide.options.apacheServerBaseUrl + 'Project/library/static/img/instruments/'
       };
 
       // /c4x/Seneca_College/M01S01_Test/asset/
@@ -1646,10 +1650,11 @@ AVIATION.common.Slide.prototype = {
               i = 0;
               data.element = {};
               data.element.type = "csv";
-              data.element.index = slide.activeIndex;
+              data.element.index = slide.mediaActiveIndex;
               data.slide = slide;
 
-              if(slide.slideContent[slide.activeIndex].advanceWith.action === "pattern"){
+              if(slide.slideContent[slide.mediaActiveIndex].advanceWith.action &&
+                  slide.slideContent[slide.mediaActiveIndex].advanceWith.action === "pattern"){
                 if(slide.options.minScan <= slide.completedScan){
                   slide.setStatus("Congratulations, you have completed the scan sucessfully.");
                   slide.setInstrumentStatus2("The flight has finished.");
@@ -2291,7 +2296,7 @@ AVIATION.common.Slide.prototype = {
 
   // constrols the state of the Previous/Next 'player' buttons
   checkSlideControlPlayButtonsState: function(){
-    var controls = this.slideElements.slideControls, active = this.activeIndex,
+    var controls = this.slideElements.slideControls, active = this.mediaActiveIndex,
         players = this.players, slide = this;
 
     if(this.options.showSlideControls){
@@ -2389,7 +2394,7 @@ AVIATION.common.Slide.prototype = {
 
   resetSlide: function(){
 
-    this.activeIndex = 0;
+    this.mediaActiveIndex = 0;
     // console.log(this.slideElements.slideControls);
     this.checkSlideControlPlayButtons();
 
@@ -2442,13 +2447,13 @@ AVIATION.common.Slide.prototype = {
 
     advancePattern = function(oldActions){
       console.log("trying to advance on quiz complete!");
-      $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: slide.activeIndex + slide.patternInnerIndex }, slide: slide });
+      $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: slide.mediaActiveIndex + slide.patternInnerIndex }, slide: slide });
       if(oldActions && typeof oldActions === 'function'){
         oldActions();
       }
 
       //slide.trigger("continuePattern");
-      slide.buildContent(true, slide.activeIndex);
+      slide.buildContent(true, slide.mediaActiveIndex);
     };
 
     for(i=0; i<quizzes.length; i++){
@@ -2623,7 +2628,9 @@ AVIATION.common.Slide.prototype = {
 
     this.extraStates = [];
 
-    this.activeIndex = options.activeIndex || 0;
+    this.mediaActiveIndex = options.mediaActiveIndex || 0;
+
+    this.contentActiveIndex = options.contentActiveIndex || 0;
 
     this.extraActiveIndex = options.extraActiveIndex || 0;
 
@@ -2843,21 +2850,21 @@ AVIATION.common.Slide.prototype = {
             $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
 
-          if(advanceWith.content && slide.slideContent[slide.activeIndex+innerIndex+1] &&
-              slide.slideContent[slide.activeIndex+innerIndex+1].media.index === index){
+          if(advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] &&
+              slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.index === index){
             
-            console.log("index expected: " + slide.slideContent[slide.activeIndex+innerIndex].media.index);
+            console.log("index expected: " + slide.slideContent[slide.contentActiveIndex+innerIndex].media.index);
             console.log("index provided: " + index);
             console.log("inner index: " + innerIndex);
             innerIndex++;
-            slide.buildContent(true, (slide.activeIndex + innerIndex) );
+            slide.buildContent(true, (slide.contentActiveIndex + innerIndex) );
 
-          } else if (advanceWith.content && slide.slideContent[slide.activeIndex+innerIndex+1] && 
-              slide.slideContent[slide.activeIndex+innerIndex+1].media.type !== 'highlight'){
+          } else if (advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] && 
+              slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.type !== 'highlight'){
 
             console.log("finished a scans content....");
             // reset active index to the content after pattern content
-            slide.activeIndex = slide.activeIndex + innerIndex;
+            slide.contentActiveIndex = slide.contentActiveIndex + innerIndex;
 
           }
           //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);

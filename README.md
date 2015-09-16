@@ -1,5 +1,6 @@
-** last updated at 15:44 on Sept 16/2015
-** advanceWith and media inside slideContent has been updated
+** last updated at 17:10 on Sept 16/2015
+** advanceWith with explanations added along with mediaIndex + contentIndex
+** I have separated control over media and content. There was a flaw in my logic.
 
 # Aviation Project
 
@@ -273,15 +274,22 @@ Acceptable options and defaults are as follows:
         callback: function(){ console.log("this is a callback function"); },
         "advanceWith": {
             "action": "pattern",
+            // for both properties below, anything to do with the contentIndex will only rebuild the content for that
+            // index and not replay the media associated with the content
+            // BUT, anything to do with mediaIndex, will restart the media and run all of the content associated with that media again
+            // "<-"/previous btn and "->"/forward btn on the slides skip mediaIndices NOT contentIndices
             "onSuccess": { ** optional if needed and currently under development
                 "status": "Good job, let's move on...",
-                "index": 3 // optional, which index should we jump to if not in order of slideContent,
+                // if onSuccess content is not the next slideContent....
+                "contentIndex": 3 // optional, which index should we jump to in slideContent OR use mediaIndex instead
+                "mediaIndex": 2 // mediaIndex will jump to the beginning of a media at set index and run all the content from that
                 "callback": "function(){ console.log('You did smth right'); }" // optional
             },
             "onFail": { ** optional if needed and currently under development
                 "index": 2, // which altMediaFile should be played (currently sound only)
                 "status": "That's not correct. Let's try this again", // what msg should we display in the status bar?
-                "resetIndex": 0 // which slideContent index do we need to replay?
+                "resetContentIndex": 0 // which slideContent index do we need to replay on end of altMedia?
+                "resetMediaIndex": 0 // which media index do we need to replay on end of altMedia?
             },
             "content": true // if there is content to that should be triggered during the scanning pattern
         }
