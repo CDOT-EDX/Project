@@ -1,6 +1,7 @@
 ** last updated at 17:10 on Sept 16/2015
 ** advanceWith with explanations added along with mediaIndex + contentIndex
-** I have separated control over media and content. There was a flaw in my logic.
+** I am separating control over media and content. There was a flaw in my logic.
+** will update this note when finished
 
 # Aviation Project
 
