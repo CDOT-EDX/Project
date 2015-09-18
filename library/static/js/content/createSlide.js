@@ -137,13 +137,24 @@ AVIATION.common.Slide.prototype = {
       },
       contentNext: function(e,data){
         var slide = this;
-        slide.buildContent(true, this.contentActiveIndex+1);
+        if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
+          slide.buildContent(true, this.contentActiveIndex+1);
+        } else {
+          $(slide).trigger("slideEnd");
+          slide.setStatus('Click "Continue" to proceed to the next slide');
+        }
         // slide.checkAdvanceWith({
         //   event: e,
         //   data: data
         // });
       },
+      slideEnd: function(e, data){
+        slide.setStatus('Click "Continue" to proceed to the next slide');
+        slide.checkSlideControlPlayButtons("replay");
+        slide.activateTimer(5, slide.options.autoRedirect);
+      },
       end: function(e, data){
+        slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
         // check if everything has stopped playing
@@ -160,14 +171,12 @@ AVIATION.common.Slide.prototype = {
       play: function(e){
         console.log("!* play event fired");
 
-        var active = this.mediaActiveIndex, players = slide.players;
+        var active = slide.mediaActiveIndex, players = slide.players, content = slide.slideContent;
 
         slide.checkSlideControlPlayButtons("play");
         console.log(players[active]);
         if(players[active] && players[active].player){
           players[active].player.play();  
-        } else {
-          // change to replay and run the redirect/timer to advance
         }
       },
       pause: function(e){
@@ -193,7 +202,7 @@ AVIATION.common.Slide.prototype = {
         // move on to the next track
         if(date && data !== undefined){
           if(data.type !== undefined && (data.type === 'button' || data.type === 'highlight' || data.type === 'quiz')){
-            slide.buildContent(true, this.contentActiveIndex+1);
+            $(slide).trigger("contentNext");
           } else {
             $(slide).trigger("pause");
             $(slide).trigger("reset");
@@ -2327,7 +2336,7 @@ AVIATION.common.Slide.prototype = {
   // constrols the state of the Previous/Next 'player' buttons
   checkSlideControlPlayButtonsState: function(){
     var controls = this.slideElements.slideControls, active = this.mediaActiveIndex,
-        players = this.players, slide = this;
+        players = this.players, slide = this, contentActive = this.contentActiveIndex;
 
     if(this.options.showSlideControls){
 
@@ -2359,12 +2368,14 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if(active > players.length - 1){
-            slide.setStatus('Click "Continue" to proceed to the next slide');
+          if( (active > players.length - 1) && (contentActive > this.slideContent.length - 1) ){
+            $(slide).trigger("slideEnd");
             controls.pause.hide();
             controls.play.hide();
             controls.replay.show();
-            slide.activateTimer(5, slide.options.autoRedirect);
+          } else {
+            controls.play.hide();
+            controls.pause.show();
           }
           controls.next.attr("disabled", true);
           controls.next.prop("disabled", true);
