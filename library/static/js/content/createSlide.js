@@ -1389,7 +1389,7 @@ AVIATION.common.Slide.prototype = {
   setSlider: function(slideContent){
     "use strict";
 
-    if(this.options.enableSlider && slideContent.slider && slideContent.slider !== ""){
+    if(this.options.enableSlider && slideContent.slider !== undefined && slideContent.slider !== ""){
       this.slideElements.slider.slider("option", "values", [slideContent.slider]);
     }
   },
