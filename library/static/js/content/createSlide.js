@@ -135,6 +135,14 @@ AVIATION.common.Slide.prototype = {
           slide.contentActiveIndex = data.resetContentIndex;
         }
       },
+      contentNext: function(e,data){
+        var slide = this;
+        slide.buildContent(true, this.contentActiveIndex+1);
+        // slide.checkAdvanceWith({
+        //   event: e,
+        //   data: data
+        // });
+      },
       end: function(e, data){
         console.log("!* end event fired");
         console.log(data);
@@ -689,8 +697,11 @@ AVIATION.common.Slide.prototype = {
           if(innerImage){
             innerImage.appendTo(newSlideInner);
           }
+
+          newSlideInner.appendTo(contentContainer);
+
           if($().pulse){
-            newSlideInner.appendTo(contentContainer)
+            newSlideInner  
               .pulse(slide.options.pulseProperties, slide.options.pulseSettings);
           }
         }
@@ -1026,6 +1037,8 @@ AVIATION.common.Slide.prototype = {
           // }
         }
       }
+    } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
+      $(slide).trigger("contentNext");
     } else {
       $(slide).trigger("next");
     }
@@ -2107,13 +2120,16 @@ AVIATION.common.Slide.prototype = {
         if(content[i].media && content[i].media.type && 
             (content[i].media.type !== "button" && content[i].media.type !== "highlight") ){
           // case for audio, csv, timer
+          console.log("initing mediaEvents:");
+          console.log(content[i]);
+          console.log(content[i].media.index);
           if(!playerInitted[content[i].media.index]){
             slide.initGenericEvents(players[content[i].media.index].player, content[i], slide, i);
-            slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
+            //slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
             playerInitted[content[i].media.index] = true;
-          } else {
+          } //else {
             slide.initCueEvents(players[content[i].media.index].player, content[i], slide, i);
-          }
+          //}
 
         } else if(content[i].media && content[i].media.type){
           // case for btn, hlight
