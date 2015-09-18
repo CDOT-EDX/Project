@@ -165,6 +165,9 @@ Acceptable options and defaults are as follows:
             }
           ],
         },
+        // not mentioned on SlickQuiz page but added by edX CDOT team
+        "showRemediationOnSuccess": true,
+        "showRemediationOnFail": true,
         "animationCallbacks": {
           "checkAnswer": function(){
             console.log("do something");
