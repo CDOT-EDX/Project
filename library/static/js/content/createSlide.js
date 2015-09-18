@@ -106,7 +106,7 @@ AVIATION.common.Slide.prototype = {
         if(data && data.onSuccess){
 
         }
-        $(slide).trigger("next");
+        $(slide).trigger("next", data);
       },
       "wrongAdvance": function(e, data){
         console.log("!* wrong advance triggered");
@@ -188,15 +188,24 @@ AVIATION.common.Slide.prototype = {
         //slide.states.stopped = true;
         //slide.states.playing = false;
       },
-      next: function(e){
+      next: function(e, data){
         console.log("!* next event fired");
         // move on to the next track
-        $(slide).trigger("pause");
-
-        $(slide).trigger("reset");
-
-        slide.mediaActiveIndex++;
-        $(slide).trigger("play");
+        if(date && data !== undefined){
+          if(data.type !== undefined && (data.type === 'button' || data.type === 'highlight' || data.type === 'quiz')){
+            slide.buildContent(true, this.contentActiveIndex+1);
+          } else {
+            $(slide).trigger("pause");
+            $(slide).trigger("reset");
+            slide.mediaActiveIndex++;
+            $(slide).trigger("play");
+          }
+        } else {
+          $(slide).trigger("pause");
+          $(slide).trigger("reset");
+          slide.mediaActiveIndex++;
+          $(slide).trigger("play");
+        }
       },
       previous: function(e){
         console.log("!* previous event fired");
@@ -2846,14 +2855,14 @@ AVIATION.common.Slide.prototype = {
     // check the logic
     if(type && index===undefined && advanceWith.action===undefined){
       if(type === advanceWith.type)
-        $(slide).trigger("correctAdvance");
+        $(slide).trigger("correctAdvance", advanceWith);
       else
         $(slide).trigger("wrongAdvance");
     } else
 
     if(type === advanceWith.type && index !== undefined && advanceWith.action === undefined ){
       if(type === advanceWith.type && index === advanceWith.index)
-        $(slide).trigger("correctAdvance");
+        $(slide).trigger("correctAdvance", advanceWith);
       else
         $(slide).trigger("wrongAdvance");
     } else
@@ -2905,7 +2914,7 @@ AVIATION.common.Slide.prototype = {
           slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
           
           if(completedScan >= slide.options.minScan && slide.panelEnd){
-            $(slide).trigger("correctAdvance");
+            $(slide).trigger("correctAdvance", advanceWith);
           }
         }
 
