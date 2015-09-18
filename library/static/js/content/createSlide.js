@@ -198,11 +198,22 @@ AVIATION.common.Slide.prototype = {
         //slide.states.playing = false;
       },
       next: function(e, data){
+        var nextContent = slide.slideContent[slide.contentActiveIndex+1], type;
         console.log("!* next event fired");
         // move on to the next track
         if(data && data !== undefined){
-          if(data.type !== undefined && (data.type === 'button' || data.type === 'highlight' || data.type === 'quiz')){
-            $(slide).trigger("contentNext");
+          if(nextContent && nextContent.media && nextContent.media !== undefined && nextContent.media.type &&
+              nextContent.media.type !== undefined){
+            type = nextContent.media.type;
+            if(type === 'button' || type === 'highlight' || type === 'quiz'){
+          //if(data.type !== undefined && (data.type === 'button' || data.type === 'highlight' || data.type === 'quiz')){
+              $(slide).trigger("contentNext");
+            } else {
+              $(slide).trigger("pause");
+              $(slide).trigger("reset");
+              slide.mediaActiveIndex++;
+              $(slide).trigger("play");             
+            }
           } else {
             $(slide).trigger("pause");
             $(slide).trigger("reset");
