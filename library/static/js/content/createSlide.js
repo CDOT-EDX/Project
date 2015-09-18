@@ -200,7 +200,7 @@ AVIATION.common.Slide.prototype = {
       next: function(e, data){
         console.log("!* next event fired");
         // move on to the next track
-        if(date && data !== undefined){
+        if(data && data !== undefined){
           if(data.type !== undefined && (data.type === 'button' || data.type === 'highlight' || data.type === 'quiz')){
             $(slide).trigger("contentNext");
           } else {
