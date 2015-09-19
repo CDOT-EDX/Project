@@ -69,9 +69,12 @@ AVIATION.common.Slide = function (options, slideContent, mediaFiles, parentSlide
 };
 
 AVIATION.common.Slide.prototype = {
-  version: "0.1",
-  // 0.1.1 changed bootstrap approach to instruments
-  // working on advanceWith
+  version: "0.1.1",
+  // 0.1.1 - 2015-09-19
+  // changed bootstrap approach to instruments
+  // working on advanceWith and separting activeIndex into
+  // mediaActiveIndex and contentActiveIndex (seems succcessful)
+  // added ability to disable/enable btns/hlights (haven't tested how this affects quizzes)
 
   // constructor which initiates the building process
   constructor: function(options){
@@ -206,26 +209,19 @@ AVIATION.common.Slide.prototype = {
               nextContent.media.type !== undefined){
             type = nextContent.media.type;
             if(type === 'button' || type === 'highlight' || type === 'quiz'){
-          //if(data.type !== undefined && (data.type === 'button' || data.type === 'highlight' || data.type === 'quiz')){
               $(slide).trigger("contentNext");
-            } else {
-              $(slide).trigger("pause");
-              $(slide).trigger("reset");
-              slide.mediaActiveIndex++;
-              $(slide).trigger("play");             
+              return 0;
             }
-          } else {
-            $(slide).trigger("pause");
-            $(slide).trigger("reset");
-            slide.mediaActiveIndex++;
-            $(slide).trigger("play");
           }
-        } else {
-          $(slide).trigger("pause");
-          $(slide).trigger("reset");
-          slide.mediaActiveIndex++;
-          $(slide).trigger("play");
         }
+        // if we have returned, we need to increment mediaActiveIndex instead
+        $(slide).trigger("nextMedia");
+      },
+      nextMedia: function(e, data){
+        $(slide).trigger("pause");
+        $(slide).trigger("reset");
+        slide.mediaActiveIndex++;
+        $(slide).trigger("play");  
       },
       previous: function(e){
         console.log("!* previous event fired");
@@ -1302,6 +1298,7 @@ AVIATION.common.Slide.prototype = {
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
+          slide.elementsToDisable[action].push(false);
           console.log("pusshign onto " + obj.elementArray);
           console.log($action);
           slide.slideElements[obj.elementArray].push($action);
@@ -2703,6 +2700,8 @@ AVIATION.common.Slide.prototype = {
     this.slideTimer = -1;
 
     this.elementsToShow = { "button": [], "highlight": [], "quiz": [] };
+    this.elementsToDisable = { "button": [], "highlight": [], "quiz": [] };
+
 
     this.slideContent = this.options.slideContent ||  [
                                                         { 
@@ -2758,6 +2757,10 @@ AVIATION.common.Slide.prototype = {
     */
   },
 
+  /***
+    *   check if a button has been shown/hidden
+    *   as well as check the buttons enabled/disabled prop
+    **/
   checkHideShowActions: function(slideContent, slide){
     "use strict";
 
@@ -2774,23 +2777,25 @@ AVIATION.common.Slide.prototype = {
             "elements" : "quizElements",
             "mult": "quiz"
           } 
-        }, action, toShowBtn = [], toShowHighlights = [], toShowQuiz = [], i;
+        }, action, toShowBtn = [], toShowHighlights = [], toShowQuiz = [], i, toDisable = [];
 
     for(action in possibleActions){
       if( possibleActions.hasOwnProperty(action) ){
         for(i=0; i < slide.slideElements[possibleActions[action].elements].length; i++){
           slide.elementsToShow[action][i] = false;
+          slide.elementsToDisable[action][i] = false;          
         }
       }
       
       if(slideContent.hasOwnProperty(possibleActions[action].mult) && possibleActions.hasOwnProperty(action)){
         for(i = 0; slideContent[possibleActions[action].mult] &&  i < slideContent[possibleActions[action].mult].length; i++){
           if(typeof slideContent[possibleActions[action].mult][i] === "object" ){
-            slide.elementsToShow[action][slideContent[possibleActions[action].mult].index] = true;
-            //toShow[showButtons[j].index] = true;
+            slide.elementsToShow[action][slideContent[possibleActions[action].mult][i].index] = true;
+             if(slideContent[possibleActions[action].mult][i].disable && slideContent[possibleActions[action].mult][i].disable === true){
+               slide.elementsToDisable[action][slideContent[possibleActions[action].mult][i].index] = slideContent[possibleActions[action].mult][i].disable;
+             }
           } else {
             slide.elementsToShow[action][slideContent[possibleActions[action].mult][i]] = true;
-            //toShow[showButtons[j]] = true;  
           }
         }
       }
@@ -2802,6 +2807,12 @@ AVIATION.common.Slide.prototype = {
           if(slide.elementsToShow[action][i]){
             //show this one
             slide.slideElements[possibleActions[action].elements][i].show();
+            // only disable the ones we show
+            if(slide.elementsToDisable[action][i]){
+              slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+            } else {
+              slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+            }
           } else {
             //hide this one
             slide.slideElements[possibleActions[action].elements][i].hide();
@@ -2816,6 +2827,7 @@ AVIATION.common.Slide.prototype = {
     *   Function for checking if the student is performing the correct scanning pattern
     *   The scanning pattern order is:
     *   AI, ASI, AI, ALT, AI, VC, AI, HC, AI, TC
+    *   0,  3,   0,  1,   0,  4,  0,  2,  0,  5
     **/
   // oldName : checkScanningPattern
   checkActionables: function(type, index, event, advanceWith){

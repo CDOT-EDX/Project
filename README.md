@@ -1,10 +1,10 @@
-*last updated at 17:10 on Sept 16/2015*
+*last updated on Sept 19/2015*
 
-*advanceWith with explanations added along with mediaIndex + contentIndex*
+*added enable/disable on buttons*
 
-*I am separating control over media and content. There was a flaw in my logic.*
+*see the button example inside slideContent for more details*
 
-*will update this note when finished*
+*not updated on online.cdot yet*
 
 # Aviation Project
 
@@ -270,7 +270,7 @@ Acceptable options and defaults are as follows:
         // this is to hide / show buttons just like we do with highlights
         buttons: [
                     0 , 
-                    { index: 2, onclick: function(){ console.log("button onclick");} }, 
+                    { "index": 2, "disable": true, "onclick": "function(){ console.log('button onclick');}" }, 
                     3 
         ],
         // set slider to any throttle possition from 0-4
