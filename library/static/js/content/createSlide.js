@@ -70,11 +70,6 @@ AVIATION.common.Slide = function (options, slideContent, mediaFiles, parentSlide
 
 AVIATION.common.Slide.prototype = {
   version: "0.1.1",
-  // 0.1.1 - 2015-09-19
-  // changed bootstrap approach to instruments
-  // working on advanceWith and separting activeIndex into
-  // mediaActiveIndex and contentActiveIndex (seems succcessful)
-  // added ability to disable/enable btns/hlights (haven't tested how this affects quizzes)
 
   // constructor which initiates the building process
   constructor: function(options){
@@ -1036,7 +1031,7 @@ AVIATION.common.Slide.prototype = {
     if(content.advanceWith){
       for(advance in content.advanceWith){
         if(content.advanceWith.hasOwnProperty(advance)){
-          slide.checkActionables(element.type, element.index, event, content.advanceWith);
+          slide.checkActionables(element.type, element.index, event, content.advanceWith, slide.contentActiveIndex);
           // TODO: better solution over a break?
           break;
 
@@ -1628,7 +1623,6 @@ AVIATION.common.Slide.prototype = {
         }
       }
     }
-
   },
 
   initCSVParser: function(csvs, callback){
@@ -1651,7 +1645,7 @@ AVIATION.common.Slide.prototype = {
         console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
 
         myFlightIntVar = setInterval(function(){
-          slide.setInstrumentStatus2("Instrument panel PLAYING...");
+          slide.setInstrumentStatus2("Instrument panel is playing...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
 
@@ -1689,7 +1683,7 @@ AVIATION.common.Slide.prototype = {
           } else {
             if(i < flight.length){
               slide.pausedPanelIndex = i;
-              slide.setInstrumentStatus2("Instrument panel PAUSED.");
+              slide.setInstrumentStatus2("Instrument panel is paused.");
             } else {
               i = 0;
               data.element = {};
@@ -1697,26 +1691,28 @@ AVIATION.common.Slide.prototype = {
               data.element.index = slide.mediaActiveIndex;
               data.slide = slide;
 
+              /**
+              *** moved inside checkActionable to do checkAdvance properly there
               if(slide.slideContent[slide.contentActiveIndex].advanceWith.action &&
                   slide.slideContent[slide.contentActiveIndex].advanceWith.action === "pattern"){
                 if(slide.options.minScan <= slide.completedScan){
                   slide.setStatus("Congratulations, you have completed the scan sucessfully.");
-                  slide.setInstrumentStatus2("The flight has finished.");
-                  console.log("csv ended event");
-                  $(slide).trigger("next");
                 } else {
-                  slide.setStatus("Sorry you didn't compelete the scan in time.");
-                  slide.setInstrumentStatus2("The flight has finished.");
+                  slide.setStatus("Unfortunately, you didn't compelete the scan in time. Try again!");
                   console.log("minScan: " + slide.minScan + " completedScans: " + slide.completedScan);
 
                   // TODO: show modal to retry or continue?
                 }
-              } else {
-                console.log("csv ended event");
-                slide.panelEnd = true;
-                $(slide).trigger("end", data);
+              }
+              **/
+
+              slide.panelEnd = true;
+
+              if(this.end && typeof this.end === 'function'){
+                this.end();
               }
 
+              $(slide).trigger("end", data);
             }
             
             clearInterval(myFlightIntVar);
@@ -1738,7 +1734,18 @@ AVIATION.common.Slide.prototype = {
 
       var papaCueLine = function(line, callback){
         console.log("csv cueing at line " + line);
+        console.log(this.result);
         this.result.data[line].push(callback);
+      };
+
+      var papaCueEnd = function(callback){
+        console.log("papaparse end event");
+        slide.setInstrumentStatus2("The flight has finished.");
+        this.end = callback;
+      };
+
+      var papaCuePause = function(callback){
+        console.log("papaparse pause event");
       };
 
       var papaSaveObject = function(result){
@@ -1747,6 +1754,8 @@ AVIATION.common.Slide.prototype = {
         this.pause = papaPause;
         this.cueLine = papaCueLine;
         this.currentTime = papaCurrentLine;
+        this.papaCuePause = papaCuePause;
+        this.papaCueEnd = papaCueEnd;
         csvPlayers.push(this);
 
         parsed++;
@@ -1764,7 +1773,6 @@ AVIATION.common.Slide.prototype = {
             delimiter: "|",
             skipEmptyLines: true,
             fastMode: true,
-            download: true,
           },
           download: true,
           complete: papaSaveObject
@@ -2177,6 +2185,14 @@ AVIATION.common.Slide.prototype = {
 
     switch(content.media.type){
       case "csv":
+      /**
+        player.papaCueEnd(function(){
+
+        });
+        player.papaCuePause(function(){
+
+        });
+      **/
         break;
       case "audio":
         player.on("ended", function(e){
@@ -2830,7 +2846,7 @@ AVIATION.common.Slide.prototype = {
     *   0,  3,   0,  1,   0,  4,  0,  2,  0,  5
     **/
   // oldName : checkScanningPattern
-  checkActionables: function(type, index, event, advanceWith){
+  checkActionables: function(type, index, event, advanceWith, activeContent){
     "use strict";
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
@@ -2846,137 +2862,145 @@ AVIATION.common.Slide.prototype = {
 
     });
 */
+    // new check to see if we've already moved past this advanceWith index
+    console.log("new actionable index: ");
+    console.log(activeContent);
+    console.log("vs contentActive");
+    console.log(slide.contentActiveIndex);
+    if(activeContent >= slide.contentActiveIndex){
+      console.log("type inside checkActionabels" + type);
 
-    console.log("type inside checkActionabels" + type);
+      // init defaults
+      if(event.target){
+        element = event.target;
+      } else if(type === 'highlight'){
+        element = slide.slideElements.highlightElements[index];
+      } else if(type === 'button'){
+        element = slide.slideElements.buttonElements[index];
+      } else if(type === 'quiz'){
+        element = slide.slideElements.quizElements[index];
+      }
 
-    // init defaults
-    if(event.target){
-      element = event.target;
-    } else if(type === 'highlight'){
-      element = slide.slideElements.highlightElements[index];
-    } else if(type === 'button'){
-      element = slide.slideElements.buttonElements[index];
-    } else if(type === 'quiz'){
-      element = slide.slideElements.quizElements[index];
-    }
+      if(slide.overallScanIndex !== undefined){
+        overallScanIndex = slide.overallScanIndex;
+      } else {
+        overallScanIndex = -1;
+      }
 
-    if(slide.overallScanIndex !== undefined){
-      overallScanIndex = slide.overallScanIndex;
-    } else {
-      overallScanIndex = -1;
-    }
-
-    if(slide.allowedUnsuccesful !== undefined){
-      allowedUnsuccesful = slide.allowedUnsuccesful;
-    } else {
-      allowedUnsuccesful = 3;
-    }
-    
-    if(slide.unsuccesfulAttempts !== undefined){
-      unsuccesfulAttempts = slide.unsuccesfulAttempts;
-    } else {
-      unsuccesfulAttempts = 0;
-    }
-
-    if(slide.patternInnerIndex !== undefined){
-      innerIndex = slide.patternInnerIndex;
-    } else {
-      innerIndex = 0;
-    }
-
-    console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
-
-    // check the logic
-    if(type && index===undefined && advanceWith.action===undefined){
-      if(type === advanceWith.type)
-        $(slide).trigger("correctAdvance", advanceWith);
-      else
-        $(slide).trigger("wrongAdvance");
-    } else
-
-    if(type === advanceWith.type && index !== undefined && advanceWith.action === undefined ){
-      if(type === advanceWith.type && index === advanceWith.index)
-        $(slide).trigger("correctAdvance", advanceWith);
-      else
-        $(slide).trigger("wrongAdvance");
-    } else
-
-    if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
-      //TODO: put into separate function?
-      //slide.checkScanningPattern();
+      if(slide.allowedUnsuccesful !== undefined){
+        allowedUnsuccesful = slide.allowedUnsuccesful;
+      } else {
+        allowedUnsuccesful = 3;
+      }
       
-      slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
-      
-      if( scanPattern[overallScanIndex+1] === index){
-        if(element !== undefined){
-          //$(element).pulse('destroy');
+      if(slide.unsuccesfulAttempts !== undefined){
+        unsuccesfulAttempts = slide.unsuccesfulAttempts;
+      } else {
+        unsuccesfulAttempts = 0;
+      }
 
-          if($().pulse){
-            $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
-          }
+      if(slide.patternInnerIndex !== undefined){
+        innerIndex = slide.patternInnerIndex;
+      } else {
+        innerIndex = 0;
+      }
 
-          if(advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] &&
-              slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.index === index){
-            
-            console.log("index expected: " + slide.slideContent[slide.contentActiveIndex+innerIndex].media.index);
-            console.log("index provided: " + index);
-            console.log("inner index: " + innerIndex);
-            innerIndex++;
-            slide.buildContent(true, (slide.contentActiveIndex + innerIndex) );
+      console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
-          } else if (advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] && 
-              slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.type !== 'highlight'){
+      // check the logic
+      if(type && index===undefined && advanceWith.action===undefined){
+        if(type === advanceWith.type)
+          $(slide).trigger("correctAdvance", advanceWith);
+        else
+          $(slide).trigger("wrongAdvance");
+      } else
 
-            console.log("finished a scans content....");
-            // reset active index to the content after pattern content
-            slide.contentActiveIndex = slide.contentActiveIndex + innerIndex;
+      if(type === advanceWith.type && index !== undefined && advanceWith.action === undefined ){
+        if(type === advanceWith.type && index === advanceWith.index)
+          $(slide).trigger("correctAdvance", advanceWith);
+        else
+          $(slide).trigger("wrongAdvance");
+      } else
 
-          }
-          //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
-        }
-        overallScanIndex++;
+      if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
+        //TODO: put into separate function?
+        //slide.checkScanningPattern();
+        
+        slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
+        
+        if( scanPattern[overallScanIndex+1] === index){
+          if(element !== undefined){
+            //$(element).pulse('destroy');
 
-        if(overallScanIndex === scanPattern.length-1){
-          completedScan++;
-          for(i=0; i<slide.slideElements.highlightElements.length; i++){
             if($().pulse){
-              slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);  
+              $(element).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
             }
-            //$(".instrument.col-xs-4").pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+
+            if(advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] &&
+                slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.index === index){
+              
+              console.log("index expected: " + slide.slideContent[slide.contentActiveIndex+innerIndex].media.index);
+              console.log("index provided: " + index);
+              console.log("inner index: " + innerIndex);
+              innerIndex++;
+              slide.buildContent(true, (slide.contentActiveIndex + innerIndex) );
+
+            } else if (advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] && 
+                slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.type !== 'highlight'){
+
+              console.log("finished a scans content....");
+              // reset active index to the content after pattern content
+              slide.contentActiveIndex = slide.contentActiveIndex + innerIndex;
+
+            }
+            //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
-          overallScanIndex = -1;
-          slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
-          
-          if(completedScan >= slide.options.minScan && slide.panelEnd){
-            $(slide).trigger("correctAdvance", advanceWith);
+          overallScanIndex++;
+
+          if(overallScanIndex === scanPattern.length-1){
+            completedScan++;
+            for(i=0; i<slide.slideElements.highlightElements.length; i++){
+              if($().pulse){
+                slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);  
+              }
+              //$(".instrument.col-xs-4").pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
+            }
+            overallScanIndex = -1;
+            slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
+            
+            if(completedScan >= slide.options.minScan && slide.panelEnd){
+              $(slide).trigger("correctAdvance", advanceWith);
+            }
+          }
+
+        } else {
+          unsuccesfulAttempts++;
+          if(element !== undefined){
+            //$(element).pulse('destroy');
+            if($().pulse){
+              $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+            }
+            //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
+          }
+          slide.setStatus("Wrong instrument during scan. Try Again!" + " Wrong attempts: " + unsuccesfulAttempts);
+
+          if(unsuccesfulAttempts >= allowedUnsuccesful){
+            // TODO: show modal asking to redo or continue
           }
         }
 
       } else {
-        unsuccesfulAttempts++;
-        if(element !== undefined){
-          //$(element).pulse('destroy');
-          if($().pulse){
-            $(element).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
-          }
-          //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseWrongProp, slide.options.pulseInstrumentSettings);
-        }
-        slide.setStatus("Wrong instrument during scan. Try Again!" + " Wrong attempts: " + unsuccesfulAttempts);
-
-        if(unsuccesfulAttempts >= allowedUnsuccesful){
-          // TODO: show modal asking to redo or continue
-        }
+        $(slide).trigger("wrongAdvance");
       }
 
-    } else {
-      $(slide).trigger("wrongAdvance");
+      slide.patternInnerIndex = innerIndex;
+      slide.allowedUnsuccesful = allowedUnsuccesful;
+      slide.unsuccesfulAttempts = unsuccesfulAttempts;
+      slide.overallScanIndex = overallScanIndex;
+      slide.completedScan = completedScan;
+
     }
 
-    slide.patternInnerIndex = innerIndex;
-    slide.allowedUnsuccesful = allowedUnsuccesful;
-    slide.unsuccesfulAttempts = unsuccesfulAttempts;
-    slide.overallScanIndex = overallScanIndex;
-    slide.completedScan = completedScan;
   },
 
 };

@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased][unreleased]
 ### Changed
 - improvements to advanceWith
+- CSV end event has been simplified, advanceWith check moved into checkActionable and not inside papaComplete
+
+### Added
+- papaCueEnd + papaCuePause to be able to execute custom functions on those actions of the CSV
 
 ## [0.0.1] - 2015-09-19
 ### Added
