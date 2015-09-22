@@ -97,15 +97,23 @@ AVIATION.common.Slide.prototype = {
     var events = {}, event, slide = this;
 
     events = {
+      /*
       "continuePattern": function(e, data){
 
       },
+      */
       "correctAdvance": function(e, data){
         console.log("!* correctAdvance triggered");
         if(data && data.onSuccess){
-          
-        } else {
+          if(data.onSuccess.contentIndex !== undefined){
+            slide.contentActiveIndex = data.onSuccess.contentIndex;
 
+            slide.mediaActiveIndex = slide.content[slide.contentActive].media.index;
+          } else if (data.onSuccess.mediaIndex !== undefined){
+            slide.mediaActiveIndex = data.onSuccess.mediaIndex;
+            $(slide).trigger("play");
+          }
+          return;
         }
         $(slide).trigger("next", data);
       },
