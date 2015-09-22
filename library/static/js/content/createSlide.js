@@ -2922,9 +2922,9 @@ AVIATION.common.Slide.prototype = {
       } else
 
       if(type === 'csv' && slide.completedScan >= slide.minScan){
-        slide.trigger("correctAdvance", advanceWith);
+        $(slide).trigger("correctAdvance", advanceWith);
       } else if(type === 'csv') {
-        slide.trigger("wrongAdvance", advanceWith)
+        $(slide).trigger("wrongAdvance", advanceWith)
       }
 
       if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
