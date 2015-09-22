@@ -151,6 +151,11 @@ AVIATION.common.Slide.prototype = {
         slide.activateTimer(5, slide.options.autoRedirect);
       },
       end: function(e, data){
+        if(data && data.element && data.element.type !== undefined){
+          if(data.element.type === 'csv'){
+            // set inst panel status as 'ended'
+          }
+        }
         slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
@@ -996,7 +1001,7 @@ AVIATION.common.Slide.prototype = {
 
   checkAdvanceWith: function(event){
     "use strict";
-
+    // TODO: allow for array of possible indices!
     var onclick = event.data.onclick, callback = event.data.callbacks, c,
         element = event.data.element, onSuccess = event.data.onSuccess,
         slide = event.data.slide, advance,
