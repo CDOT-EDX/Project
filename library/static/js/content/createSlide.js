@@ -103,6 +103,8 @@ AVIATION.common.Slide.prototype = {
         console.log("!* correctAdvance triggered");
         if(data && data.onSuccess){
 
+        } else {
+
         }
         $(slide).trigger("next", data);
       },
@@ -113,6 +115,7 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("reset");
           $(slide).trigger("playAltIndex", data);
         }
+        // TODO: tell the student that the action was a wrong one...
       },
       "playAltIndex": function(e, data){
         var index = data.index, altPlayer = slide.altPlayers;
@@ -141,10 +144,6 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("slideEnd");
           slide.setStatus('Click "Continue" to proceed to the next slide');
         }
-        // slide.checkAdvanceWith({
-        //   event: e,
-        //   data: data
-        // });
       },
       slideEnd: function(e, data){
         slide.setStatus('Click "Continue" to proceed to the next slide');
@@ -203,13 +202,13 @@ AVIATION.common.Slide.prototype = {
           if(nextContent && nextContent.media && nextContent.media !== undefined && nextContent.media.type &&
               nextContent.media.type !== undefined){
             type = nextContent.media.type;
-            if(type === 'button' || type === 'highlight' || type === 'quiz'){
+            if(type === 'button' || type === 'highlight' || type === 'quiz'){ // or pattern?
               $(slide).trigger("contentNext");
-              return 0;
+              return;
             }
           }
         }
-        // if we have returned, we need to increment mediaActiveIndex instead
+        // if we got this far, we need to increment mediaActiveIndex instead
         $(slide).trigger("nextMedia");
       },
       nextMedia: function(e, data){
@@ -2868,7 +2867,7 @@ AVIATION.common.Slide.prototype = {
     console.log("vs contentActive");
     console.log(slide.contentActiveIndex);
     if(activeContent >= slide.contentActiveIndex){
-      console.log("type inside checkActionabels" + type);
+      console.log("type inside checkActionabels: " + type);
 
       // init defaults
       if(event.target){
@@ -2922,6 +2921,12 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("wrongAdvance");
       } else
 
+      if(type === 'csv' && slide.completedScan >= slide.minScan){
+        slide.trigger("correctAdvance", advanceWith);
+      } else if(type === 'csv') {
+        slide.trigger("wrongAdvance", advanceWith)
+      }
+
       if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
@@ -2953,7 +2958,6 @@ AVIATION.common.Slide.prototype = {
               slide.contentActiveIndex = slide.contentActiveIndex + innerIndex;
 
             }
-            //$("#" + slide.options.instrumentIds[highlightInstrument[index]]).pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
           }
           overallScanIndex++;
 
@@ -2972,7 +2976,6 @@ AVIATION.common.Slide.prototype = {
               $(slide).trigger("correctAdvance", advanceWith);
             }
           }
-
         } else {
           unsuccesfulAttempts++;
           if(element !== undefined){
@@ -2988,7 +2991,6 @@ AVIATION.common.Slide.prototype = {
             // TODO: show modal asking to redo or continue
           }
         }
-
       } else {
         $(slide).trigger("wrongAdvance");
       }
