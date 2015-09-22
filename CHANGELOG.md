@@ -4,8 +4,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased][unreleased]
 ### Changed
-- improvements to advanceWith
+- improvements to advanceWith, fixed bug advancing after a CSV end
 - CSV end event has been simplified, advanceWith check moved into checkActionable and not inside papaComplete
+- got rid of VSI transform 1.0s (to give faster feedback according to Gordon)
+
+### Added
+- advanceWith now can have an array of types and indices
 
 ### Added
 - papaCueEnd + papaCuePause to be able to execute custom functions on those actions of the CSV

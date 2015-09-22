@@ -19,6 +19,7 @@
 /*jslint plusplus: true*/
 /*jslint todo: true*/
 /*global $:false */
+/*global _:false */
 /*global jQuery:false */
 /*global ResizeSensor:false */
 
@@ -110,10 +111,10 @@ AVIATION.common.Slide.prototype = {
       },
       "wrongAdvance": function(e, data){
         console.log("!* wrong advance triggered");
-        if(data && data.index && typeof data.index !== undefined){
+        if(data && data.onFail && data.onFail.index && data.onFail.index !== undefined){
           $(slide).trigger("pause");
           $(slide).trigger("reset");
-          $(slide).trigger("playAltIndex", data);
+          $(slide).trigger("playAltIndex", data.onFail);
         }
         // TODO: tell the student that the action was a wrong one...
       },
@@ -125,7 +126,8 @@ AVIATION.common.Slide.prototype = {
         slide.checkSlideControlPlayButtons("play");
 
         if(altPlayer[index] && altPlayer[index].player){
-          altPlayer[index].player.play();          
+          altPlayer[index].player.play();
+          // buildAltContent?
         }
 
         if(data.resetMediaIndex){
@@ -1031,6 +1033,14 @@ AVIATION.common.Slide.prototype = {
     console.log(content.advanceWith);
     console.log("actual element");
     console.log(element);
+
+    if( content.advanceWith && content.advanceWith.type !== undefined && !$.isArray(content.advanceWith.type) ){
+      content.advanceWith.type = [content.advanceWith.type];
+    }
+
+    if( content.advanceWith && content.advanceWith.index !== undefined && !$.isArray(content.advanceWith.index) ){
+      content.advanceWith.index = [content.advanceWith.index];
+    }
 
     if(content.advanceWith){
       for(advance in content.advanceWith){
@@ -2911,28 +2921,26 @@ AVIATION.common.Slide.prototype = {
 
       console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
+
       // check the logic
       if(type && index===undefined && advanceWith.action===undefined){
-        if(type === advanceWith.type)
+        if( _.contains(advanceWith.type, type) )
           $(slide).trigger("correctAdvance", advanceWith);
         else
           $(slide).trigger("wrongAdvance");
-      } else
 
-      if(type === advanceWith.type && index !== undefined && advanceWith.action === undefined ){
-        if(type === advanceWith.type && index === advanceWith.index)
+      } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
+        if( _.contains(advanceWith.index, index) )
           $(slide).trigger("correctAdvance", advanceWith);
         else
           $(slide).trigger("wrongAdvance");
-      } else
 
-      if(type === 'csv' && slide.completedScan >= slide.minScan){
+      } else if(type === 'csv' && slide.completedScan >= slide.options.minScan){
         $(slide).trigger("correctAdvance", advanceWith);
       } else if(type === 'csv') {
-        $(slide).trigger("wrongAdvance", advanceWith)
-      }
+        $(slide).trigger("wrongAdvance", advanceWith);
 
-      if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
+      } else if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
         

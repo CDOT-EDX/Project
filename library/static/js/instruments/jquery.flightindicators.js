@@ -229,8 +229,8 @@ Published under GPLv3 License.
 
             placeholder.each(function(){
                 $(this).find('div.instrument.vario div.vario_hand')
-                    .css('transform', 'rotate(' + deg + 'deg)')
-                    .css('transition', 'transform 1.0s linear');
+                    .css('transform', 'rotate(' + deg + 'deg)');
+                    //.css('transition', 'transform 1.0s linear');
 
             });    
         }
