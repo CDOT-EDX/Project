@@ -1,10 +1,12 @@
-*last updated on Sept 19/2015*
+*last updated on Sept 22/2015*
+
+*changed advanceWith onSucess/onFail*
+
+*still in tests and not on online.cdot yet*
 
 *added enable/disable on buttons*
 
 *see the button example inside slideContent for more details*
-
-*not updated on online.cdot yet*
 
 # Aviation Project
 
@@ -297,8 +299,8 @@ Acceptable options and defaults are as follows:
             "onFail": { ** optional if needed and currently under development
                 "index": 2, // which altMediaFile should be played (currently sound only)
                 "status": "That's not correct. Let's try this again", // what msg should we display in the status bar?
-                "resetContentIndex": 0 // which slideContent index do we need to replay on end of altMedia?
-                "resetMediaIndex": 0 // which media index do we need to replay on end of altMedia?
+                "resetContentIndex": 0 // which slideContent index do we need show as altMedia starts to play?
+                "resetMediaIndex": 0 // which media index do we need to play after altMedia?
             },
             "content": true // if there is content to that should be triggered during the scanning pattern
         }

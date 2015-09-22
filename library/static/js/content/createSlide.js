@@ -103,7 +103,7 @@ AVIATION.common.Slide.prototype = {
       "correctAdvance": function(e, data){
         console.log("!* correctAdvance triggered");
         if(data && data.onSuccess){
-
+          
         } else {
 
         }
@@ -1048,27 +1048,6 @@ AVIATION.common.Slide.prototype = {
           slide.checkActionables(element.type, element.index, event, content.advanceWith, slide.contentActiveIndex);
           // TODO: better solution over a break?
           break;
-
-          // switch(content.advanceWith[advance]){
-          //   case "pattern":
-          //     slide.checkScanningPattern(element.type, element.index, event, content.advanceWith);
-          //     console.log("advanceWith: pattern case");
-          //     break;
-
-          //   case "highlight":
-          //   case "button":
-          //     slide.checkActionable(element.type, element.index, event, content.advanceWith);
-          //     console.log("advanceWith: high/btn case");            
-          //     break;
-
-          //   case "quiz":
-          //     console.log("advanceWith: quiz case");
-          //     break;
-
-          //   default:
-          //     console.log("advanceWith: default case");
-          //     break;
-          // }
         }
       }
     } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
@@ -1076,49 +1055,6 @@ AVIATION.common.Slide.prototype = {
     } else {
       $(slide).trigger("next");
     }
-
-/***
-  **  old advance with below
-  **
-    if(content.advanceWith && content.advanceWith.override){
-      //$(slide).trigger("playIndex", )
-    } else if (content.advanceWith && content.advanceWith.type === element.type){
-      // TODO: check if audio has completed
-      if(typeof content.advanceWith.index !== undefined){
-        if(content.advanceWith.index === element.index){
-          if(onSuccess && typeof onSuccess === 'function'){
-            onSuccess();
-          }
-          $(slide).trigger("next");
-        } else if(content.advanceWith.action === "pattern"){
-          slide.checkScanningPattern(element.type, element.index, event, content.advanceWith.content);
-        } else {
-          slide.setStatus("Nope, that's wrong. Try again");
-          console.log("wrong advance index, waiting for correcet input");
-          // TODO: set status to wrong / retry
-        }
-      } else {
-        console.log("no index on advance with, advancing...");
-        $(slide).trigger("next");
-      }
-    } else if (content.advanceWith) {
-      //$(slide).trigger("next");
-      console.log("completed scans: ");
-      console.log(slide.completedScan);
-      console.log("min scan:");
-      console.log(slide.minScan);
-      if(slide.completedScan === slide.options.minScan){
-        //slide.mediaActiveIndex = slide.mediaActiveIndex + slide.patternInnerIndex;
-        //slide.buildContent(true, slide.mediaActiveIndex + slide.patternInnerIndex + 1);
-      } else {
-        console.log("wrong advanceWith, waiting for correcet input");
-      }
-
-    } else {
-      $(slide).trigger("next");
-    }
-  ***  end old advanceWith
-*****/
   },
 
   countObjectLength: function(obj){
