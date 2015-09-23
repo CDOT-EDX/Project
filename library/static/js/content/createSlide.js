@@ -1717,6 +1717,7 @@ AVIATION.common.Slide.prototype = {
         console.log("inside papaSaveObject");
         console.log("this is: ");
         console.log(this);
+        console.log(c);
         console.log(result);
         this.result = result;
         this.play = papaComplete;
@@ -1725,7 +1726,7 @@ AVIATION.common.Slide.prototype = {
         this.currentTime = papaCurrentLine;
         this.papaCuePause = papaCuePause;
         this.papaCueEnd = papaCueEnd;
-        csvPlayers.push(this);
+        csvPlayers[c] = this;
 
         parsed++;
 
@@ -1736,6 +1737,8 @@ AVIATION.common.Slide.prototype = {
       };
 
       for(c=0; csvs && c < csvs.length; c++){
+        csvPlayers.push(false);
+
         console.log("parsing: " + csvs[c].src);
         Papa.parse(slide.options.apacheServerBaseUrl + csvs[c].src, {
           config: {
