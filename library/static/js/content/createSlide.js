@@ -1708,6 +1708,10 @@ AVIATION.common.Slide.prototype = {
       };
 
       var papaSaveObject = function(result){
+        console.log("inside papaSaveObject");
+        console.log("this is: ");
+        console.log(this);
+        console.log(result);
         this.result = result;
         this.play = papaComplete;
         this.pause = papaPause;
