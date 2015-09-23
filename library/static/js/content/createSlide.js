@@ -1586,30 +1586,31 @@ AVIATION.common.Slide.prototype = {
   initCSVParser: function(csvs, callback){
     "use strict";
 
-    var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [], interval, 
+    var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [],  
         instrumentOptions = {}, csvPlayers = [], parsed = 0, c; //runFlight;
 
     if(slide.options.enablePanel && !slide.options.noCSV){
 
       var papaComplete = function() {
-        var data = {}, flight = this.result.data, i = this.index || 0, toggle = true, end = this.end;
+        var data = {}, flight = this.result.data, i = this.index || 0, toggle = true, end = this.end,
+            player = this, interval;
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
         slide.panelPause = false;
         slide.panelEnd = false;
-
+        //Window.interval = '';
         i = this.index || slide.pausedPanelIndex || 0;
 
         console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
-        console.log("this csv is: ");
-        console.log(this);
+        //console.log("this csv is: ");
+        //console.log(this);
 
         function runFlight(flight, slide, end){
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
-            console.log("airspeed: " + flight[i][7]);
+            //console.log("airspeed: " + flight[i][7]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
@@ -1678,11 +1679,11 @@ AVIATION.common.Slide.prototype = {
             
             clearInterval(interval);
           }
-        };
+        }
 
         //interval = setInterval( function(){runFlight(flight, slide, end); },75 );
 
-        interval = setInterval( runFlight.bind(null, flight, slide, end),75 );
+        interval = setInterval( runFlight.bind(player, flight, slide, end),75 );
       };
 
       var papaPause = function(){
