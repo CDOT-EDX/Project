@@ -1647,12 +1647,13 @@ AVIATION.common.Slide.prototype = {
         i = this.index || slide.pausedPanelIndex || 0;
 
         console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
-
+        console.log("this csv is: ");
+        console.log(this);
         myFlightIntVar = setInterval(function(){
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
-
+            console.log("airspeed: " + flight[i][7]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
