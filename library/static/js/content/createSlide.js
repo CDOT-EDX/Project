@@ -1127,8 +1127,6 @@ AVIATION.common.Slide.prototype = {
         if(slide[possibleActions[action].arrayName]){
           slide[possibleActions[action].arrayName].sort(slide.sortActionables);
         }
-        //slide.slideElements[possibleActions[action].elementArray].sort = slide.sortActionables;
-        //slide.elementsToShow[action] = slide.elementsToShow[action] || [];
 
         if( slide.options[possibleActions[action].enableOption] && slide[possibleActions[action].arrayName] && 
               objCount > 0 && objCount !== slide.slideElements[possibleActions[action].elementArray].length ){
@@ -1178,8 +1176,6 @@ AVIATION.common.Slide.prototype = {
           }
   
           slide.buildActionables(action, possibleActions[action], $parent, options);
-
-          //slide.slideElements[possibleActions[action].elementArray].sort(slide.sortActionables);
         }
       }
     }
@@ -1191,7 +1187,6 @@ AVIATION.common.Slide.prototype = {
     var callbacks = event.data.callbacks, i,
         element = event.data.element,
         slide = event.data.slide;
-        //content = slide.slideContent[slide.mediaActiveIndex];
 
     for(i = 0; i < callbacks.length; i++){
       if(callbacks[i] && typeof callbacks[i] === 'function'){
@@ -1224,8 +1219,6 @@ AVIATION.common.Slide.prototype = {
           ";position:absolute;z-index:1;";
         }
 */
-        //options.data.orderNumber = slide.options[possibleActions[action].arrayName].orderNumber || "";
-
 
         $action = $("#" + act + "_" + action);
 
@@ -1262,13 +1255,9 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  // simple function to sort an array by their orderNumber prop
   sortActionables: function(a,b){
     "use strict";
-
-    console.log("trying to sort actionables");
-    console.log(a.orderNumber);
-    console.log(b.orderNumber);
-
     return a.orderNumber - b.orderNumber;
   },
 
