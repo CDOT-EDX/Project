@@ -1726,7 +1726,7 @@ AVIATION.common.Slide.prototype = {
         this.currentTime = papaCurrentLine;
         this.papaCuePause = papaCuePause;
         this.papaCueEnd = papaCueEnd;
-        csvPlayers[c] = this;
+        csvPlayers[this.config.selfIndex] = this;
 
         parsed++;
 
@@ -1745,6 +1745,7 @@ AVIATION.common.Slide.prototype = {
             delimiter: "|",
             skipEmptyLines: true,
             fastMode: true,
+            selfIndex: c
           },
           download: true,
           complete: papaSaveObject
