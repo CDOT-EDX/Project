@@ -1586,12 +1586,13 @@ AVIATION.common.Slide.prototype = {
   initCSVParser: function(csvs, callback){
     "use strict";
 
-    var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [], myFlightIntVar, instrumentOptions = {}, csvPlayers = [], parsed = 0, c;
+    var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [], interval, 
+        instrumentOptions = {}, csvPlayers = [], parsed = 0, c; //runFlight;
 
     if(slide.options.enablePanel && !slide.options.noCSV){
 
       var papaComplete = function() {
-        var data = {}, flight = this.result.data, i = this.index || 0, toggle = true;
+        var data = {}, flight = this.result.data, i = this.index || 0, toggle = true, end = this.end;
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
@@ -1603,7 +1604,8 @@ AVIATION.common.Slide.prototype = {
         console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
         console.log("this csv is: ");
         console.log(this);
-        myFlightIntVar = setInterval(function(){
+
+        function runFlight(flight, slide, end){
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
@@ -1667,17 +1669,20 @@ AVIATION.common.Slide.prototype = {
 
               slide.panelEnd = true;
 
-              if(this.end && typeof this.end === 'function'){
-                this.end();
+              if(end && typeof end === 'function'){
+                end();
               }
 
               $(slide).trigger("end", data);
             }
             
-            clearInterval(myFlightIntVar);
+            clearInterval(interval);
           }
-        },75);
+        };
 
+        //interval = setInterval( function(){runFlight(flight, slide, end); },75 );
+
+        interval = setInterval( runFlight.bind(null, flight, slide, end),75 );
       };
 
       var papaPause = function(){
