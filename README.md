@@ -322,6 +322,16 @@ Acceptable options and defaults are as follows:
                 "resetIndex": 1
             }
         }
+    },
+    {
+        "media":{
+            "type": "csv",
+            "line": 1000,
+            "action": "pause"
+        },
+    },
+    {
+
     }],
     // default models that we want to be set-up in the background
     modals: [{ 
