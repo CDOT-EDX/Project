@@ -10,7 +10,7 @@
  * @license MIT
  */
 var anySlide = {};
-console.log("Define anySlide VARIABLE");
+console.log("Define anySlide VARIABLE33333");
 
 function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
@@ -66,6 +66,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     setupQuiz: function () {},
                     startQuiz: function () {},
                     resetQuiz: function () {},
+                   // buildRemediation: function () {},
                     checkAnswer: function () {},
                     nextQuestion: function () {},
                     backToQuestion: function () {},
@@ -276,7 +277,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         }
                         */
                         
-                        console.log("----------TRUTHS " + question.truths);
+                        console.log("----------TRUTHS222 " + question.truths);
 
                         // Now let's append the answers with checkboxes or radios depending on truth count
                         var answerHTML = $('<ul class="' + answersClass + '"></ul>');
@@ -441,19 +442,23 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 var singleRemidiation = '';
                                 
                 for (i in answersPr) {
+                    console.log("answersPr:" + answersPr[i]);
                     if (answersPr.hasOwnProperty(i)) {
-                        var answer = answersPr[i];
-                                     
+                        var answer = answersPr[i];             
                         //console.log("answer " + answer.reason);
 
                         if (!answer.correct) {
+                            console.log("singleRemidiation correct before:" + singleRemidiation);
                             if(answer.reason !== undefined || answer.reason != ''){
                                 singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason;
+                                console.log("singleRemidiation correct after:" + singleRemidiation);
                                 remidiation.push(singleRemidiation);
                             }
                         }else{
+                            console.log("singleRemidiation incorrect before:" + singleRemidiation);
                             if(answer.reason !== undefined || answer.reason != ''){
-                                singleRemidiation = '<b><i>Q. ' + answer.option + '</i></b><br />' + '<b><i>' + answer.reason + '<b><i>';
+                                singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + '<i>' + answer.reason + '<i>';
+                                console.log("singleRemidiation incorrect after:" + singleRemidiation);
                                 remidiation.push(singleRemidiation);
                             }
                         }
@@ -497,7 +502,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                 $(anySlide).off('checkCompleted');
                 $(anySlide).on('checkCompleted', function(evt, data){
-                    console.log('WWWWW');
+                    console.log('WWWWW555566666');
                     var correctResponse = data.quiz_result_id.correct;
                     console.log("answer");
                     console.log(correctResponse);
@@ -511,28 +516,17 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     }
 
                     if (correctResponse) {
-                        console.log("this was a correct response");
-                        console.log(data);
-                        console.log(correctClass);
-                        if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {
-
+                        if (plugin.config.showRemediationOnSuccess) 
                             //"Firing callback"
-                            questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
                             plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-                        }
 
                         questionLI.addClass(correctClass);
                     } else {
-                        console.log("this was an incorrect response");
-                        console.log(data);
-                        console.log(incorrectClass);
-                        if (questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function') {
 
+                        if (plugin.config.showRemediationOnFail)
                             //"Firing callback"
-                            questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
-                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-                        }
-
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass);
+ 
                         questionLI.addClass(incorrectClass);
                     }
 
