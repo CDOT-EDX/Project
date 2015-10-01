@@ -446,22 +446,13 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     if (answersPr.hasOwnProperty(i)) {
                         var answer = answersPr[i];             
                         //console.log("answer " + answer.reason);
-
-                        if (!answer.correct) {
-                            console.log("singleRemidiation correct before:" + singleRemidiation);
-                            if(answer.reason !== undefined || answer.reason != ''){
+                        if(answer.reason !== undefined || answer.reason != ''){
+                            if (!answer.correct)             
                                 singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason;
-                                console.log("singleRemidiation correct after:" + singleRemidiation);
-                                remidiation.push(singleRemidiation);
-                            }
-                        }else{
-                            console.log("singleRemidiation incorrect before:" + singleRemidiation);
-                            if(answer.reason !== undefined || answer.reason != ''){
+                            else
                                 singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + '<i>' + answer.reason + '<i>';
-                                console.log("singleRemidiation incorrect after:" + singleRemidiation);
-                                remidiation.push(singleRemidiation);
-                            }
                         }
+                        remidiation.push(singleRemidiation);
                     }
                 }
 
