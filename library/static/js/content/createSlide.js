@@ -1643,7 +1643,7 @@ AVIATION.common.Slide.prototype = {
             i++;
           } else {
             if(i < flight.length){
-              $(slide).trigger("instrumentPause", i;)
+              $(slide).trigger("instrumentPause", i);
             } else {
               i = 0;
               data.element = {};
@@ -2468,7 +2468,7 @@ AVIATION.common.Slide.prototype = {
     console.log(quizzes);
 
     advancePattern = function(oldActions){
-      console.log("trying to advance on quiz complete!");
+      console.log("trying to advance on quiz complete with index: " + slide.contentActiveIndex);
       $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: slide.contentActiveIndex + slide.patternInnerIndex }, slide: slide });
       if(oldActions && typeof oldActions === 'function'){
         oldActions();
@@ -2779,7 +2779,14 @@ AVIATION.common.Slide.prototype = {
           if(slide.elementsToShow[action][i]){
             //show this one
             if(action === 'highlight'){
-              slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
+              if(slide.options.hiddenHighlights){
+                slide.slideElements[possibleActions[action].elements][i].css("border", "");
+                slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
+              } else {
+                slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
+                slide.slideElements[possibleActions[action].elements][i].css("cursor", "pointer");
+              }
+              
             } else {
               slide.slideElements[possibleActions[action].elements][i].show();              
               // only disable the ones we show (btn, quizzes only)
@@ -2796,6 +2803,8 @@ AVIATION.common.Slide.prototype = {
             //hide this one
             if(action === 'highlight'){
               slide.slideElements[possibleActions[action].elements][i].css("border", "");
+              slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
+              slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
             } else {
               slide.slideElements[possibleActions[action].elements][i].hide();              
             }
