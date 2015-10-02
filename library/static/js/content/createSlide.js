@@ -146,6 +146,16 @@ AVIATION.common.Slide.prototype = {
           slide.contentActiveIndex = data.resetContentIndex;
         }
       },
+      instrumentPause: function(index){
+        slide.pausedPanelIndex = index;
+        slide.setInstrumentStatus2("Instrument panel is paused.");
+        slide.checkSlideControlPlayButtons("pause");
+      },
+      instrumentResume: function(){
+        panelPause = false;
+        slide.setInstrumentStatus2("Instrument panel is playing...");
+        slide.checkSlideControlPlayButtons("play");
+      },
       contentNext: function(e,data){
         var slide = this;
         if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
@@ -1633,29 +1643,13 @@ AVIATION.common.Slide.prototype = {
             i++;
           } else {
             if(i < flight.length){
-              slide.pausedPanelIndex = i;
-              slide.setInstrumentStatus2("Instrument panel is paused.");
+              $(slide).trigger("instrumentPause", i);
             } else {
               i = 0;
               data.element = {};
               data.element.type = "csv";
               data.element.index = slide.mediaActiveIndex;
               data.slide = slide;
-
-              /**
-              *** moved inside checkActionable to do checkAdvance properly there
-              if(slide.slideContent[slide.contentActiveIndex].advanceWith.action &&
-                  slide.slideContent[slide.contentActiveIndex].advanceWith.action === "pattern"){
-                if(slide.options.minScan <= slide.completedScan){
-                  slide.setStatus("Congratulations, you have completed the scan sucessfully.");
-                } else {
-                  slide.setStatus("Unfortunately, you didn't compelete the scan in time. Try again!");
-                  console.log("minScan: " + slide.minScan + " completedScans: " + slide.completedScan);
-
-                  // TODO: show modal to retry or continue?
-                }
-              }
-              **/
 
               slide.panelEnd = true;
 
@@ -2474,7 +2468,7 @@ AVIATION.common.Slide.prototype = {
     console.log(quizzes);
 
     advancePattern = function(oldActions){
-      console.log("trying to advance on quiz complete!");
+      console.log("trying to advance on quiz complete with index: " + slide.contentActiveIndex);
       $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: slide.contentActiveIndex + slide.patternInnerIndex }, slide: slide });
       if(oldActions && typeof oldActions === 'function'){
         oldActions();
@@ -2494,7 +2488,7 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(this.options.quizId);
 
       quizzes[i].slide = $.isEmptyObject(slide.parentSlide) ? slide : slide.parentSlide;
-      
+      //quizzes[i]
       if(slide.options.enablePanel){
         quizzes[i].animationCallbacks = {
           completeQuiz : advancePattern
@@ -2785,7 +2779,14 @@ AVIATION.common.Slide.prototype = {
           if(slide.elementsToShow[action][i]){
             //show this one
             if(action === 'highlight'){
-              slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
+              if(slide.options.hiddenHighlights){
+                slide.slideElements[possibleActions[action].elements][i].css("border", "");
+                slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
+              } else {
+                slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
+                slide.slideElements[possibleActions[action].elements][i].css("cursor", "pointer");
+              }
+              
             } else {
               slide.slideElements[possibleActions[action].elements][i].show();              
               // only disable the ones we show (btn, quizzes only)
@@ -2802,6 +2803,8 @@ AVIATION.common.Slide.prototype = {
             //hide this one
             if(action === 'highlight'){
               slide.slideElements[possibleActions[action].elements][i].css("border", "");
+              slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
+              slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
             } else {
               slide.slideElements[possibleActions[action].elements][i].hide();              
             }
@@ -2889,7 +2892,9 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("wrongAdvance");
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
-        if( _.contains(advanceWith.index, index) )
+        if(type === 'quiz'){
+
+        } else if( _.contains(advanceWith.index, index) )
           $(slide).trigger("correctAdvance", advanceWith);
         else
           $(slide).trigger("wrongAdvance");
