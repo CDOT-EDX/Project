@@ -1,12 +1,7 @@
-*last updated on Sept 22/2015*
+*last updated on October 22/2015*
 
-*changed advanceWith onSucess/onFail*
-
-*still in tests and not on online.cdot yet*
-
-*added enable/disable on buttons*
-
-*see the button example inside slideContent for more details*
+*added default options 
+showRemediationOnSuccess and showRemediationOnFail*
 
 # Aviation Project
 
