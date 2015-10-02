@@ -753,11 +753,23 @@ AVIATION.common.Slide.prototype = {
         slideInner.children().remove();
       }
 
+
+      if(callback && typeof callback != 'function'){
+        console.log("reassigning eval");
+        callback = eval(callback);
+      }      
+
       if(callback && typeof callback === 'function'){
+        console.log("running eval");
         callback();
       }
 
       console.log("trigger callback? ***");
+
+      if(triggerCallback && slideContent.callback && typeof slideContent.callback != 'function'){
+        slideContent.callback = eval(slideContent.callback);
+      }
+
       if(triggerCallback && slideContent.callback && typeof slideContent.callback === 'function'){
         console.log("triggering the callback! ****");
         slideContent.callback();
@@ -1034,12 +1046,19 @@ AVIATION.common.Slide.prototype = {
 
     // Running custom callbacks/onclicks
     for(c=0; onclick && c < onclick.length; c++){
+      
+      if(typeof onclick[c] != 'function'){
+        onclick[c] = eval(onclick[c]);
+      }
       if(typeof onclick[c] === 'function'){
         onclick[c]();
       }
     }
 
     for(c=0; callback && c < callback.length; c++){
+      if(typeof callback[c] != 'function'){
+        callback[c] = eval(callback[c]);
+      }
       if(typeof callback[c] === 'function'){
         callback[c]();
       }
@@ -1199,6 +1218,10 @@ AVIATION.common.Slide.prototype = {
         slide = event.data.slide;
 
     for(i = 0; i < callbacks.length; i++){
+      if(callbacks[i] && typeof callbacks[i] != 'function'){
+        callbacks[i] = eval(callbacks[i]);
+      }
+
       if(callbacks[i] && typeof callbacks[i] === 'function'){
         callbacks[i]();
       }
@@ -1635,6 +1658,11 @@ AVIATION.common.Slide.prototype = {
             };
 
             slide.setAllInstruments( instrumentOptions );
+            
+            // eval here?
+            // if(flight[i][flight[i].length-1]){
+            //   flight[i][flight[i].length-1] 
+            // }
 
             if(flight[i][flight[i].length-1] && typeof flight[i][flight[i].length-1] === 'function'){
               flight[i][flight[i].length-1]();
@@ -1975,9 +2003,15 @@ AVIATION.common.Slide.prototype = {
       // now lets add on clicks on the modals we need them in
       for(h=0; h<slide.slideContent[index].highlights.length; h++){
         if(typeof slide.slideContent[index].highlights[h] === "object" && 
-            slide.slideContent[index].highlights[h].onclick &&
-            typeof slide.slideContent[index].highlights[h].onclick === "function"){
-          addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+            slide.slideContent[index].highlights[h].onclick){
+
+          if(typeof slide.slideContent[index].highlights[h].onclick != "function"){
+            slide.slideContent[index].highlights[h].onclick = eval(slide.slideContent[index].highlights[h].onclick);
+          }
+
+          if(typeof slide.slideContent[index].highlights[h].onclick === "function"){
+            addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+          }
         }
       }
 
@@ -2203,12 +2237,21 @@ AVIATION.common.Slide.prototype = {
           player.cueLine(content.media.line, function(){
             slide.buildContent(true, index);
 
+            if(content.callback && typeof content.callback != "function"){
+              content.callback = eval(content.callback);
+            }
+
             if(content.callback && typeof content.callback === "function"){
               content.callback();
             }
           });  
         } else {
           contentAtStart = index;
+          
+          if(content.callback && typeof content.callback != "function"){
+            content.callback = eval(content.callback);
+          }
+
           if(content.callback && typeof content.callback === 'function'){
             callbackAtBeginning = content.callback;
           }
@@ -2226,12 +2269,22 @@ AVIATION.common.Slide.prototype = {
             if(second === content.media.second){
               slideObject.buildContent(true, index);
             }
+
+            if(content.callback && typeof content.callback != "function"){
+              content.callback = eval(content.callback);
+            }
+
             if(content.callback && typeof content.callback === "function"){
               content.callback();
             }
           });
         } else {
           contentAtStart = index;
+
+          if(content.callback && typeof content.callback != "function"){
+            content.callback = eval(content.callback);
+          }
+
           if(content.callback && typeof content.callback === "function"){
             callbackAtBeginning = content.callback;
           }
@@ -2251,12 +2304,21 @@ AVIATION.common.Slide.prototype = {
           player.cue(content.media.second, function(){
             slide.buildContent(true, index);
 
+            if(content.callback && typeof content.callback != "function"){
+              content.callback = eval(content.callback);
+            }
+
             if(content.callback && typeof content.callback === "function"){
               content.callback();
             }
           });  
         } else {
           contentAtStart = index;
+
+          if(content.callback && typeof content.callback != "function"){
+            content.callback = eval(content.callback);
+          }
+
           if(content.callback && typeof content.callback === "function"){
             callbackAtBeginning = content.callback;
           }
@@ -2470,6 +2532,11 @@ AVIATION.common.Slide.prototype = {
     advancePattern = function(oldActions){
       console.log("trying to advance on quiz complete with index: " + slide.contentActiveIndex);
       $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: slide.contentActiveIndex + slide.patternInnerIndex }, slide: slide });
+
+      if(oldActions && typeof oldActions != "function"){
+        oldActions = eval(oldActions);
+      }
+
       if(oldActions && typeof oldActions === 'function'){
         oldActions();
       }
@@ -2796,9 +2863,6 @@ AVIATION.common.Slide.prototype = {
                 slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
               }
             }
-
-
-            
           } else {
             //hide this one
             if(action === 'highlight'){
