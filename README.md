@@ -54,6 +54,8 @@ Acceptable options and defaults are as follows:
     showAvatars:        false,
     showSlideControls:  true,
     showStatus:         true,
+    showRemediationOnSuccess: true, //show all remediations on Correct answer
+    showRemediationOnFail: true, //show all remediations on inCorrect answe
     showControls:       true,
     showBorder:         true, // this applies to the border around the content
     autoplay:           true, // proceeds to the next AUDIO automatically after current is finished
@@ -77,6 +79,7 @@ Acceptable options and defaults are as follows:
     footerId:           "#slideFooter",
     quizId:             "#slideQuiz",   // id of div that contains all quizzes
     quizContainerClass: "cdot_quiz_container", // class thats appended to each individual quiz
+    
 
     // new optinal+experimental additions below
     panelId: "#flightInstruments",
