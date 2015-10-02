@@ -2,6 +2,7 @@
 
 *added default options 
 showRemediationOnSuccess and showRemediationOnFail*
+showRemediationOne*
 
 # Aviation Project
 
@@ -50,7 +51,8 @@ Acceptable options and defaults are as follows:
     showSlideControls:  true,
     showStatus:         true,
     showRemediationOnSuccess: true, //show all remediations on Correct answer
-    showRemediationOnFail: true, //show all remediations on inCorrect answe
+    showRemediationOnFail: true, //show all remediations on inCorrect answer
+    showRemediationOne: true, //will show remediation for selected answer (showRemediationOnSuccess or showRemediationOnFail must be set to true) !!can only be used only with showRemediationOnSuccess or showRemediationOnFail
     showControls:       true,
     showBorder:         true, // this applies to the border around the content
     autoplay:           true, // proceeds to the next AUDIO automatically after current is finished
