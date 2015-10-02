@@ -1,12 +1,8 @@
-*last updated on Sept 22/2015*
+*last updated on October 22/2015*
 
-*changed advanceWith onSucess/onFail*
-
-*still in tests and not on online.cdot yet*
-
-*added enable/disable on buttons*
-
-*see the button example inside slideContent for more details*
+*added default options 
+showRemediationOnSuccess and showRemediationOnFail*
+showRemediationOne*
 
 # Aviation Project
 
@@ -54,6 +50,9 @@ Acceptable options and defaults are as follows:
     showAvatars:        false,
     showSlideControls:  true,
     showStatus:         true,
+    showRemediationOnSuccess: true, //show all remediations on Correct answer
+    showRemediationOnFail: true, //show all remediations on inCorrect answer
+    showRemediationOne: true, //will show remediation for selected answer (showRemediationOnSuccess or showRemediationOnFail must be set to true) !!can only be used only with showRemediationOnSuccess or showRemediationOnFail
     showControls:       true,
     showBorder:         true, // this applies to the border around the content
     autoplay:           true, // proceeds to the next AUDIO automatically after current is finished
@@ -77,6 +76,7 @@ Acceptable options and defaults are as follows:
     footerId:           "#slideFooter",
     quizId:             "#slideQuiz",   // id of div that contains all quizzes
     quizContainerClass: "cdot_quiz_container", // class thats appended to each individual quiz
+    
 
     // new optinal+experimental additions below
     panelId: "#flightInstruments",

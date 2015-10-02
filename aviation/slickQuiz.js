@@ -437,7 +437,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
             },
 
-            buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr){
+            buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr, questionId){
                 var remidiation = [], i;
                 var singleRemidiation = '';
                                 
@@ -447,12 +447,16 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         var answer = answersPr[i];             
                         //console.log("answer " + answer.reason);
                         if(answer.reason !== undefined || answer.reason != ''){
-                            if (!answer.correct)             
+                            if (!plugin.config.showRemediationOne){
                                 singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason;
-                            else
-                                singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + '<i>' + answer.reason + '<i>';
+                                remidiation.push(singleRemidiation);   
+                            }else 
+                                if (i == questionId){
+                                    singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason ;
+                                    remidiation.push(singleRemidiation);   
+                            }
                         }
-                        remidiation.push(singleRemidiation);
+                        
                     }
                 }
 
@@ -481,24 +485,18 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 var questionLI = $($(checkButton).parents(_question)[0]),
                     answerLIs = questionLI.find(_answers + ' li'),
                     answerSelects = answerLIs.find('input:checked'),
+                    questionId = answerSelects.attr('id').split('_')[3];
                     questionIndex = parseInt(questionLI.attr('id').replace(/(question)/, ''), 10),
                     answers = questions[questionIndex].a,
                     selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
 
                 answerLIs.addClass(incorrectResponseClass);
-                console.log("incRClass");
-                console.log(incorrectResponseClass);
                 // Collect the true answers needed for a correct response
                 var trueAnswers = [];
 
                 $(anySlide).off('checkCompleted');
                 $(anySlide).on('checkCompleted', function(evt, data){
-                    console.log('WWWWW555566666');
                     var correctResponse = data.quiz_result_id.correct;
-                    console.log("answer");
-                    console.log(correctResponse);
-                    console.log("data: ");
-                    console.log(data);
 
                     if(correctResponse && correctResponse === "true"){
                         correctResponse = true;
@@ -509,14 +507,14 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     if (correctResponse) {
                         if (plugin.config.showRemediationOnSuccess) 
                             //"Firing callback"
-                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
 
                         questionLI.addClass(correctClass);
                     } else {
 
                         if (plugin.config.showRemediationOnFail)
                             //"Firing callback"
-                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass);
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId);
  
                         questionLI.addClass(incorrectClass);
                     }
