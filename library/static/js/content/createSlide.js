@@ -2778,16 +2778,27 @@ AVIATION.common.Slide.prototype = {
         for(i=0; i < slide.elementsToShow[action].length; i++){
           if(slide.elementsToShow[action][i]){
             //show this one
-            slide.slideElements[possibleActions[action].elements][i].show();
-            // only disable the ones we show
-            if(slide.elementsToDisable[action][i]){
-              slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+            if(action === 'highlight'){
+              slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
             } else {
-              slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+              slide.slideElements[possibleActions[action].elements][i].show();              
+              // only disable the ones we show (btn, quizzes only)
+              if(slide.elementsToDisable[action][i]){
+                slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+              } else {
+                slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+              }
             }
+
+
+            
           } else {
             //hide this one
-            slide.slideElements[possibleActions[action].elements][i].hide();
+            if(action === 'highlight'){
+              slide.slideElements[possibleActions[action].elements][i].css("border", "");
+            } else {
+              slide.slideElements[possibleActions[action].elements][i].hide();              
+            }
           }
         }
       }
