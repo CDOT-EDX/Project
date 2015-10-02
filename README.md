@@ -171,10 +171,10 @@ Acceptable options and defaults are as follows:
         "showRemediationOnSuccess": true,
         "showRemediationOnFail": true,
         "animationCallbacks": {
-          "checkAnswer": function(){
+          "checkAnswer": (function(){
             console.log("do something");
             $(anySlide).trigger("completedQuiz");
-          }
+          })
         }
       }
     ],
@@ -252,7 +252,7 @@ Acceptable options and defaults are as follows:
           "title": 'I am a button',
           "classes": ["btn", "btn-default"],
           "orderNumber": 0,
-          "action": function(){ console.log("button of someId is executing"); }
+          "action": "(function(){ console.log('button of someId is executing'); })"
         },
         {
           "id": "btn1",
@@ -266,13 +266,13 @@ Acceptable options and defaults are as follows:
         image: {src: "/someSource/image.png", classes: ["imageClass"] },
         highlights: [ 
                         0 , 
-                        { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
+                        { index: 2, onclick: (function(){ console.log("highlight onclick");}) }, 
                         5 
         ],
         // this is to hide / show buttons just like we do with highlights
         buttons: [
                     0 , 
-                    { "index": 2, "disable": true, "onclick": "function(){ console.log('button onclick');}" }, 
+                    { "index": 2, "disable": true, "onclick": "(function(){ console.log('button onclick');})" }, 
                     3 
         ],
         // set slider to any throttle possition from 0-4
@@ -282,7 +282,7 @@ Acceptable options and defaults are as follows:
             "index": 0,
             "second" 10
         },
-        callback: function(){ console.log("this is a callback function"); },
+        callback: (function(){ console.log("this is a callback function"); }),
         "advanceWith": {
             "action": "pattern",
             // for both properties below, anything to do with the contentIndex will only rebuild the content for that
@@ -294,7 +294,7 @@ Acceptable options and defaults are as follows:
                 // if onSuccess content is not the next slideContent....
                 "contentIndex": 3 // optional, which index should we jump to in slideContent OR use mediaIndex instead
                 "mediaIndex": 2 // mediaIndex will jump to the beginning of a media at set index and run all the content from that
-                "callback": "function(){ console.log('You did smth right'); }" // optional
+                "callback": "(function(){ console.log('You did smth right'); })" // optional
             },
             "onFail": { ** optional if needed and currently under development
                 "index": 2, // which altMediaFile should be played (currently sound only)
