@@ -1,8 +1,12 @@
-*last updated on October 22/2015*
+*last updated on October 03/2015*
 
-*added default options 
-showRemediationOnSuccess and showRemediationOnFail*
-showRemediationOne*
+*added default options:*
+```
+	showRemediationOnSuccess
+	showRemediationOnFail
+	showRemediationOne
+	timer (new media option , check the description and the example bellow) 
+```
 
 # Aviation Project
 
@@ -306,6 +310,18 @@ Acceptable options and defaults are as follows:
         }
     },
     {
+      	"media":{
+            "type": "timer", 
+            "index": 1,
+            "second" 1 // timer is a count down , starts at 10 and ends at 1 
+    	}, 
+    	"buttons": [0],
+        "content": {
+	   "html": "UH OH, Press that button yo!"
+        },
+        "advanceWith": {"type": "button", "index": 0}
+    }, 
+    {
         //... another slide content can go here to be triggered at a different time of the audio
         title: {html: "This is a different title / slide"},
         slider: 3,
@@ -350,6 +366,7 @@ Acceptable options and defaults are as follows:
         {type: "audio", src: "someRelativeURL/toAudioFile"},
         {type: "audio", src: "anotherURL/toOtherFile"},
         {type: "csv", src: "someURL/flightData"},
+        {type: "timer", "duration": 10}
     ],
     altMediaFiles: [ // media files that will be used in alternative content (in case a student answered a question wrong)
         {type: "audio", src: "someURL/toAudioFile"},
@@ -570,3 +587,4 @@ The rest of this README is being edited at this moment
           highlights: [
 
           ]
+
