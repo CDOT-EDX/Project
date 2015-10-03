@@ -2118,10 +2118,7 @@ AVIATION.common.Slide.prototype = {
         }
 
       });
-
-      
     }
-
   },
 
 
