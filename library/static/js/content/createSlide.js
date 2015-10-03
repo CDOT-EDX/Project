@@ -2520,26 +2520,30 @@ AVIATION.common.Slide.prototype = {
   buildQuizzes: function(){
     "use strict";
 
-    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement, advancePattern;
+    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement, advancePattern, onComplete;
 
     console.log("building quizzes");
 
     console.log(quizzes);
 
-    advancePattern = function(oldActions){
-      console.log("trying to advance on quiz complete with index: " + slide.contentActiveIndex);
-      $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: slide.contentActiveIndex + slide.patternInnerIndex }, slide: slide });
+    advancePattern = function(index){
+      return function(){
+        console.log("trying to advance on quiz complete with index: " + index);
+        console.log("on quiz end contentIndex: "+ slide.contentActiveIndex);
 
-      if(oldActions && typeof oldActions != "function"){
-        oldActions = eval(oldActions);
-      }
+        $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: index }, slide: slide });
 
-      if(oldActions && typeof oldActions === 'function'){
-        oldActions();
-      }
+        /*
+        if(oldActions && typeof oldActions != "function"){
+          oldActions = eval(oldActions);
+        }
 
-      //slide.trigger("continuePattern");
-      slide.buildContent(true, slide.contentActiveIndex);
+        if(oldActions && typeof oldActions === 'function'){
+          oldActions();
+        }
+        */
+        //slide.buildContent(true, slide.contentActiveIndex);
+      };
     };
 
     for(i=0; i<quizzes.length; i++){
@@ -2552,10 +2556,12 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(this.options.quizId);
 
       quizzes[i].slide = $.isEmptyObject(slide.parentSlide) ? slide : slide.parentSlide;
-      //quizzes[i]
+
+      onComplete = advancePattern(i);
+
       if(slide.options.enablePanel){
         quizzes[i].animationCallbacks = {
-          completeQuiz : advancePattern
+          completeQuiz : onComplete
         };
       }
       
