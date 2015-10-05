@@ -2531,7 +2531,7 @@ AVIATION.common.Slide.prototype = {
         console.log("trying to advance on quiz complete with index: " + index);
         console.log("on quiz end contentIndex: "+ slide.contentActiveIndex);
 
-        $(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide });
+        $(slide).trigger("next", { element: { type: "quiz", index: index }, slide: slide });
 
         /*
         if(oldActions && typeof oldActions != "function"){
