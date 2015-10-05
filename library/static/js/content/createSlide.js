@@ -2865,8 +2865,10 @@ AVIATION.common.Slide.prototype = {
               // only disable the ones we show (btn, quizzes only)
               if(slide.elementsToDisable[action][i]){
                 slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+                slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
               } else {
                 slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+                slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
               }
             }
           } else {
@@ -2875,6 +2877,7 @@ AVIATION.common.Slide.prototype = {
               slide.slideElements[possibleActions[action].elements][i].css("border", "");
               slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
               slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+              slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
             } else {
               slide.slideElements[possibleActions[action].elements][i].hide();              
             }
