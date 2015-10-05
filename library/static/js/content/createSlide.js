@@ -157,11 +157,11 @@ AVIATION.common.Slide.prototype = {
         slide.checkSlideControlPlayButtons("play");
       },
       contentNext: function(e,data){
-        var slide = this;
-        if(data && typeof data.mediaIndex !== undefined){
-          slide.mediaActiveIndex = data.mediaIndex-1;
-          $(slide).trigger("nextMedia");
-        } else if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
+        // if(data && typeof data.mediaIndex !== undefined){
+        //   slide.mediaActiveIndex = data.mediaIndex-1;
+        //   $(slide).trigger("nextMedia");
+        // } else 
+        if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
           slide.buildContent(true, slide.contentActiveIndex+1);
         } else {
           $(slide).trigger("slideEnd");
