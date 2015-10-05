@@ -158,11 +158,10 @@ AVIATION.common.Slide.prototype = {
       },
       contentNext: function(e,data){
         var slide = this;
-        // if(typeof data.mediaIndex !== undefined){
-        //   slide.mediaActiveIndex = data.mediaIndex-1;
-        //   $(slide).trigger("nextMedia");
-        // } else 
-        if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
+        if(data && typeof data.mediaIndex !== undefined){
+          slide.mediaActiveIndex = data.mediaIndex-1;
+          $(slide).trigger("nextMedia");
+        } else if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
           slide.buildContent(true, slide.contentActiveIndex+1);
         } else {
           $(slide).trigger("slideEnd");
@@ -1045,7 +1044,7 @@ AVIATION.common.Slide.prototype = {
         availableAdvances = ["action", "type"];
 
     console.log("event.data");
-    console.log(callback);
+    console.log(event);
     console.log("CHECKING ADVANCE WITH!");
 
     // Running custom callbacks/onclicks
@@ -1092,7 +1091,7 @@ AVIATION.common.Slide.prototype = {
         }
       }
     } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
-      $(slide).trigger("contentNext");
+      $(slide).trigger("contentNext", event.data.element);
     } else {
       $(slide).trigger("next");
     }
