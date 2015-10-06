@@ -1618,12 +1618,14 @@ AVIATION.common.Slide.prototype = {
 
       var papaComplete = function() {
         var data = {}, flight = this.result.data, i = this.index || 0, toggle = true, end = this.end,
-            player = this, interval;
+            player = this, interval, this.panelPause, this.panelEnd;
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
         slide.panelPause = false;
         slide.panelEnd = false;
+        this.panelPause = false;
+        this.panelEnd = false;
         //Window.interval = '';
         i = this.index || slide.pausedPanelIndex || 0;
 
@@ -1634,7 +1636,7 @@ AVIATION.common.Slide.prototype = {
         function runFlight(flight, slide, end){
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
-          if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
+          if(flight && flight.length > 0 && i < flight.length && !slide.panelPause && !this.panelPause){
             //console.log("airspeed: " + flight[i][7]);
             instrumentOptions = {
               attitude: {
