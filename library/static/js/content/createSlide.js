@@ -157,10 +157,10 @@ AVIATION.common.Slide.prototype = {
         slide.checkSlideControlPlayButtons("play");
       },
       contentNext: function(e,data){
-        // if(data && typeof data.mediaIndex !== undefined){
-        //   slide.mediaActiveIndex = data.mediaIndex-1;
-        //   $(slide).trigger("nextMedia");
-        // } else 
+        if(data && data.mediaIndex !== undefined){
+          slide.mediaActiveIndex = data.mediaIndex-1;
+          $(slide).trigger("nextMedia");
+        } else 
         if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
           slide.buildContent(true, slide.contentActiveIndex+1);
         } else {
@@ -1275,8 +1275,10 @@ AVIATION.common.Slide.prototype = {
             callback = [];
           }
 
+          console.log("whats the media index?! : " + actions[act].mediaIndex );
+
           $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]), 
-                                mediaIndex: actions[act].mediaIndexadc }, slide: slide }, slide.checkAdvanceWith );
+                                mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
