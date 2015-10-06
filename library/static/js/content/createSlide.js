@@ -1276,7 +1276,7 @@ AVIATION.common.Slide.prototype = {
           }
 
           $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]), 
-                                mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
+                                mediaIndex: actions[act].mediaIndexadc }, slide: slide }, slide.checkAdvanceWith );
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
@@ -2534,7 +2534,7 @@ AVIATION.common.Slide.prototype = {
         console.log("trying to advance on quiz complete with index: " + index);
         console.log("on quiz end contentIndex: "+ slide.contentActiveIndex);
 
-        $(slide).trigger("next", { element: { type: "quiz", index: index }, slide: slide });
+        $(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.advanceWith);
 
         /*
         if(oldActions && typeof oldActions != "function"){
