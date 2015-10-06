@@ -153,6 +153,7 @@ AVIATION.common.Slide.prototype = {
       },
       instrumentResume: function(){
         panelPause = false;
+
         slide.setInstrumentStatus2("Instrument panel is playing...");
         slide.checkSlideControlPlayButtons("play");
       },
@@ -628,13 +629,13 @@ AVIATION.common.Slide.prototype = {
   },
 
   // method for building the content of the slide
-  buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback){
+  buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback, action){
     "use strict";
     var outerSlideContent = this.slideContent, slide = this, highlightsAddOnClick = [], buttonsAddOnClick = [], 
         localClass, contentActiveIndex = index || this.contentActiveIndex, 
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
-    if(index && index !== undefined){
+    if(index && index !== undefined && action !== 'pattern'){
       this.contentActiveIndex = index;
     }
 
@@ -1620,7 +1621,7 @@ AVIATION.common.Slide.prototype = {
 
       var papaComplete = function() {
         var data = {}, flight = this.result.data, i = this.index || 0, toggle = true, end = this.end,
-            player = this, interval, this.panelPause, this.panelEnd;
+            player = this, interval;
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
@@ -1707,12 +1708,17 @@ AVIATION.common.Slide.prototype = {
       var papaPause = function(){
         console.log("attempting to pause csv");
         slide.panelPause = true;
+        this.panelPause = true;
       };
 
       var papaCurrentLine = function(index){
         this.index = index || 0;
         console.log("setting current line of csv");
         //return this.index;
+      };
+
+      var papaResetLine = function(line){
+        this.index = line;
       };
 
       var papaCueLine = function(line, callback){
@@ -1741,7 +1747,7 @@ AVIATION.common.Slide.prototype = {
         this.play = papaComplete;
         this.pause = papaPause;
         this.cueLine = papaCueLine;
-        this.currentTime = papaCurrentLine;
+        this.currentTime = papaResetLine;
         this.papaCuePause = papaCuePause;
         this.papaCueEnd = papaCueEnd;
         csvPlayers[this.config.selfIndex] = this;
@@ -2538,7 +2544,7 @@ AVIATION.common.Slide.prototype = {
         console.log("trying to advance on quiz complete with index: " + index);
         console.log("on quiz end contentIndex: "+ slide.contentActiveIndex);
 
-        $(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.advanceWith);
+        $(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.checkAdvanceWith);
 
         /*
         if(oldActions && typeof oldActions != "function"){
@@ -2970,7 +2976,7 @@ AVIATION.common.Slide.prototype = {
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
-
+          $(slide).trigger("correctAdvance");
         } else if( _.contains(advanceWith.index, index) )
           $(slide).trigger("correctAdvance", advanceWith);
         else
@@ -2981,13 +2987,15 @@ AVIATION.common.Slide.prototype = {
       } else if(type === 'csv') {
         $(slide).trigger("wrongAdvance", advanceWith);
 
-      } else if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
+      } else if( (type === 'highlight' || type === 'quiz' ) && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
         
         slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
         
-        if( scanPattern[overallScanIndex+1] === index){
+        if(type === 'quiz'){
+          // all good, let's wait for next input...
+        } else if( scanPattern[overallScanIndex+1] === index){
           if(element !== undefined){
             //$(element).pulse('destroy');
 
@@ -3002,7 +3010,8 @@ AVIATION.common.Slide.prototype = {
               console.log("index provided: " + index);
               console.log("inner index: " + innerIndex);
               innerIndex++;
-              slide.buildContent(true, (slide.contentActiveIndex + innerIndex) );
+              slide.buildContent(true, (slide.contentActiveIndex + innerIndex), this.mediaActiveIndex, false, null, false, advanceWith.action );
+              //this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
 
             } else if (advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] && 
                 slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.type !== 'highlight'){
