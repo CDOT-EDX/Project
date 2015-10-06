@@ -1,12 +1,20 @@
-*last updated on October 03/2015*
+*last updated on October 06/2015*
 
-*added default options:*
+*buttons can now invoke CSVs or possibly audio*
+
+*check the syntax when declaring buttons, look for `mediaIndex`*
+
+*timer implementation:*
+``
+timer (new media option , check the description and the example bellow) 
+  // add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
+``
+
+*added default options for SlickQuiz:*
 ```
 	showRemediationOnSuccess
 	showRemediationOnFail
 	showRemediationOne
-	timer (new media option , check the description and the example bellow) 
-	// add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
 ```
 
 # Aviation Project
@@ -263,6 +271,11 @@ Acceptable options and defaults are as follows:
           "id": "btn1",
           title: 'another button',
           "orderNumber": 1
+        },
+        {
+          "id": "topple",
+          "title": "TOPPLE",
+          "mediaIndex": 3 // mediaIndex will invoke "play" on mediaFile at index 3 once button is clicked
         }
     ],
     slideContent: [{

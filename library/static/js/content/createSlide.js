@@ -152,22 +152,22 @@ AVIATION.common.Slide.prototype = {
         slide.checkSlideControlPlayButtons("pause");
       },
       instrumentResume: function(){
-        panelPause = false;
+        slide.panelPause = false;
 
         slide.setInstrumentStatus2("Instrument panel is playing...");
         slide.checkSlideControlPlayButtons("play");
       },
-      instrumentResetPlay: function(){
+      instrumentResetPlay: function(e,newMediaIndex){
         $(slide).trigger("pause");
         $(slide).trigger("reset");
-        slide.mediaActiveIndex++;
+        slide.mediaActiveIndex = newMediaIndex;
+        //slide.mediaActiveIndex++;
         $(slide).trigger("reset");
         $(slide).trigger("play");  
       },
       contentNext: function(e,data){
         if(data && data.mediaIndex !== undefined){
-          slide.mediaActiveIndex = data.mediaIndex-1;
-          $(slide).trigger("instrumentResetPlay");
+          $(slide).trigger("instrumentResetPlay", data.mediaIndex);
         } else 
         if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
           slide.buildContent(true, slide.contentActiveIndex+1);
@@ -626,7 +626,7 @@ AVIATION.common.Slide.prototype = {
         console.log("resetting slider height!!");
         $sliderContainer.height( $body.height() );
         $slider.height( $body.height() - 22 );
-        slide.instrumentResizer( $body.width() );
+        slide.instrumentResizer( $body.width(), $body.height() );
         console.log($slider.height() );
         console.log($sliderContainer.height() );
         console.log($body.height() );
@@ -1544,7 +1544,7 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  instrumentResizer: function(bodySize){
+  instrumentResizer: function(bodyWidth, bodyHeight){
     "use strict";
 
     var slide = this, instrument, instIds = slide.options.instrumentIds, numberOfInstrments = slide.countObjectLength( slide.options.panelType ), divider, size;
@@ -1555,7 +1555,7 @@ AVIATION.common.Slide.prototype = {
       divider = 3;
     }
 
-    size = bodySize / divider;
+    size = bodyWidth / divider;
 
     console.log("resizing to: " + size );
 
@@ -1566,6 +1566,10 @@ AVIATION.common.Slide.prototype = {
         }
       }
     }
+
+    // resize panelHighlights as well to be the same size as inst panel
+    $(panelHighlightsId).height( bodyHeight );
+    $(panelHighlightsId).width( bodyWidth );
 
   },
 
@@ -1636,8 +1640,12 @@ AVIATION.common.Slide.prototype = {
         slide.panelEnd = false;
         this.config.panelPause = false;
         this.panelEnd = false;
-        //Window.interval = '';
-        i = this.config.line || this.index || slide.pausedPanelIndex || 0;
+        if(this.config.line !== undefined){
+          i = this.config.line;
+        } else {
+          i = this.index || slide.pausedPanelIndex || 0;
+        }
+        
 
         console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
         console.log("this csv is: ");
@@ -1647,7 +1655,6 @@ AVIATION.common.Slide.prototype = {
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause && !player.config.panelPause){
-            //console.log("airspeed: " + flight[i][7]);
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
