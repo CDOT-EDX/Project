@@ -265,7 +265,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         questionHTML.append('<h3>' + formatQuestion + '</h3>');
 
                         // Count the number of true values
-                        /*
                         var truths = 0;
                         for (i in question.a) {
                             if (question.a.hasOwnProperty(i)) {
@@ -275,9 +274,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                                 }
                             }
                         }
-                        */
                         
-                        console.log("----------TRUTHS222 " + question.truths);
+                        console.log("----------TRUTHS " + truths);
 
                         // Now let's append the answers with checkboxes or radios depending on truth count
                         var answerHTML = $('<ul class="' + answersClass + '"></ul>');
@@ -290,7 +288,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         // prepare a name for the answer inputs based on the question
                         var selectAny = question.select_any ? question.select_any : false,
                             forceCheckbox = question.force_checkbox ? question.force_checkbox : false,
-                            checkbox = (/*plugin.config.numberOfTrueAnswersInQuestions*/question.truths > 1 && !selectAny) || forceCheckbox,
+                            checkbox = (/*plugin.config.numberOfTrueAnswersInQuestions*/truths > 1 && !selectAny) || forceCheckbox,
                             inputName = $element.attr('id') + '_question' + (count - 1),
                             inputType = checkbox ? 'checkbox' : 'radio';
 
