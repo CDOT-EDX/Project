@@ -353,15 +353,60 @@ Acceptable options and defaults are as follows:
             }
         }
     },
+    // PAUSE / PLAY example for CSV
     {
         "media":{
+            "index": 2,
             "type": "csv",
             "line": 1000,
-            "action": "pause"
+        },
+        "action": {
+          "type": "pause",
+          "index": 2
+        },
+        "advanceWith": {
+            "type": "button",
+            "index": 1
         },
     },
     {
-
+        "media": {
+          "type": "button",
+          "index": 1
+        },
+        "action":{
+          "type": "play",
+          "index": 2 // can only be a mediaIndex (not contentIndex)
+          "line": 1001 // in this case its a csv
+          // in the case of an audio we can specify "second": 10.1 and not 'line'
+        }
+    },
+    // PAUSE / PLAY example for AUDIO
+    {
+        "media":{
+            "index": 2,
+            "type": "audio",
+            "second": 7,
+        },
+        "action": {
+          "type": "pause",
+          "index": 2
+        },
+        "advanceWith": {
+            "type": "button",
+            "index": 1
+        },
+    },
+    {
+        "media": {
+          "type": "button",
+          "index": 1
+        },
+        "action":{
+          "type": "play",
+          "index": 2 // can only be a mediaIndex (not contentIndex)
+          "second": 7.1 // in this case its an audio
+        }
     }],
     // default models that we want to be set-up in the background
     modals: [{ 
