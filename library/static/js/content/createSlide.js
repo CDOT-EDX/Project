@@ -287,6 +287,15 @@ AVIATION.common.Slide.prototype = {
           }
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
+      },
+      setPosition: function(e, position){
+        if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
+          // if(slide.players[slide.mediaActiveIndex].type === 'audio'){
+          //   slide.players[slide.mediaActiveIndex].player.currentTime(position*1000);
+          // } else {
+            slide.players[slide.mediaActiveIndex].player.currentTime(position); 
+          //}
+        }
       }
     };
 
@@ -639,7 +648,7 @@ AVIATION.common.Slide.prototype = {
   buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback, action){
     "use strict";
     var outerSlideContent = this.slideContent, slide = this, highlightsAddOnClick = [], buttonsAddOnClick = [], 
-        localClass, contentActiveIndex = index || this.contentActiveIndex, 
+        localClass, contentActiveIndex = index || this.contentActiveIndex, position,
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
     if(index && index !== undefined && action !== 'pattern'){
@@ -682,9 +691,25 @@ AVIATION.common.Slide.prototype = {
     // console.log(buttonsAddOnClick);
     // this.buildButtons(mediaActiveIndex, buttonsAddOnClick);
 
+    // TESTING actions (pause/play)
+
+    if(slide.slideContent[contentActiveIndex].action !== undefined){
+      // set line or second of media before playing it
+      position = slide.slideContent[contentActiveIndex].action.line || slide.slideContent[contentActiveIndex].action.second;
+      if(position !== undefined){
+        $(slide).trigger("setPosition", position );
+      }
+
+      if(slide.slideContent[contentActiveIndex].action.type !== undefined && 
+          slide.slideContent[contentActiveIndex].action.index !== undefined){
+        slide.mediaActiveIndex = slide.slideContent[contentActiveIndex].action.index;
+        $(slide).trigger(slide.slideContent[contentActiveIndex].action.type);
+      }
+    }
+
     setupInnerContent = function(classSize, callback){
       var slideContent = outerSlideContent[contentActiveIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
-          action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
+          contentClasses = "", imageClasses = "", innerContent, innerImage,
           newSlideInner;// callback = c;b
 
       if(!clearContent){

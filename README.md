@@ -355,10 +355,28 @@ Acceptable options and defaults are as follows:
     },
     {
         "media":{
+            "index": 2,
             "type": "csv",
             "line": 1000,
-            "action": "pause"
         },
+        "action": {
+          "type": "pause",
+          "index": 2
+        },
+        "advanceWith": {
+            "type": "button",
+            "index": 1
+        },
+        "media""{
+          "type": "button",
+          "index": 1
+        },
+        "action":{
+          "type": "play",
+          "index": 2 // can only be a mediaIndex (not contentIndex)
+          "line": 1000 // in this case its a csv
+          // in the case of an audio we can specify "second": 10 and not 'line'
+        }
     },
     {
 
