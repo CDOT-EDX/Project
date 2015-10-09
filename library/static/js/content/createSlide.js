@@ -707,6 +707,14 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
+    if(slide.slideContent[contentActiveIndex].setContentIndex !== undefined){
+      slide.contentActiveIndex = parseInt(slide.slideContent[contentActiveIndex].setContentIndex, 10);
+    }
+
+    if(slide.slideContent[contentActiveIndex].setMediaIndex !== undefined){
+      slide.mediaActiveIndex = parseInt(slide.slideContent[contentActiveIndex].setMediaIndex, 10);
+    }
+
     setupInnerContent = function(classSize, callback){
       var slideContent = outerSlideContent[contentActiveIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
           contentClasses = "", imageClasses = "", innerContent, innerImage,
