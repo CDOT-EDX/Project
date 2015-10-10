@@ -17,6 +17,7 @@ div.instrument {
 
 .instruments {
   background-color: #444547;
+  border-radius: 5%;
 }
 
 /* The box containing any element of an indicator */
