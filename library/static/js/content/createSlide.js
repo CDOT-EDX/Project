@@ -789,11 +789,14 @@ AVIATION.common.Slide.prototype = {
             innerImage.appendTo(imageParent);
           }
 
-          if($().pulse){
-            innerContent  
-              .pulse(slide.options.pulseProperties, slide.options.pulseSettings);
-            innerImage
-              .pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+          if($().pulseinnerContent){
+            if(innerContent){
+              innerContent.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            }
+
+            if(innerImage){
+              innerImage.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            }
           }
         }
       } else {
