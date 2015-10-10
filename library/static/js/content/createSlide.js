@@ -2963,11 +2963,14 @@ AVIATION.common.Slide.prototype = {
               if(slide.options.hiddenHighlights){
                 slide.slideElements[possibleActions[action].elements][i].css("border", "");
                 slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
+
               } else {
                 slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
                 slide.slideElements[possibleActions[action].elements][i].css("cursor", "pointer");
               }
-              
+
+              slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+              slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
             } else {
               slide.slideElements[possibleActions[action].elements][i].show();              
               // only disable the ones we show (btn, quizzes only)
