@@ -711,7 +711,6 @@ AVIATION.common.Slide.prototype = {
         }
 
         // and the buttons
-        slide.checkHideShowActions(slideContent, slide);
         // let's switch the slider if needed
         slide.setSlider(slideContent);
 
@@ -826,6 +825,7 @@ AVIATION.common.Slide.prototype = {
       }
 
       slide.initActionables();
+      slide.checkHideShowActions(slideContent, slide);
 
     };
 
