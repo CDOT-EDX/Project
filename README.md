@@ -1,14 +1,21 @@
-*last updated on October 06/2015*
+*last updated on October 10/2015*
+
+*highlights have to specify now whether they belong to: `content, image, or panel`*
+
+*if NO parent specified for a highlight, the highlight will be created in the general body of the slide*
+
+*meaning that if the slides height or width will change so will the highlight*
 
 *buttons can now invoke CSVs or possibly audio*
 
 *check the syntax when declaring buttons, look for `mediaIndex`*
 
 *timer implementation:*
-``
+
+```
 timer (new media option , check the description and the example bellow) 
-  // add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
-``
+add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
+```
 
 *added default options for SlickQuiz:*
 ```
@@ -215,6 +222,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "ai",
@@ -223,6 +231,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       }, 
       {
         id: "alt",
@@ -230,7 +239,8 @@ Acceptable options and defaults are as follows:
         name: "Altimeter (ALT)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "tc",
@@ -238,7 +248,8 @@ Acceptable options and defaults are as follows:
         name: "Turn Coordinator (TC)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "hi",
@@ -246,7 +257,8 @@ Acceptable options and defaults are as follows:
         name: "Heading Indicator (HI)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "vsi",
@@ -255,6 +267,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       },
     ],
     },
