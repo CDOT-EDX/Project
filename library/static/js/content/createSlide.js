@@ -1273,6 +1273,8 @@ AVIATION.common.Slide.prototype = {
       if(callbacks[i] && typeof callbacks[i] === 'function'){
         callbacks[i]();
       }
+
+      console.log("executing actionable callbacks");
     }
   },
 
@@ -1626,8 +1628,8 @@ AVIATION.common.Slide.prototype = {
     }
 
     // resize panelHighlights as well to be the same size as inst panel
-    $(panelHighlightsId).height( bodyHeight );
-    $(panelHighlightsId).width( bodyWidth );
+    //$(slide.options.panelHighlightsId).height( bodyHeight );
+    //$(slide.options.panelHighlightsId).width( bodyWidth );
 
   },
 
@@ -2966,10 +2968,10 @@ AVIATION.common.Slide.prototype = {
                 slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
                 slide.slideElements[possibleActions[action].elements][i].css("cursor", "pointer");
               }
+              slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+              slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
               slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
               slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
-              // slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
-              // slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
             } else {
               slide.slideElements[possibleActions[action].elements][i].show();              
               // only disable the ones we show (btn, quizzes only)
@@ -2977,8 +2979,8 @@ AVIATION.common.Slide.prototype = {
                 slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
                 slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
               } else {
-                // slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
-                // slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
+                slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+                slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
                 slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
                 slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
               }
