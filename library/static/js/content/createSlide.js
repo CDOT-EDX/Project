@@ -712,11 +712,6 @@ AVIATION.common.Slide.prototype = {
         // let's switch the slider if needed
         slide.setSlider(slideContent);
 
-        console.log("action: " + action);
-
-        console.log("general parent:");
-        console.log(generalParent);
-
         // check parent of general content
         if(generalParent.length < 1){
           generalParent = jQuery('<div/>',{
@@ -724,10 +719,7 @@ AVIATION.common.Slide.prototype = {
             "class": "slideGeneral row"
           }).appendTo($(slide.container + " > .cdot_contentText") );
         }
-        console.log(generalParent);
 
-        console.log("image parent exists?");
-        console.log(imageParent);
         if(imageParent.length < 1){
           imageParent =jQuery('<div/>', {
             id: "imageParent",
@@ -735,8 +727,6 @@ AVIATION.common.Slide.prototype = {
           }).appendTo(generalParent);
         }
 
-        console.log("content parent exists?");
-        console.log(contentParent);
         // if image and content parents dont exist, create them
         if(contentParent.length < 1){
           contentParent =jQuery('<div/>', {
@@ -778,11 +768,9 @@ AVIATION.common.Slide.prototype = {
 
         if(action === "append" || action === "replace"){
           if(innerContent){
-            console.log("is there an inner content");
             innerContent.appendTo(contentParent);
           }
           if(innerImage){
-            console.log("is there an inner image");
             innerImage.appendTo(imageParent);
           }
 
@@ -810,8 +798,6 @@ AVIATION.common.Slide.prototype = {
         console.log("running eval");
         callback();
       }
-
-      console.log("trigger callback? ***");
 
       if(triggerCallback && slideContent.callback && typeof slideContent.callback != 'function'){
         slideContent.callback = eval(slideContent.callback);
