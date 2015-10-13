@@ -173,10 +173,10 @@ AVIATION.common.Slide.prototype = {
           slide.buildContent(true, slide.contentActiveIndex+1);
         } else {
           $(slide).trigger("slideEnd");
-          slide.setStatus('Click "Continue" to proceed to the next slide');
         }
       },
       slideEnd: function(e, data){
+        $(slide).trigger('reset');
         slide.setStatus('Click "Continue" to proceed to the next slide');
         slide.checkSlideControlPlayButtons("replay");
         slide.activateTimer(5, slide.options.autoRedirect);
@@ -251,7 +251,11 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("pause");
         $(slide).trigger("reset");
         slide.mediaActiveIndex++;
-        $(slide).trigger("play");  
+        if(slide.slideContent && slide.mediaActiveIndex < slide.players.length-1){
+          $(slide).trigger("play");
+        } else {
+          $(slide).trigger("slideEnd");
+        }
       },
       previous: function(e){
         console.log("!* previous event fired");
@@ -282,19 +286,13 @@ AVIATION.common.Slide.prototype = {
         console.log("!* reset event fired");
 
         if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
-          if(!slide.panelPause){
-            slide.panelPause = true;
-          }
+          slide.players[slide.mediaActiveIndex].player.pause();
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
       },
       setPosition: function(e, position){
         if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
-          // if(slide.players[slide.mediaActiveIndex].type === 'audio'){
-          //   slide.players[slide.mediaActiveIndex].player.currentTime(position*1000);
-          // } else {
             slide.players[slide.mediaActiveIndex].player.currentTime(position); 
-          //}
         }
       }
     };
