@@ -2496,7 +2496,7 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if( (active > players.length - 1) && (contentActive + 1 > this.slideContent.length - 1) ){
+          if( ( (active > players.length - 1) && (contentActive + 1 > this.slideContent.length - 1) ) || (contentActive + 1 > this.slideContent.length - 1) ){
             if(action !== 'replay'){
               $(slide).trigger("slideEnd");
             }
