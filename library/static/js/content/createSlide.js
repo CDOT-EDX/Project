@@ -166,17 +166,21 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("play");  
       },
       contentNext: function(e,data){
+        //slide.checkSlideControlPlayButtons("play");
         if(data && data.mediaIndex !== undefined){
           $(slide).trigger("instrumentResetPlay", data.mediaIndex);
         } else 
         if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
           slide.buildContent(true, slide.contentActiveIndex+1);
+          slide.checkSlideControlPlayButtons("play");
         } else {
           $(slide).trigger("slideEnd");
         }
       },
       slideEnd: function(e, data){
+        console.log("attempting reset");
         $(slide).trigger('reset');
+        console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
         slide.setStatus('Click "Continue" to proceed to the next slide');
         slide.activateTimer(5, slide.options.autoRedirect);
@@ -289,6 +293,7 @@ AVIATION.common.Slide.prototype = {
           slide.players[slide.mediaActiveIndex].player.pause();
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
+        console.log("reset event finished");
       },
       setPosition: function(e, position){
         if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
@@ -2459,6 +2464,10 @@ AVIATION.common.Slide.prototype = {
     var controls = this.slideElements.slideControls, active = this.mediaActiveIndex,
         players = this.players, slide = this, contentActive = this.contentActiveIndex;
 
+    console.log("check button state");
+    console.log(contentActive);
+    console.log(this.slideContent.length);
+
     if(this.options.showSlideControls){
 
       if(active < 1 && players.length > 1){
@@ -2469,7 +2478,6 @@ AVIATION.common.Slide.prototype = {
         controls.next.attr("disabled", false);
         controls.next.removeProp("disabled");
         controls.next.removeAttr("disabled");
-
         //if(this.slideHasListened[active]){
         //}
       } else {
@@ -2477,16 +2485,14 @@ AVIATION.common.Slide.prototype = {
           console.log("active is before the last player");
           controls.previous.prop("disabled", false);
           controls.previous.removeAttr("disabled");
-
           //if(this.slideHasListened[active]){
             //controls.next.prop("disabled", false);
             //controls.next.removeAttr("disabled");
           //} else {
-
-            controls.next.prop("disabled", false);
-            controls.next.attr("disabled", false);
-            controls.next.removeProp("disabled");
-            controls.next.removeAttr("disabled");
+          controls.next.prop("disabled", false);
+          controls.next.attr("disabled", false);
+          controls.next.removeProp("disabled");
+          controls.next.removeAttr("disabled");
           //}
         } else if (active >= players.length - 1){
           console.log("active is the last players length");
