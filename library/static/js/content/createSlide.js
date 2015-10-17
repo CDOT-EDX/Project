@@ -147,8 +147,7 @@ AVIATION.common.Slide.prototype = {
         }
       },
       instrumentPause: function(index){
-        slide.pausedPanelIndex = index;
-        slide.setInstrumentStatus2("Instrument panel is paused.");
+        slide.setInstrumentStatus2("Instrument panel is paused");
         slide.checkSlideControlPlayButtons("pause");
       },
       instrumentResume: function(){
@@ -265,13 +264,9 @@ AVIATION.common.Slide.prototype = {
         console.log("!* previous event fired");
         // go to the previous track
         slide.resetStatusBar();
-
         $(slide).trigger("pause");
-
         $(slide).trigger("reset");
-
         slide.mediaActiveIndex--;
-
         $(slide).trigger("play");
       },
       replay: function(e){
@@ -1677,7 +1672,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [],  
-        instrumentOptions = {}, csvPlayers = [], parsed = 0, c; //runFlight;
+        instrumentOptions = {}, csvPlayers = [], parsed = 0, c, playFirstLine = false; //runFlight;
 
     if(slide.options.enablePanel && !slide.options.noCSV){
 
@@ -1687,66 +1682,72 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-        slide.panelPause = false;
+
+        if(!this.config.panelPause){
+          this.config.pausedIndex = this.index || slide.pausedPanelIndex || 0;
+        }
+
+        if(this.config.line !== undefined){
+          this.config.pausedIndex = this.config.line;
+          this.config.line = undefined;
+        }
+
+        console.log("starting csv at: " + this.config.pausedIndex);
+        
         slide.panelEnd = false;
         this.config.panelPause = false;
-        this.panelEnd = false;
-        if(this.config.line !== undefined){
-          i = this.config.line;
-        } else {
-          i = this.index || slide.pausedPanelIndex || 0;
-        }
-        
+        this.config.panelEnd = false;
 
-        console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
         console.log("this csv is: ");
         console.log(this.config.selfIndex);
 
         function runFlight(flight, slide, end){
+          var i = player.config.pausedIndex;
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
-          if(flight && flight.length > 0 && i < flight.length && !slide.panelPause && !player.config.panelPause){
-
-            console.log("altitude: " + flight[i][41]);
-            
+          if(flight && flight.length > 0 && i < flight.length && !player.config.panelPause){
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
-                roll: ( -( flight[i][31] ) ), //( -(allFlight[i].roll) ) 
+                roll: ( -( flight[i][31] ) ),
               },
               heading: {
                 heading: flight[i][33]
               },
               altimeter: {
-                altitude: flight[i][41],//allFlight[i].altitude
+                altitude: flight[i][41],
                 pressure: flight[i][19]
               },
               airspeed: {
-                airSpeed: flight[i][7]//allFlight[i].airSpeed
+                airSpeed: flight[i][7]
               },
               turn_coordinator: {
                 turnRate: ( ( parseFloat(flight[i][28]) * 57.3 ) + (parseFloat(flight[i][31]) ) ),
                 yaw: ( parseFloat( flight[i][29] || 0 ) + 0.5 )
               },
               variometer: {
-                vario: (parseFloat(flight[i][15]) / 100)//allFlight[i].vario
+                vario: (parseFloat(flight[i][15]) / 100)
               }
             };
 
             slide.setAllInstruments( instrumentOptions );
-            
-            // eval here?
-            // if(flight[i][flight[i].length-1]){
-            //   flight[i][flight[i].length-1] 
-            // }
 
             if(flight[i][flight[i].length-1] && typeof flight[i][flight[i].length-1] === 'function'){
               flight[i][flight[i].length-1]();
             }
 
-            i++;
-          } else {
+            player.config.pausedIndex++;
+
+            // if statement to pause if first csv and needs to set panel
+            if(slide.options.setPanel && slide.justLoaded){
+              if(player.config.selfIndex === 0 && player.config.pausedIndex === 1){
+                player.config.panelPause = true;
+                slide.justLoaded = false;
+              }
+            }
+          } else if (i !== 1) {
             if(i < flight.length){
+              player.config.pausedIndex = i;
               $(slide).trigger("instrumentPause", i);
             } else {
               i = 0;
@@ -1755,6 +1756,7 @@ AVIATION.common.Slide.prototype = {
               data.element.index = slide.mediaActiveIndex;
               data.slide = slide;
 
+              player.config.panelEnd = true;
               slide.panelEnd = true;
 
               if(end && typeof end === 'function'){
@@ -1768,8 +1770,6 @@ AVIATION.common.Slide.prototype = {
           }
         }
 
-        //interval = setInterval( function(){runFlight(flight, slide, end); },75 );
-
         interval = setInterval( runFlight.bind(player, flight, slide, end),75 );
       };
 
@@ -1777,8 +1777,8 @@ AVIATION.common.Slide.prototype = {
         console.log("attempting to pause csv: ");
         slide.panelPause = true;
         this.config.panelPause = true;
-        console.log(this);
         console.log("for csv: " + this.config.selfIndex);
+        slide.setInstrumentStatus2("Instrument panel is paused");
       };
 
       var papaCurrentLine = function(index){
@@ -1792,18 +1792,16 @@ AVIATION.common.Slide.prototype = {
         console.log("for csv: " + this.config.selfIndex);
         console.log("reseting csv line: "+ this.config.line);
         this.config.line = line;
-        console.log("2reseting csv line: "+ this.config.line);
       };
 
       var papaCueLine = function(line, callback){
         console.log("csv cueing at line " + line);
-        console.log(this.result);
         this.result.data[line].push(callback);
       };
 
       var papaCueEnd = function(callback){
         console.log("papaparse end event");
-        slide.setInstrumentStatus2("The flight has finished.");
+        slide.setInstrumentStatus2("The flight has finished");
         this.end = callback;
       };
 
@@ -1812,11 +1810,6 @@ AVIATION.common.Slide.prototype = {
       };
 
       var papaSaveObject = function(result){
-        console.log("inside papaSaveObject");
-        console.log("this is: ");
-        console.log(this);
-        console.log(c);
-        console.log(result);
         this.result = result;
         this.play = papaComplete;
         this.pause = papaPause;
@@ -1830,7 +1823,12 @@ AVIATION.common.Slide.prototype = {
         parsed++;
 
         if(parsed === csvs.length){
-          slide.setInstrumentStatus2("Instrument panel ready.");
+          // play the first line of first csv only
+          if(slide.justLoaded && slide.options.setPanel){
+            csvPlayers[0].play();
+          }
+
+          slide.setInstrumentStatus2("Instrument panel ready");
           callback(csvPlayers);
         }
       };
@@ -1846,6 +1844,7 @@ AVIATION.common.Slide.prototype = {
             fastMode: true,
             selfIndex: c,
             panelPause: false,
+            panelEnd: false,
             line: 0
           },
           download: true,
@@ -2898,6 +2897,7 @@ AVIATION.common.Slide.prototype = {
     this.throttleContainer = options.throttleContainer || "#sliderContainer";
 
     this.panelEnd = false;
+    this.justLoaded = true;
     /* error handling example
     try {
       // if smth might cause an error....
