@@ -1706,6 +1706,9 @@ AVIATION.common.Slide.prototype = {
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
           if(flight && flight.length > 0 && i < flight.length && !slide.panelPause && !player.config.panelPause){
+
+            console.log("altitude: " + flight[i][41]);
+            
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
