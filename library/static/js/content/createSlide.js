@@ -1322,6 +1322,7 @@ AVIATION.common.Slide.prototype = {
             class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
             html: actions[act].title,
             "data-toggle": options.dataToggle,
+            "data-target": "#" + actions[act].id + "_modal",
             "data-orderNumber": actions[act].orderNumber,
             role: options.role,
             style: options.style
