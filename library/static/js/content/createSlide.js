@@ -148,7 +148,7 @@ AVIATION.common.Slide.prototype = {
       },
       instrumentPause: function(index){
         slide.setInstrumentStatus2("Instrument panel is paused");
-        slide.checkSlideControlPlayButtons("pause");
+        //slide.checkSlideControlPlayButtons("pause");
       },
       instrumentResume: function(){
         slide.panelPause = false;
@@ -178,11 +178,11 @@ AVIATION.common.Slide.prototype = {
       },
       slideEnd: function(e, data){
         console.log("attempting reset");
-        $(slide).trigger('reset');
+        $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
         console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
         slide.setStatus('Click "Continue" to proceed to the next slide');
-        slide.activateTimer(5, slide.options.autoRedirect);
+        slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
         if(data && data.element && data.element.type !== undefined){
@@ -190,7 +190,7 @@ AVIATION.common.Slide.prototype = {
             // set inst panel status as 'ended'
           }
         }
-        slide.checkSlideControlPlayButtons("pause");
+        //slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
         // check if everything has stopped playing
@@ -209,9 +209,9 @@ AVIATION.common.Slide.prototype = {
 
         var active = slide.mediaActiveIndex, players = slide.players, content = slide.slideContent;
 
-        slide.checkSlideControlPlayButtons("play");
         console.log(players[active]);
         if(players[active] && players[active].player){
+          slide.checkSlideControlPlayButtons("play");
           players[active].player.play();  
         }
       },
@@ -219,10 +219,10 @@ AVIATION.common.Slide.prototype = {
         console.log("!* pause event fired");
 
         var active = slide.mediaActiveIndex, players = slide.players;
-        slide.checkSlideControlPlayButtons("pause");
 
         console.log(players[active]);
         if(players[active] && players[active].player){
+          slide.checkSlideControlPlayButtons("pause");
           console.log("trying to pause ");
           players[active].player.pause();  
         }
@@ -281,12 +281,16 @@ AVIATION.common.Slide.prototype = {
         console.log("!* replayOne event fired");
         $(slide).trigger("previous");
       },
-      reset: function(e){
+      reset: function(e, status){
         console.log("!* reset event fired");
 
         if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
           slide.players[slide.mediaActiveIndex].player.pause();
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
+        }
+        console.log("status on reset: " + status);
+        if(status){
+          slide.setStatus(status);
         }
         console.log("reset event finished");
       },
@@ -1928,21 +1932,23 @@ AVIATION.common.Slide.prototype = {
   activateTimer: function(seconds, isAuto){
     "use strict";
 
-    var timer = this._timer, slideObject = this, continueId = slideObject.options.continueId,
-        counter = seconds || 5, // duration of the timer (each 1 point is about a second)
-        statusBar = this.slideElements.statusBar;
+    var slideObject = this, timer = this._timer, continueId = slideObject.options.continueId,
+        counter = seconds || 6, // duration of the timer (each 1 point is about a second)
+        statusBar = slideObject.slideElements.statusBar;
 
     if (!timer){
-      this._timer = "";
-      timer = this._timer;
+      slideObject._timer = "";
+      timer = slideObject._timer;
     }
 
     var resetTimerOnClick = function(e){
       e.preventDefault();
       // console.log("clicked reset on status bar");
       slideObject.resetTimer(true);
+
       if(continueId && continueId !== ""){
-        $(this).on('click', function(){
+        statusBar.off();
+        statusBar.on('click', function(){
           slideObject.redirectToPage(continueId); // any URL
         });
       }
@@ -1951,47 +1957,57 @@ AVIATION.common.Slide.prototype = {
     // enable the status bar because we need to accept clicks
     statusBar.prop("disabled", false);
 
+    statusBar.off();
     statusBar.on('click', resetTimerOnClick);
   
     if(isAuto) {
-      statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
+      slideObject.setStatus("Continuing in " + counter.toString() + "... Click here to cancel");
     
-      this._timer = setInterval( function(){
-          counter--;
-          if(counter < 0) {
-            clearInterval(slideObject._timer);
-            
-            if(continueId && continueId !== ""){
-              slideObject.redirectToPage(continueId);
-              statusBar.text("Redirecting...");
+      if(!slideObject.timerActivated){
+        slideObject.timerActivated = true;
+        slideObject._timer = setInterval( function(){
+            counter--;
+            if(counter < 0) {
+              clearInterval(slideObject._timer);
+              
+              if(continueId && continueId !== ""){
+                //slideObject.redirectToPage(continueId);
+                slideObject.setStatus("Redirecting...");
+              } else {
+                slideObject.setStatus("Error: continueId is undefined");
+              }
             } else {
-              statusBar.text("Error: continueId is undefined");
+              slideObject.setStatus("Continuing in " + counter.toString() + "... Click here to cancel");
             }
-          } else {
-            statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
-          }
-      }, 1000);
+        }, 1000);
+      }
+      console.log("timer after setting");
+      console.log(slideObject._timer);
     } else {
-      this._timer = null;
+      slideObject.setStatus('Press "Continue" when ready');
+      slideObject._timer = null;
     }
   },
 
   resetTimer: function( manual ){
     "use strict";
-
-    if(this._timer){
+    var slide = this;
+    if(slide._timer){
       if(manual){
-        this.slideElements.statusBar.text("Continue when ready");
+        slide.setStatus('Press "Continue" when ready');
       }
 
-      clearInterval(this._timer);
+      console.log("trying to resetTimer");
+      console.log(slide._timer);
+      clearInterval(slide._timer);
+      slide.timerActivated = false;
     }
   },
   
   buttonOnClickEvents: function(){
+    var slide = this;
     // check if there is a timer and reset if we click on a control button
-    this.resetTimer();
-
+    slide.resetTimer();
   },
 
   initSlideButtonEvents: function(){
@@ -2534,20 +2550,19 @@ AVIATION.common.Slide.prototype = {
   },
 
   setStatus: function(action){
-    var slide = this, status = this.slideElements.statusBar;
+    var slide = this, status = slide.slideElements.statusBar;
+    console.log("setting status to: " + action);
 
     switch(action){
       case "play":
-      case "replay":
         status.text("Playing...");
         break;
       case "pause":
         status.text("Paused");
         break;
-      case "end":
-        break;
       default:
         if(action){
+          console.log("setting custom status to: " + action);
           status.text(action);
         } else {
           status.text("Status is undefined!");
@@ -2899,6 +2914,8 @@ AVIATION.common.Slide.prototype = {
 
     this.panelEnd = false;
     this.justLoaded = true;
+
+    this.timerActivated = false;
     /* error handling example
     try {
       // if smth might cause an error....
