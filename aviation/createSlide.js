@@ -1,3 +1,4 @@
+
 /***
   *   Custom library/framework to speed up content development
   *   for the edX Aviation project at CDOT
@@ -33,6 +34,7 @@ AVIATION.common = {};
 /*
 AVIATION.common.Player = function(){
   "use strict";
+
 };
 */
 // begin a javascript class "Slide"
@@ -1511,7 +1513,6 @@ AVIATION.common.Slide.prototype = {
       }
 
       console.log("initing panel!");
-
  	options={
  		size: 200,
  		beacononeshow: slide.options.panelOverlay,
@@ -1697,7 +1698,7 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
+	//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
         slide.panelPause = false;
         slide.panelEnd = false;
         this.config.panelPause = false;
@@ -2280,6 +2281,7 @@ AVIATION.common.Slide.prototype = {
         player.papaCueEnd(function(){
         });
         player.papaCuePause(function(){
+
         });
       **/
         break;

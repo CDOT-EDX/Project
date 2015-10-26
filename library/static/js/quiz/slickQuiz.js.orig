@@ -52,11 +52,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 numberOfQuestions: null,
                 randomSortQuestions: false,
                 randomSortAnswers: false,
-<<<<<<< HEAD:library/static/js/slickQuiz.js
-                preventUnanswered: false,   // set true for student to be alerted for unanswered questions
-=======
                 preventUnanswered: false, // set true for student to be alerted for unanswered questions
->>>>>>> b9d6fc2071b464fa1d1a26a2af1acee5597b255d:library/static/js/quiz/slickQuiz.js
                 disableScore: false,
                 disableRanking: false,
                 scoreAsPercentage: false,
@@ -489,14 +485,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     answerLIs = questionLI.find(_answers + ' li'),
                     answerSelects = answerLIs.find('input:checked'),
                     questionIndex = parseInt(questionLI.attr('id').replace(/(question)/, ''), 10),
-<<<<<<< HEAD:library/static/js/slickQuiz.js
-                    answers       = questions[questionIndex].a,
-                    selectAny     = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
-                    plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-=======
                     answers = questions[questionIndex].a,
                     selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
->>>>>>> b9d6fc2071b464fa1d1a26a2af1acee5597b255d:library/static/js/quiz/slickQuiz.js
 
                 answerLIs.addClass(incorrectResponseClass);
 
@@ -564,31 +554,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         // var questionIdFound = str.replace("#quiz_", "");
 
 
-<<<<<<< HEAD:library/static/js/slickQuiz.js
-                // Verify all/any true answers (and no false ones) were submitted
-                var correctResponse = plugin.method.compareAnswers(trueAnswers, selectedAnswers, selectAny);
-
-                if (correctResponse) {
-                
-                    if(questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function'){
-                    
-                        //"Firing callback"
-                        questions[questionIndex].onSuccess(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass);
-                    }
-                
-                
-                    questionLI.addClass(correctClass);
-                } else {
-                
-                    if(questions[questionIndex].onFail && typeof questions[questionIndex].onFail === 'function'){
-                    
-                        //"Firing callback"
-                        questions[questionIndex].onFail(questionIndex, questions[questionIndex].a, incorrectClass, responsesClass);
-                    }
-                
-                    questionLI.addClass(incorrectClass);
-                }
-=======
                         // if (plugin.config.preventUnanswered && selectedAnswers.length === 0) {
                         //     alert(plugin.config.preventUnansweredText);
                         //     return false;
@@ -599,7 +564,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                             var correctResponse = data.quiz_result_id.correct;
 
                         if (correctResponse) {
->>>>>>> b9d6fc2071b464fa1d1a26a2af1acee5597b255d:library/static/js/quiz/slickQuiz.js
 
                             if (questions[questionIndex].onSuccess && typeof questions[questionIndex].onSuccess === 'function') {
 
@@ -893,17 +857,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 });
             });
 
-<<<<<<< HEAD:library/static/js/slickQuiz.js
-            if(plugin.config.animationCallbacks.disappearOptions && typeof plugin.config.animationCallbacks.disappearOptions === 'function'){
-                plugin.config.animationCallbacks.disappearOptions();
-            }
-            
-=======
             if (plugin.config.animationCallbacks.disappearOptions && typeof plugin.config.animationCallbacks.disappearOptions === 'function') {
                 plugin.config.animationCallbacks.disappearOptions();
             }
 
->>>>>>> b9d6fc2071b464fa1d1a26a2af1acee5597b255d:library/static/js/quiz/slickQuiz.js
             // Accessibility (WAI-ARIA).
             var _qnid = $element.attr('id') + '-name';
             $quizName.attr('id', _qnid);

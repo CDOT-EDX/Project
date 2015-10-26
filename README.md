@@ -1,15 +1,21 @@
-*last updated on October 06/2015*
+*last updated on October 10/2015*
+
+*highlights have to specify now whether they belong to: `content, image, or panel`*
+
+*if NO parent specified for a highlight, the highlight will be created in the general body of the slide*
+
+*meaning that if the slides height or width will change so will the highlight*
 
 *buttons can now invoke CSVs or possibly audio*
 
 *check the syntax when declaring buttons, look for `mediaIndex`*
 
 *timer implementation:*
-``
-timer (new media option , check the description and the example bellow) 
-  // add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
-``
 
+```
+timer (new media option , check the description and the example bellow) 
+add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
+```
 *added default options for SlickQuiz:*
 ```
 	showRemediationOnSuccess
@@ -58,6 +64,7 @@ Acceptable options and defaults are as follows:
 ```javascript
     serverBaseUrl:      window.location.protocol + "//" + window.location.host + "/",
     apacheServerBaseUrl:window.location.protocol + "//" + window.location.host + ":25080/",
+    setPanel:           false, // makes the first line of the first CSV set panel before CSV plays
     parentSlide:        {},
     development         false, // if running inside a devstack set to true
     showAvatars:        false,
@@ -215,6 +222,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "ai",
@@ -223,6 +231,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       }, 
       {
         id: "alt",
@@ -230,7 +239,8 @@ Acceptable options and defaults are as follows:
         name: "Altimeter (ALT)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "tc",
@@ -238,7 +248,8 @@ Acceptable options and defaults are as follows:
         name: "Turn Coordinator (TC)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "hi",
@@ -246,7 +257,8 @@ Acceptable options and defaults are as follows:
         name: "Heading Indicator (HI)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "vsi",
@@ -255,6 +267,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       },
     ],
     },
@@ -353,15 +366,60 @@ Acceptable options and defaults are as follows:
             }
         }
     },
+    // PAUSE / PLAY example for CSV
     {
         "media":{
+            "index": 2,
             "type": "csv",
             "line": 1000,
-            "action": "pause"
+        },
+        "action": {
+          "type": "pause",
+          "index": 2
+        },
+        "advanceWith": {
+            "type": "button",
+            "index": 1
         },
     },
     {
-
+        "media": {
+          "type": "button",
+          "index": 1
+        },
+        "action":{
+          "type": "play",
+          "index": 2 // can only be a mediaIndex (not contentIndex)
+          "line": 1001 // in this case its a csv
+          // in the case of an audio we can specify "second": 10.1 and not 'line'
+        }
+    },
+    // PAUSE / PLAY example for AUDIO
+    {
+        "media":{
+            "index": 2,
+            "type": "audio",
+            "second": 7,
+        },
+        "action": {
+          "type": "pause",
+          "index": 2
+        },
+        "advanceWith": {
+            "type": "button",
+            "index": 1
+        },
+    },
+    {
+        "media": {
+          "type": "button",
+          "index": 1
+        },
+        "action":{
+          "type": "play",
+          "index": 2 // can only be a mediaIndex (not contentIndex)
+          "second": 7.1 // in this case its an audio
+        }
     }],
     // default models that we want to be set-up in the background
     modals: [{ 
