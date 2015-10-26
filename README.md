@@ -1,12 +1,28 @@
-*last updated on Sept 22/2015*
+*last updated on October 10/2015*
 
-*changed advanceWith onSucess/onFail*
+*highlights have to specify now whether they belong to: `content, image, or panel`*
 
-*still in tests and not on online.cdot yet*
+*if NO parent specified for a highlight, the highlight will be created in the general body of the slide*
 
-*added enable/disable on buttons*
+*meaning that if the slides height or width will change so will the highlight*
 
-*see the button example inside slideContent for more details*
+*buttons can now invoke CSVs or possibly audio*
+
+*check the syntax when declaring buttons, look for `mediaIndex`*
+
+*timer implementation:*
+
+```
+timer (new media option , check the description and the example bellow) 
+add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
+```
+
+*added default options for SlickQuiz:*
+```
+	showRemediationOnSuccess
+	showRemediationOnFail
+	showRemediationOne
+```
 
 # Aviation Project
 
@@ -49,11 +65,15 @@ Acceptable options and defaults are as follows:
 ```javascript
     serverBaseUrl:      window.location.protocol + "//" + window.location.host + "/",
     apacheServerBaseUrl:window.location.protocol + "//" + window.location.host + ":25080/",
+    setPanel:           false, // makes the first line of the first CSV set panel before CSV plays
     parentSlide:        {},
     development         false, // if running inside a devstack set to true
     showAvatars:        false,
     showSlideControls:  true,
     showStatus:         true,
+    showRemediationOnSuccess: true, //show all remediations on Correct answer
+    showRemediationOnFail: true, //show all remediations on inCorrect answer
+    showRemediationOne: true, //will show remediation for selected answer (showRemediationOnSuccess or showRemediationOnFail must be set to true) !!can only be used only with showRemediationOnSuccess or showRemediationOnFail
     showControls:       true,
     showBorder:         true, // this applies to the border around the content
     autoplay:           true, // proceeds to the next AUDIO automatically after current is finished
@@ -77,6 +97,7 @@ Acceptable options and defaults are as follows:
     footerId:           "#slideFooter",
     quizId:             "#slideQuiz",   // id of div that contains all quizzes
     quizContainerClass: "cdot_quiz_container", // class thats appended to each individual quiz
+    
 
     // new optinal+experimental additions below
     panelId: "#flightInstruments",
@@ -171,10 +192,10 @@ Acceptable options and defaults are as follows:
         "showRemediationOnSuccess": true,
         "showRemediationOnFail": true,
         "animationCallbacks": {
-          "checkAnswer": function(){
+          "checkAnswer": (function(){
             console.log("do something");
             $(anySlide).trigger("completedQuiz");
-          }
+          })
         }
       }
     ],
@@ -202,6 +223,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "ai",
@@ -210,6 +232,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       }, 
       {
         id: "alt",
@@ -217,7 +240,8 @@ Acceptable options and defaults are as follows:
         name: "Altimeter (ALT)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "tc",
@@ -225,7 +249,8 @@ Acceptable options and defaults are as follows:
         name: "Turn Coordinator (TC)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "hi",
@@ -233,7 +258,8 @@ Acceptable options and defaults are as follows:
         name: "Heading Indicator (HI)",
         height: "50%",
         classes: ["col-xs-4"],
-        border : "7px ridge yellow",                            
+        border : "7px ridge yellow",
+        parent: 'panel'
       },
       {
         id: "vsi",
@@ -242,6 +268,7 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
+        parent: 'panel'
       },
     ],
     },
@@ -252,12 +279,17 @@ Acceptable options and defaults are as follows:
           "title": 'I am a button',
           "classes": ["btn", "btn-default"],
           "orderNumber": 0,
-          "action": function(){ console.log("button of someId is executing"); }
+          "action": "(function(){ console.log('button of someId is executing'); })"
         },
         {
           "id": "btn1",
           title: 'another button',
           "orderNumber": 1
+        },
+        {
+          "id": "topple",
+          "title": "TOPPLE",
+          "mediaIndex": 3 // mediaIndex will invoke "play" on mediaFile at index 3 once button is clicked
         }
     ],
     slideContent: [{
@@ -266,13 +298,13 @@ Acceptable options and defaults are as follows:
         image: {src: "/someSource/image.png", classes: ["imageClass"] },
         highlights: [ 
                         0 , 
-                        { index: 2, onclick: function(){ console.log("highlight onclick");} }, 
+                        { index: 2, onclick: (function(){ console.log("highlight onclick");}) }, 
                         5 
         ],
         // this is to hide / show buttons just like we do with highlights
         buttons: [
                     0 , 
-                    { "index": 2, "disable": true, "onclick": "function(){ console.log('button onclick');}" }, 
+                    { "index": 2, "disable": true, "onclick": "(function(){ console.log('button onclick');})" }, 
                     3 
         ],
         // set slider to any throttle possition from 0-4
@@ -282,7 +314,7 @@ Acceptable options and defaults are as follows:
             "index": 0,
             "second" 10
         },
-        callback: function(){ console.log("this is a callback function"); },
+        callback: (function(){ console.log("this is a callback function"); }),
         "advanceWith": {
             "action": "pattern",
             // for both properties below, anything to do with the contentIndex will only rebuild the content for that
@@ -294,7 +326,7 @@ Acceptable options and defaults are as follows:
                 // if onSuccess content is not the next slideContent....
                 "contentIndex": 3 // optional, which index should we jump to in slideContent OR use mediaIndex instead
                 "mediaIndex": 2 // mediaIndex will jump to the beginning of a media at set index and run all the content from that
-                "callback": "function(){ console.log('You did smth right'); }" // optional
+                "callback": "(function(){ console.log('You did smth right'); })" // optional
             },
             "onFail": { ** optional if needed and currently under development
                 "index": 2, // which altMediaFile should be played (currently sound only)
@@ -305,6 +337,18 @@ Acceptable options and defaults are as follows:
             "content": true // if there is content to that should be triggered during the scanning pattern
         }
     },
+    {
+      	"media":{
+            "type": "timer", 
+            "index": 1,
+            "second" 1 // timer is a count down , starts at 10 and ends at 1 
+    	}, 
+    	"buttons": [0],
+        "content": {
+	   "html": "UH OH, Press that button yo!"
+        },
+        "advanceWith": {"type": "button", "index": 0}
+    }, 
     {
         //... another slide content can go here to be triggered at a different time of the audio
         title: {html: "This is a different title / slide"},
@@ -321,6 +365,61 @@ Acceptable options and defaults are as follows:
                 "index": 0,
                 "resetIndex": 1
             }
+        }
+    },
+    // PAUSE / PLAY example for CSV
+    {
+        "media":{
+            "index": 2,
+            "type": "csv",
+            "line": 1000,
+        },
+        "action": {
+          "type": "pause",
+          "index": 2
+        },
+        "advanceWith": {
+            "type": "button",
+            "index": 1
+        },
+    },
+    {
+        "media": {
+          "type": "button",
+          "index": 1
+        },
+        "action":{
+          "type": "play",
+          "index": 2 // can only be a mediaIndex (not contentIndex)
+          "line": 1001 // in this case its a csv
+          // in the case of an audio we can specify "second": 10.1 and not 'line'
+        }
+    },
+    // PAUSE / PLAY example for AUDIO
+    {
+        "media":{
+            "index": 2,
+            "type": "audio",
+            "second": 7,
+        },
+        "action": {
+          "type": "pause",
+          "index": 2
+        },
+        "advanceWith": {
+            "type": "button",
+            "index": 1
+        },
+    },
+    {
+        "media": {
+          "type": "button",
+          "index": 1
+        },
+        "action":{
+          "type": "play",
+          "index": 2 // can only be a mediaIndex (not contentIndex)
+          "second": 7.1 // in this case its an audio
         }
     }],
     // default models that we want to be set-up in the background
@@ -340,6 +439,7 @@ Acceptable options and defaults are as follows:
         {type: "audio", src: "someRelativeURL/toAudioFile"},
         {type: "audio", src: "anotherURL/toOtherFile"},
         {type: "csv", src: "someURL/flightData"},
+        {type: "timer", "duration": 10}
     ],
     altMediaFiles: [ // media files that will be used in alternative content (in case a student answered a question wrong)
         {type: "audio", src: "someURL/toAudioFile"},
@@ -560,3 +660,4 @@ The rest of this README is being edited at this moment
           highlights: [
 
           ]
+

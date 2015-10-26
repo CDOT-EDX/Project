@@ -146,19 +146,43 @@ AVIATION.common.Slide.prototype = {
           slide.contentActiveIndex = data.resetContentIndex;
         }
       },
+      instrumentPause: function(index){
+        slide.setInstrumentStatus2("Instrument panel is paused");
+        //slide.checkSlideControlPlayButtons("pause");
+      },
+      instrumentResume: function(){
+        slide.panelPause = false;
+
+        slide.setInstrumentStatus2("Instrument panel is playing...");
+        slide.checkSlideControlPlayButtons("play");
+      },
+      instrumentResetPlay: function(e,newMediaIndex){
+        $(slide).trigger("pause");
+        $(slide).trigger("reset");
+        slide.mediaActiveIndex = newMediaIndex;
+        //slide.mediaActiveIndex++;
+        $(slide).trigger("reset");
+        $(slide).trigger("play");  
+      },
       contentNext: function(e,data){
-        var slide = this;
+        //slide.checkSlideControlPlayButtons("play");
+        if(data && data.mediaIndex !== undefined){
+          $(slide).trigger("instrumentResetPlay", data.mediaIndex);
+        } else 
         if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
-          slide.buildContent(true, this.contentActiveIndex+1);
+          slide.buildContent(true, slide.contentActiveIndex+1);
+          slide.checkSlideControlPlayButtons("play");
         } else {
           $(slide).trigger("slideEnd");
-          slide.setStatus('Click "Continue" to proceed to the next slide');
         }
       },
       slideEnd: function(e, data){
-        slide.setStatus('Click "Continue" to proceed to the next slide');
+        console.log("attempting reset");
+        $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
+        console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
-        slide.activateTimer(5, slide.options.autoRedirect);
+        slide.setStatus('Click "Continue" to proceed to the next slide');
+        slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
         if(data && data.element && data.element.type !== undefined){
@@ -166,7 +190,7 @@ AVIATION.common.Slide.prototype = {
             // set inst panel status as 'ended'
           }
         }
-        slide.checkSlideControlPlayButtons("pause");
+        //slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
         // check if everything has stopped playing
@@ -185,9 +209,9 @@ AVIATION.common.Slide.prototype = {
 
         var active = slide.mediaActiveIndex, players = slide.players, content = slide.slideContent;
 
-        slide.checkSlideControlPlayButtons("play");
         console.log(players[active]);
         if(players[active] && players[active].player){
+          slide.checkSlideControlPlayButtons("play");
           players[active].player.play();  
         }
       },
@@ -195,10 +219,10 @@ AVIATION.common.Slide.prototype = {
         console.log("!* pause event fired");
 
         var active = slide.mediaActiveIndex, players = slide.players;
-        slide.checkSlideControlPlayButtons("pause");
 
         console.log(players[active]);
         if(players[active] && players[active].player){
+          slide.checkSlideControlPlayButtons("pause");
           console.log("trying to pause ");
           players[active].player.pause();  
         }
@@ -230,19 +254,19 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("pause");
         $(slide).trigger("reset");
         slide.mediaActiveIndex++;
-        $(slide).trigger("play");  
+        if(slide.slideContent && slide.mediaActiveIndex < slide.players.length){
+          $(slide).trigger("play");
+        } else {
+          $(slide).trigger("slideEnd");
+        }
       },
       previous: function(e){
         console.log("!* previous event fired");
         // go to the previous track
         slide.resetStatusBar();
-
         $(slide).trigger("pause");
-
         $(slide).trigger("reset");
-
         slide.mediaActiveIndex--;
-
         $(slide).trigger("play");
       },
       replay: function(e){
@@ -257,14 +281,22 @@ AVIATION.common.Slide.prototype = {
         console.log("!* replayOne event fired");
         $(slide).trigger("previous");
       },
-      reset: function(e){
+      reset: function(e, status){
         console.log("!* reset event fired");
 
         if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
-          if(!slide.panelPause){
-            slide.panelPause = true;
-          }
+          slide.players[slide.mediaActiveIndex].player.pause();
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
+        }
+        console.log("status on reset: " + status);
+        if(status){
+          slide.setStatus(status);
+        }
+        console.log("reset event finished");
+      },
+      setPosition: function(e, position){
+        if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
+            slide.players[slide.mediaActiveIndex].player.currentTime(position); 
         }
       }
     };
@@ -342,7 +374,7 @@ AVIATION.common.Slide.prototype = {
     console.log("whos the parent?");
     console.log(parent);
 
-    this.buildAvatars(parent, content.avatar, function(bsSize){
+    this.buildAvatars(parent, content.avatar, function(){
 
       console.log("build avatars callback from HEADER");
       console.log(content);
@@ -418,7 +450,7 @@ AVIATION.common.Slide.prototype = {
       }
 
       if(setupContent && typeof setupContent === 'function'){
-        setupContent(bsSize, callback);
+        setupContent(callback);
       }
 
     });
@@ -605,7 +637,7 @@ AVIATION.common.Slide.prototype = {
         console.log("resetting slider height!!");
         $sliderContainer.height( $body.height() );
         $slider.height( $body.height() - 22 );
-        slide.instrumentResizer( $body.width() );
+        slide.instrumentResizer( $body.width(), $body.height() );
         console.log($slider.height() );
         console.log($sliderContainer.height() );
         console.log($body.height() );
@@ -615,22 +647,17 @@ AVIATION.common.Slide.prototype = {
   },
 
   // method for building the content of the slide
-  buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback){
+  buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback, action){
     "use strict";
-    var outerSlideContent = this.slideContent, slide = this, highlightsAddOnClick = [], buttonsAddOnClick = [], 
-        localClass, contentActiveIndex = index || this.contentActiveIndex, 
+    var outerSlideContent = this.slideContent, slide = this, 
+        contentActiveIndex = index || this.contentActiveIndex, position,
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
-    if(index && index !== undefined){
+    if(index && index !== undefined && action !== 'pattern'){
       this.contentActiveIndex = index;
     }
 
     outerIndex = outerIndex || this.mediaActiveIndex || 0;
-
-    // console.log("whats the container here?");
-    // console.log(contentContainer);
-    // console.log("and the modal option?");
-    // console.log(this.options.isModal);
 
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
 
@@ -648,23 +675,35 @@ AVIATION.common.Slide.prototype = {
       contentContainer = jQuery('<div/>', {
         class: "modal-content"
       }).appendTo(dialogContainer);
-      //contentContainer = $(this.container);
     }
-    
-    // console.log("and the contentainer after?");
-    // console.log(contentContainer);
-    // highlightsAddOnClick = this.initHighlights();
-    // this.buildHighlights(mediaActiveIndex, highlightsAddOnClick);
-    slide.initActionables();
-    // buttonsAddOnClick = this.initButtons();
-    // console.log("buttons ADD ON CLICK!");
-    // console.log(buttonsAddOnClick);
-    // this.buildButtons(mediaActiveIndex, buttonsAddOnClick);
 
-    setupInnerContent = function(classSize, callback){
-      var slideContent = outerSlideContent[contentActiveIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
-          action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
-          newSlideInner;// callback = c;b
+    if(slide.slideContent[contentActiveIndex].action !== undefined){
+      // set line or second of media before playing it
+      position = slide.slideContent[contentActiveIndex].action.line || slide.slideContent[contentActiveIndex].action.second;
+      if(position !== undefined){
+        $(slide).trigger("setPosition", position );
+      }
+
+      if(slide.slideContent[contentActiveIndex].action.type !== undefined && 
+          slide.slideContent[contentActiveIndex].action.index !== undefined){
+        slide.mediaActiveIndex = slide.slideContent[contentActiveIndex].action.index;
+        $(slide).trigger(slide.slideContent[contentActiveIndex].action.type);
+      }
+    }
+
+    if(slide.slideContent[contentActiveIndex].setContentIndex !== undefined){
+      slide.contentActiveIndex = parseInt(slide.slideContent[contentActiveIndex].setContentIndex, 10);
+    }
+
+    if(slide.slideContent[contentActiveIndex].setMediaIndex !== undefined){
+      slide.mediaActiveIndex = parseInt(slide.slideContent[contentActiveIndex].setMediaIndex, 10);
+    }
+
+    setupInnerContent = function(callback){
+      // TODO: "slideInner doesn't work if we are in a modal?"
+      var slideContent = outerSlideContent[contentActiveIndex], contentParent = $(slide.options.contentParentId),
+          contentClasses = "", imageClasses = "", innerContent, innerImage, imageParent = $(slide.options.imageParentId),
+          generalParent = $(slide.options.generalContentId);
 
       if(!clearContent){
         if(slideContent.content){
@@ -673,19 +712,32 @@ AVIATION.common.Slide.prototype = {
           action = "replace";
         }
 
-        // lets take care of our highlights
-        //checkHideShowActions(slideContent, slide);
-
         // and the buttons
-        //checkSlideButtons(slideContent.buttons, slide);
-        slide.checkHideShowActions(slideContent, slide);
         // let's switch the slider if needed
         slide.setSlider(slideContent);
 
-        newSlideInner = jQuery('<div/>', {
-          id: "slideInner_" + outerIndex,
-          "class": "slideInner col-xs-12" + (slide.options.isModal ? " modal-body" : ""),
-        });
+        // check parent of general content
+        if(generalParent.length < 1){
+          generalParent = jQuery('<div/>',{
+            id: "generalContentParent",
+            "class": "slideGeneral row"
+          }).appendTo($(slide.container + " > .cdot_contentText") );
+        }
+
+        if(imageParent.length < 1){
+          imageParent =jQuery('<div/>', {
+            id: "imageParent",
+            "class": "slideImage col-xs-12"
+          }).appendTo(generalParent);
+        }
+
+        // if image and content parents dont exist, create them
+        if(contentParent.length < 1){
+          contentParent =jQuery('<div/>', {
+            id: "contentParent",
+            "class": "slideContent col-xs-12"
+          }).appendTo(generalParent);
+        }
 
         if (slideContent.content && slideContent.content.html){
           if(slideContent.content.classes){
@@ -693,65 +745,75 @@ AVIATION.common.Slide.prototype = {
           }
 
           innerContent = jQuery('<div/>',{
-            id: "innerContent_" + outerIndex + "_" + contentActiveIndex,
-            "class": contentClasses,
+            id: "innerContent_" + outerIndex + "_" + contentActiveIndex + "_content",
+            "class": contentClasses  + " innerContent",
             html: slideContent.content.html || ""
           });
         } 
 
 
-        // console.log("is there an inner image here?");
         if (slideContent.image && slideContent.image.src) {
           if(slideContent.image.classes){
             imageClasses = slideContent.image.classes.join(" ");
           }
 
           innerImage = jQuery('<img/>',{
-            id: "innerImage_" + outerIndex + "_" + contentActiveIndex,
-            "class": imageClasses,
+            id: "innerImage_" + outerIndex + "_" + contentActiveIndex + "_img",
+            "class": imageClasses + " innerImage",
             src: slideContent.image.src || ""
           });
-
-          // console.log("inner image is: ");
-          // console.log(innerImage);
         }
 
-        console.log("the inner elemnt is...");
-        console.log(slideInner);
-
         if(action === "remove" || action === "replace"){
-          slideInner.children().remove();
-          slideInner.remove();
+          contentParent.children().remove(".innerContent");
+
+          imageParent.children().remove(".innerImage");
         }
 
         if(action === "append" || action === "replace"){
           if(innerContent){
-            innerContent.appendTo(newSlideInner);
+            innerContent.appendTo(contentParent);
           }
           if(innerImage){
-            innerImage.appendTo(newSlideInner);
+            innerImage.appendTo(imageParent);
           }
 
-          newSlideInner.appendTo(contentContainer);
+          if($().pulseinnerContent){
+            if(innerContent){
+              innerContent.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            }
 
-          if($().pulse){
-            newSlideInner  
-              .pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            if(innerImage){
+              innerImage.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            }
           }
         }
       } else {
-        slideInner.children().remove();
+        generalParent.children().remove();
       }
 
+
+      if(callback && typeof callback != 'function'){
+        console.log("reassigning eval");
+        callback = eval(callback);
+      }      
+
       if(callback && typeof callback === 'function'){
+        console.log("running eval");
         callback();
       }
 
-      console.log("trigger callback? ***");
+      if(triggerCallback && slideContent.callback && typeof slideContent.callback != 'function'){
+        slideContent.callback = eval(slideContent.callback);
+      }
+
       if(triggerCallback && slideContent.callback && typeof slideContent.callback === 'function'){
         console.log("triggering the callback! ****");
         slideContent.callback();
       }
+
+      slide.initActionables();
+      slide.checkHideShowActions(slideContent, slide);
 
     };
 
@@ -1019,17 +1081,24 @@ AVIATION.common.Slide.prototype = {
         availableAdvances = ["action", "type"];
 
     console.log("event.data");
-    console.log(callback);
+    console.log(event);
     console.log("CHECKING ADVANCE WITH!");
 
     // Running custom callbacks/onclicks
     for(c=0; onclick && c < onclick.length; c++){
+      
+      if(typeof onclick[c] != 'function'){
+        onclick[c] = eval(onclick[c]);
+      }
       if(typeof onclick[c] === 'function'){
         onclick[c]();
       }
     }
 
     for(c=0; callback && c < callback.length; c++){
+      if(typeof callback[c] != 'function'){
+        callback[c] = eval(callback[c]);
+      }
       if(typeof callback[c] === 'function'){
         callback[c]();
       }
@@ -1059,7 +1128,7 @@ AVIATION.common.Slide.prototype = {
         }
       }
     } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
-      $(slide).trigger("contentNext");
+      $(slide).trigger("contentNext", event.data.element);
     } else {
       $(slide).trigger("next");
     }
@@ -1083,7 +1152,7 @@ AVIATION.common.Slide.prototype = {
   initActionables: function(){
     "use strict";
     console.log("trying to make buttons highlights");
-    var slide = this, action, $parent, objCount, possibleActions = {}, options = {};
+    var slide = this, action, $parent, objCount, possibleActions = {}, options = {}, appendParent = slide.container;
 
     possibleActions = {
       "button": {
@@ -1135,7 +1204,6 @@ AVIATION.common.Slide.prototype = {
           switch(action){
 
             case "button":
-
               $parent = $(slide[possibleActions[action].container]);
               options.element = '<a/>';
               options.classes = "btn btn-default ";
@@ -1145,7 +1213,6 @@ AVIATION.common.Slide.prototype = {
               break;
 
             case "highlight":
-              $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
               options.element = '<div/>';
               options.classes = "clearClickable ";
               options.dataToggle = "modal";
@@ -1172,7 +1239,7 @@ AVIATION.common.Slide.prototype = {
             $parent = jQuery('<div/>',{
               id: slide[possibleActions[action].container].split("#")[1],
               class: "row"
-            }).appendTo(slide.container);
+            }).appendTo(appendParent);
           }
   
           slide.buildActionables(action, possibleActions[action], $parent, options);
@@ -1189,16 +1256,22 @@ AVIATION.common.Slide.prototype = {
         slide = event.data.slide;
 
     for(i = 0; i < callbacks.length; i++){
+      if(callbacks[i] && typeof callbacks[i] != 'function'){
+        callbacks[i] = eval(callbacks[i]);
+      }
+
       if(callbacks[i] && typeof callbacks[i] === 'function'){
         callbacks[i]();
       }
+
+      console.log("executing actionable callbacks");
     }
   },
 
   buildActionables: function(action, obj, parent, options){
     "use strict";
 
-    var act, slide = this, actions = slide[obj.arrayName], $action, callback;
+    var act, slide = this, actions = slide[obj.arrayName], $action, callback, appendParent = slide.container;
     console.log("building actionables");
     console.log(action);
     for( act in actions ){
@@ -1210,7 +1283,32 @@ AVIATION.common.Slide.prototype = {
                    (slide.highlights[act].width ? ";width:" + slide.highlights[act].width : "") + 
                    (slide.highlights[act].height ? ";height:" + slide.highlights[act].height : "") + 
                    (slide.highlights[act].position? ";position:" + slide.highlights[act].position : "") +
-                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );          
+                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );
+
+          switch(slide.highlights[act].parent){
+            case "panel":
+              parent = $(slide.options.panelHighlightsId);
+              break;
+            case "content":
+              parent = $(slide.options.contentHighlightsId);
+              appendParent = slide.options.contentParentId;
+              break;
+            case "image":
+              parent = $(slide.options.imageHighlightsId);
+              appendParent = slide.options.imageParentId;
+              break;
+            default:
+              parent = $(slide.options.generalHighlightsId);
+              appendParent = slide.options.generalContentId;
+              break;
+          }
+
+          if(parent.length < 1){
+            parent = jQuery('<div/>', {
+              id: parent.selector.split('#')[1],
+              class: "row"
+            }).appendTo(appendParent);
+          }
         }
 /*
         if(action === 'panelHighlight'){
@@ -1228,6 +1326,7 @@ AVIATION.common.Slide.prototype = {
             class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
             html: actions[act].title,
             "data-toggle": options.dataToggle,
+            "data-target": "#" + actions[act].id + "_modal",
             "data-orderNumber": actions[act].orderNumber,
             role: options.role,
             style: options.style
@@ -1239,14 +1338,12 @@ AVIATION.common.Slide.prototype = {
             callback = [];
           }
 
-          $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]) }, slide: slide }, 
-                        slide.checkAdvanceWith );
+          $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]), 
+                                mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
           slide.elementsToDisable[action].push(false);
-          console.log("pusshign onto " + obj.elementArray);
-          console.log($action);
           slide.slideElements[obj.elementArray].push($action);
 
         }
@@ -1498,7 +1595,7 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  instrumentResizer: function(bodySize){
+  instrumentResizer: function(bodyWidth, bodyHeight){
     "use strict";
 
     var slide = this, instrument, instIds = slide.options.instrumentIds, numberOfInstrments = slide.countObjectLength( slide.options.panelType ), divider, size;
@@ -1509,7 +1606,7 @@ AVIATION.common.Slide.prototype = {
       divider = 3;
     }
 
-    size = bodySize / divider;
+    size = bodyWidth / divider;
 
     console.log("resizing to: " + size );
 
@@ -1520,6 +1617,10 @@ AVIATION.common.Slide.prototype = {
         }
       }
     }
+
+    // resize panelHighlights as well to be the same size as inst panel
+    //$(slide.options.panelHighlightsId).height( bodyHeight );
+    //$(slide.options.panelHighlightsId).width( bodyWidth );
 
   },
 
@@ -1576,7 +1677,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [],  
-        instrumentOptions = {}, csvPlayers = [], parsed = 0, c; //runFlight;
+        instrumentOptions = {}, csvPlayers = [], parsed = 0, c, playFirstLine = false; //runFlight;
 
     if(slide.options.enablePanel && !slide.options.noCSV){
 
@@ -1586,41 +1687,51 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-        slide.panelPause = false;
-        slide.panelEnd = false;
-        //Window.interval = '';
-        i = this.index || slide.pausedPanelIndex || 0;
 
-        console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
-        //console.log("this csv is: ");
-        //console.log(this);
+        if(!this.config.panelPause){
+          this.config.pausedIndex = this.index || slide.pausedPanelIndex || 0;
+        }
+
+        if(this.config.line !== undefined){
+          this.config.pausedIndex = this.config.line;
+          this.config.line = undefined;
+        }
+
+        console.log("starting csv at: " + this.config.pausedIndex);
+        
+        slide.panelEnd = false;
+        this.config.panelPause = false;
+        this.config.panelEnd = false;
+
+        console.log("this csv is: ");
+        console.log(this.config.selfIndex);
 
         function runFlight(flight, slide, end){
+          var i = player.config.pausedIndex;
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
-          if(flight && flight.length > 0 && i < flight.length && !slide.panelPause){
-            //console.log("airspeed: " + flight[i][7]);
+          if(flight && flight.length > 0 && i < flight.length && !player.config.panelPause){
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
-                roll: ( -( flight[i][31] ) ), //( -(allFlight[i].roll) ) 
+                roll: ( -( flight[i][31] ) ),
               },
               heading: {
                 heading: flight[i][33]
               },
               altimeter: {
-                altitude: flight[i][41],//allFlight[i].altitude
+                altitude: flight[i][41],
                 pressure: flight[i][19]
               },
               airspeed: {
-                airSpeed: flight[i][7]//allFlight[i].airSpeed
+                airSpeed: flight[i][7]
               },
               turn_coordinator: {
                 turnRate: ( ( parseFloat(flight[i][28]) * 57.3 ) + (parseFloat(flight[i][31]) ) ),
                 yaw: ( parseFloat( flight[i][29] || 0 ) + 0.5 )
               },
               variometer: {
-                vario: (parseFloat(flight[i][15]) / 100)//allFlight[i].vario
+                vario: (parseFloat(flight[i][15]) / 100)
               }
             };
 
@@ -1630,11 +1741,19 @@ AVIATION.common.Slide.prototype = {
               flight[i][flight[i].length-1]();
             }
 
-            i++;
-          } else {
+            player.config.pausedIndex++;
+
+            // if statement to pause if first csv and needs to set panel
+            if(slide.options.setPanel && slide.justLoaded){
+              if(player.config.selfIndex === 0 && player.config.pausedIndex === 1){
+                player.config.panelPause = true;
+                slide.justLoaded = false;
+              }
+            }
+          } else if (i !== 1) {
             if(i < flight.length){
-              slide.pausedPanelIndex = i;
-              slide.setInstrumentStatus2("Instrument panel is paused.");
+              player.config.pausedIndex = i;
+              $(slide).trigger("instrumentPause", i);
             } else {
               i = 0;
               data.element = {};
@@ -1642,21 +1761,7 @@ AVIATION.common.Slide.prototype = {
               data.element.index = slide.mediaActiveIndex;
               data.slide = slide;
 
-              /**
-              *** moved inside checkActionable to do checkAdvance properly there
-              if(slide.slideContent[slide.contentActiveIndex].advanceWith.action &&
-                  slide.slideContent[slide.contentActiveIndex].advanceWith.action === "pattern"){
-                if(slide.options.minScan <= slide.completedScan){
-                  slide.setStatus("Congratulations, you have completed the scan sucessfully.");
-                } else {
-                  slide.setStatus("Unfortunately, you didn't compelete the scan in time. Try again!");
-                  console.log("minScan: " + slide.minScan + " completedScans: " + slide.completedScan);
-
-                  // TODO: show modal to retry or continue?
-                }
-              }
-              **/
-
+              player.config.panelEnd = true;
               slide.panelEnd = true;
 
               if(end && typeof end === 'function'){
@@ -1670,31 +1775,38 @@ AVIATION.common.Slide.prototype = {
           }
         }
 
-        //interval = setInterval( function(){runFlight(flight, slide, end); },75 );
-
         interval = setInterval( runFlight.bind(player, flight, slide, end),75 );
       };
 
       var papaPause = function(){
-        console.log("attempting to pause csv");
+        console.log("attempting to pause csv: ");
         slide.panelPause = true;
+        this.config.panelPause = true;
+        console.log("for csv: " + this.config.selfIndex);
+        slide.setInstrumentStatus2("Instrument panel is paused");
       };
 
       var papaCurrentLine = function(index){
-        this.index = index || 0;
+        this.config.line = line;
+        //this.index = index || 0;
         console.log("setting current line of csv");
         //return this.index;
       };
 
+      var papaResetLine = function(line){
+        console.log("for csv: " + this.config.selfIndex);
+        console.log("reseting csv line: "+ this.config.line);
+        this.config.line = line;
+      };
+
       var papaCueLine = function(line, callback){
         console.log("csv cueing at line " + line);
-        console.log(this.result);
         this.result.data[line].push(callback);
       };
 
       var papaCueEnd = function(callback){
         console.log("papaparse end event");
-        slide.setInstrumentStatus2("The flight has finished.");
+        slide.setInstrumentStatus2("The flight has finished");
         this.end = callback;
       };
 
@@ -1703,24 +1815,25 @@ AVIATION.common.Slide.prototype = {
       };
 
       var papaSaveObject = function(result){
-        console.log("inside papaSaveObject");
-        console.log("this is: ");
-        console.log(this);
-        console.log(c);
-        console.log(result);
         this.result = result;
         this.play = papaComplete;
         this.pause = papaPause;
         this.cueLine = papaCueLine;
-        this.currentTime = papaCurrentLine;
+        this.currentTime = papaResetLine;
         this.papaCuePause = papaCuePause;
         this.papaCueEnd = papaCueEnd;
+        this.panelPause = false;
         csvPlayers[this.config.selfIndex] = this;
 
         parsed++;
 
         if(parsed === csvs.length){
-          slide.setInstrumentStatus2("Instrument panel ready.");
+          // play the first line of first csv only
+          if(slide.justLoaded && slide.options.setPanel){
+            csvPlayers[0].play();
+          }
+
+          slide.setInstrumentStatus2("Instrument panel ready");
           callback(csvPlayers);
         }
       };
@@ -1734,7 +1847,10 @@ AVIATION.common.Slide.prototype = {
             delimiter: "|",
             skipEmptyLines: true,
             fastMode: true,
-            selfIndex: c
+            selfIndex: c,
+            panelPause: false,
+            panelEnd: false,
+            line: 0
           },
           download: true,
           complete: papaSaveObject
@@ -1816,21 +1932,23 @@ AVIATION.common.Slide.prototype = {
   activateTimer: function(seconds, isAuto){
     "use strict";
 
-    var timer = this._timer, slideObject = this, continueId = slideObject.options.continueId,
-        counter = seconds || 5, // duration of the timer (each 1 point is about a second)
-        statusBar = this.slideElements.statusBar;
+    var slideObject = this, timer = this._timer, continueId = slideObject.options.continueId,
+        counter = seconds || 6, // duration of the timer (each 1 point is about a second)
+        statusBar = slideObject.slideElements.statusBar;
 
     if (!timer){
-      this._timer = "";
-      timer = this._timer;
+      slideObject._timer = "";
+      timer = slideObject._timer;
     }
 
     var resetTimerOnClick = function(e){
       e.preventDefault();
       // console.log("clicked reset on status bar");
       slideObject.resetTimer(true);
+
       if(continueId && continueId !== ""){
-        $(this).on('click', function(){
+        statusBar.off();
+        statusBar.on('click', function(){
           slideObject.redirectToPage(continueId); // any URL
         });
       }
@@ -1839,47 +1957,57 @@ AVIATION.common.Slide.prototype = {
     // enable the status bar because we need to accept clicks
     statusBar.prop("disabled", false);
 
+    statusBar.off();
     statusBar.on('click', resetTimerOnClick);
   
     if(isAuto) {
-      statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
+      slideObject.setStatus("Continuing in " + counter.toString() + "... Click here to cancel");
     
-      this._timer = setInterval( function(){
-          counter--;
-          if(counter < 0) {
-            clearInterval(slideObject._timer);
-            
-            if(continueId && continueId !== ""){
-              slideObject.redirectToPage(continueId);
-              statusBar.text("Redirecting...");
+      if(!slideObject.timerActivated){
+        slideObject.timerActivated = true;
+        slideObject._timer = setInterval( function(){
+            counter--;
+            if(counter < 0) {
+              clearInterval(slideObject._timer);
+              
+              if(continueId && continueId !== ""){
+                //slideObject.redirectToPage(continueId);
+                slideObject.setStatus("Redirecting...");
+              } else {
+                slideObject.setStatus("Error: continueId is undefined");
+              }
             } else {
-              statusBar.text("Error: continueId is undefined");
+              slideObject.setStatus("Continuing in " + counter.toString() + "... Click here to cancel");
             }
-          } else {
-            statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
-          }
-      }, 1000);
+        }, 1000);
+      }
+      console.log("timer after setting");
+      console.log(slideObject._timer);
     } else {
-      this._timer = null;
+      slideObject.setStatus('Press "Continue" when ready');
+      slideObject._timer = null;
     }
   },
 
   resetTimer: function( manual ){
     "use strict";
-
-    if(this._timer){
+    var slide = this;
+    if(slide._timer){
       if(manual){
-        this.slideElements.statusBar.text("Continue when ready");
+        slide.setStatus('Press "Continue" when ready');
       }
 
-      clearInterval(this._timer);
+      console.log("trying to resetTimer");
+      console.log(slide._timer);
+      clearInterval(slide._timer);
+      slide.timerActivated = false;
     }
   },
   
   buttonOnClickEvents: function(){
+    var slide = this;
     // check if there is a timer and reset if we click on a control button
-    this.resetTimer();
-
+    slide.resetTimer();
   },
 
   initSlideButtonEvents: function(){
@@ -1981,9 +2109,15 @@ AVIATION.common.Slide.prototype = {
       // now lets add on clicks on the modals we need them in
       for(h=0; h<slide.slideContent[index].highlights.length; h++){
         if(typeof slide.slideContent[index].highlights[h] === "object" && 
-            slide.slideContent[index].highlights[h].onclick &&
-            typeof slide.slideContent[index].highlights[h].onclick === "function"){
-          addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+            slide.slideContent[index].highlights[h].onclick){
+
+          if(typeof slide.slideContent[index].highlights[h].onclick != "function"){
+            slide.slideContent[index].highlights[h].onclick = eval(slide.slideContent[index].highlights[h].onclick);
+          }
+
+          if(typeof slide.slideContent[index].highlights[h].onclick === "function"){
+            addOnClick[slide.slideContent[index].highlights[h].index] = slide.slideContent[index].highlights[h].onclick;
+          }
         }
       }
 
@@ -2090,10 +2224,7 @@ AVIATION.common.Slide.prototype = {
         }
 
       });
-
-      
     }
-
   },
 
 
@@ -2209,12 +2340,21 @@ AVIATION.common.Slide.prototype = {
           player.cueLine(content.media.line, function(){
             slide.buildContent(true, index);
 
+            if(content.callback && typeof content.callback != "function"){
+              content.callback = eval(content.callback);
+            }
+
             if(content.callback && typeof content.callback === "function"){
               content.callback();
             }
           });  
         } else {
           contentAtStart = index;
+          
+          if(content.callback && typeof content.callback != "function"){
+            content.callback = eval(content.callback);
+          }
+
           if(content.callback && typeof content.callback === 'function'){
             callbackAtBeginning = content.callback;
           }
@@ -2232,12 +2372,22 @@ AVIATION.common.Slide.prototype = {
             if(second === content.media.second){
               slideObject.buildContent(true, index);
             }
+
+            if(content.callback && typeof content.callback != "function"){
+              content.callback = eval(content.callback);
+            }
+
             if(content.callback && typeof content.callback === "function"){
               content.callback();
             }
           });
         } else {
           contentAtStart = index;
+
+          if(content.callback && typeof content.callback != "function"){
+            content.callback = eval(content.callback);
+          }
+
           if(content.callback && typeof content.callback === "function"){
             callbackAtBeginning = content.callback;
           }
@@ -2257,12 +2407,21 @@ AVIATION.common.Slide.prototype = {
           player.cue(content.media.second, function(){
             slide.buildContent(true, index);
 
+            if(content.callback && typeof content.callback != "function"){
+              content.callback = eval(content.callback);
+            }
+
             if(content.callback && typeof content.callback === "function"){
               content.callback();
             }
           });  
         } else {
           contentAtStart = index;
+
+          if(content.callback && typeof content.callback != "function"){
+            content.callback = eval(content.callback);
+          }
+
           if(content.callback && typeof content.callback === "function"){
             callbackAtBeginning = content.callback;
           }
@@ -2314,15 +2473,19 @@ AVIATION.common.Slide.prototype = {
 
     }
 
-    this.checkSlideControlPlayButtonsState();
+    this.checkSlideControlPlayButtonsState( action );
 
     this.setStatus(action);
   },
 
   // constrols the state of the Previous/Next 'player' buttons
-  checkSlideControlPlayButtonsState: function(){
+  checkSlideControlPlayButtonsState: function(action){
     var controls = this.slideElements.slideControls, active = this.mediaActiveIndex,
         players = this.players, slide = this, contentActive = this.contentActiveIndex;
+
+    console.log("check button state");
+    console.log(contentActive);
+    console.log(this.slideContent.length);
 
     if(this.options.showSlideControls){
 
@@ -2330,22 +2493,26 @@ AVIATION.common.Slide.prototype = {
         console.log("first audio, no way back");
         controls.previous.prop("disabled", true);
         controls.previous.attr("disabled", true);
-        if(this.slideHasListened[active]){
-          controls.next.prop("disabled", false);
-          controls.next.removeAttr("disabled");
-        }
+        controls.next.prop("disabled", false);
+        controls.next.attr("disabled", false);
+        controls.next.removeProp("disabled");
+        controls.next.removeAttr("disabled");
+        //if(this.slideHasListened[active]){
+        //}
       } else {
         if (active < players.length - 1){
           console.log("active is before the last player");
           controls.previous.prop("disabled", false);
           controls.previous.removeAttr("disabled");
-          if(this.slideHasListened[active]){
-            controls.next.prop("disabled", false);
-            controls.next.removeAttr("disabled");
-          } else {
-            controls.next.prop("disabled", true);
-            controls.next.attr("disabled", true);
-          }
+          //if(this.slideHasListened[active]){
+            //controls.next.prop("disabled", false);
+            //controls.next.removeAttr("disabled");
+          //} else {
+          controls.next.prop("disabled", false);
+          controls.next.attr("disabled", false);
+          controls.next.removeProp("disabled");
+          controls.next.removeAttr("disabled");
+          //}
         } else if (active >= players.length - 1){
           console.log("active is the last players length");
           console.log("active: " + active);
@@ -2354,8 +2521,10 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if( (active > players.length - 1) && (contentActive > this.slideContent.length - 1) ){
-            $(slide).trigger("slideEnd");
+          if( ( (active > players.length - 1) && (contentActive + 1 > this.slideContent.length - 1) ) || (contentActive + 1 > this.slideContent.length - 1) ){
+            if(action !== 'replay'){
+              $(slide).trigger("slideEnd");
+            }
             controls.pause.hide();
             controls.play.hide();
             controls.replay.show();
@@ -2381,20 +2550,19 @@ AVIATION.common.Slide.prototype = {
   },
 
   setStatus: function(action){
-    var slide = this, status = this.slideElements.statusBar;
+    var slide = this, status = slide.slideElements.statusBar;
+    console.log("setting status to: " + action);
 
     switch(action){
       case "play":
-      case "replay":
         status.text("Playing...");
         break;
       case "pause":
         status.text("Paused");
         break;
-      case "end":
-        break;
       default:
         if(action){
+          console.log("setting custom status to: " + action);
           status.text(action);
         } else {
           status.text("Status is undefined!");
@@ -2467,21 +2635,30 @@ AVIATION.common.Slide.prototype = {
   buildQuizzes: function(){
     "use strict";
 
-    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement, advancePattern;
+    var slide = this, i, quizzes = this.options.quizzes || "", quizElements = [], tempElement, advancePattern, onComplete;
 
     console.log("building quizzes");
 
     console.log(quizzes);
 
-    advancePattern = function(oldActions){
-      console.log("trying to advance on quiz complete!");
-      $(slide).trigger("end", { callbacks: oldActions, element: { type: "quiz", index: slide.contentActiveIndex + slide.patternInnerIndex }, slide: slide });
-      if(oldActions && typeof oldActions === 'function'){
-        oldActions();
-      }
+    advancePattern = function(index){
+      return function(){
+        console.log("trying to advance on quiz complete with index: " + index);
+        console.log("on quiz end contentIndex: "+ slide.contentActiveIndex);
 
-      //slide.trigger("continuePattern");
-      slide.buildContent(true, slide.contentActiveIndex);
+        $(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.checkAdvanceWith);
+
+        /*
+        if(oldActions && typeof oldActions != "function"){
+          oldActions = eval(oldActions);
+        }
+
+        if(oldActions && typeof oldActions === 'function'){
+          oldActions();
+        }
+        */
+        //slide.buildContent(true, slide.contentActiveIndex);
+      };
     };
 
     for(i=0; i<quizzes.length; i++){
@@ -2494,10 +2671,12 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(this.options.quizId);
 
       quizzes[i].slide = $.isEmptyObject(slide.parentSlide) ? slide : slide.parentSlide;
-      
+
+      onComplete = advancePattern(i);
+
       if(slide.options.enablePanel){
         quizzes[i].animationCallbacks = {
-          completeQuiz : advancePattern
+          completeQuiz : onComplete
         };
       }
       
@@ -2539,7 +2718,16 @@ AVIATION.common.Slide.prototype = {
           quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
+
+          generalContentId : "#generalContentParent",
+          contentParentId : "#contentParent",
+          imageParentId: "#imageParent",
+
           panelHighlightsId: "#panelHighlightContainer",
+          generalHighlightsId: "#generalHighlightContainer",
+          contentHighlightsId: "#contentHighlightContainer",
+          imageHighlightsId: "#imageHighlightContainer",
+
           instStatusId1: "#instStatus1",
           instStatusId2: "#instStatus2",
           scanningPatternArray: [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3 ],
@@ -2593,6 +2781,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
+              parent: 'panel'
             },
             { // #1
               id: "ai",
@@ -2601,6 +2790,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
+              parent: 'panel'
             }, 
             { // #2
               id: "alt",
@@ -2608,7 +2798,8 @@ AVIATION.common.Slide.prototype = {
               name: "Altimeter (ALT)",
               height: "50%",
               classes: ["col-xs-4"],
-              border : "7px ridge yellow",                            
+              border : "7px ridge yellow",
+              parent: 'panel'
             },
             { // #6
               id: "tc",
@@ -2616,7 +2807,8 @@ AVIATION.common.Slide.prototype = {
               name: "Turn Coordinator (TC)",
               height: "50%",
               classes: ["col-xs-4"],
-              border : "7px ridge yellow",                            
+              border : "7px ridge yellow",
+              parent: 'panel'
             },
             { // #3
               id: "hi",
@@ -2625,6 +2817,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
+              parent: 'panel'
             },
             { // #5
               id: "vsi",
@@ -2633,6 +2826,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
+              parent: 'panel'
             },
           ]}, option;
 
@@ -2719,6 +2913,9 @@ AVIATION.common.Slide.prototype = {
     this.throttleContainer = options.throttleContainer || "#sliderContainer";
 
     this.panelEnd = false;
+    this.justLoaded = true;
+
+    this.timerActivated = false;
     /* error handling example
     try {
       // if smth might cause an error....
@@ -2784,16 +2981,42 @@ AVIATION.common.Slide.prototype = {
         for(i=0; i < slide.elementsToShow[action].length; i++){
           if(slide.elementsToShow[action][i]){
             //show this one
-            slide.slideElements[possibleActions[action].elements][i].show();
-            // only disable the ones we show
-            if(slide.elementsToDisable[action][i]){
-              slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
-            } else {
+            if(action === 'highlight'){
+              if(slide.options.hiddenHighlights){
+                slide.slideElements[possibleActions[action].elements][i].css("border", "");
+                slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
+
+              } else {
+                slide.slideElements[possibleActions[action].elements][i].css("border", slide.options[possibleActions[action].mult][i].border);
+                slide.slideElements[possibleActions[action].elements][i].css("cursor", "pointer");
+              }
               slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+              slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
+              slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
+              slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
+            } else {
+              slide.slideElements[possibleActions[action].elements][i].show();              
+              // only disable the ones we show (btn, quizzes only)
+              if(slide.elementsToDisable[action][i]){
+                slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+                slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
+              } else {
+                slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+                slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
+                slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
+                slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
+              }
             }
           } else {
             //hide this one
-            slide.slideElements[possibleActions[action].elements][i].hide();
+            if(action === 'highlight'){
+              slide.slideElements[possibleActions[action].elements][i].css("border", "");
+              slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
+              slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+              slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
+            } else {
+              slide.slideElements[possibleActions[action].elements][i].hide();              
+            }
           }
         }
       }
@@ -2878,7 +3101,9 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("wrongAdvance");
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
-        if( _.contains(advanceWith.index, index) )
+        if(type === 'quiz'){
+          $(slide).trigger("correctAdvance");
+        } else if( _.contains(advanceWith.index, index) )
           $(slide).trigger("correctAdvance", advanceWith);
         else
           $(slide).trigger("wrongAdvance");
@@ -2888,13 +3113,15 @@ AVIATION.common.Slide.prototype = {
       } else if(type === 'csv') {
         $(slide).trigger("wrongAdvance", advanceWith);
 
-      } else if(type === 'highlight' && typeof index !== undefined && advanceWith.action === 'pattern'){
+      } else if( (type === 'highlight' || type === 'quiz' ) && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
         
         slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
         
-        if( scanPattern[overallScanIndex+1] === index){
+        if(type === 'quiz'){
+          // all good, let's wait for next input...
+        } else if( scanPattern[overallScanIndex+1] === index){
           if(element !== undefined){
             //$(element).pulse('destroy');
 
@@ -2909,7 +3136,8 @@ AVIATION.common.Slide.prototype = {
               console.log("index provided: " + index);
               console.log("inner index: " + innerIndex);
               innerIndex++;
-              slide.buildContent(true, (slide.contentActiveIndex + innerIndex) );
+              slide.buildContent(true, (slide.contentActiveIndex + innerIndex), this.mediaActiveIndex, false, null, false, advanceWith.action );
+              //this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
 
             } else if (advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] && 
                 slide.slideContent[slide.contentActiveIndex+innerIndex+1].media.type !== 'highlight'){
