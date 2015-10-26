@@ -1,0 +1,195 @@
+/***
+  ** Custom CSS File for frequently used classes in the aviation snap courses
+  ** of the edX CDOT project
+  ** created by: Maggie Ha and Pavlo Kuzhel
+  **/
+
+@media (min-width: 768px) {
+
+  }
+  @media (max-width: 1199px) {
+    .avatar {
+      display: none;
+    }
+  }
+
+.cdot_bg {
+  /*
+  border: 10px silver;
+  border-top-style: inset;
+  border-right-style: outset;
+  border-bottom-style: inset;
+  border-left-style: outset;
+  border-radius: 5px; 
+  */
+  min-height: 410px;
+  overflow: hidden;
+}
+
+.cdot_contentText {
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
+#btnN {
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnNext.png') ;   
+  background-repeat: no-repeat;
+  background-size: 32px; 
+}
+#btnP {
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPrev.png') ;   
+  background-repeat: no-repeat;
+  background-size: 32px; 
+}
+#btnPlay {
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPlay.png') ;  
+  background-repeat: no-repeat;
+  background-size: 40px; 
+}
+#btnR {
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnReplay.png') ; 
+  background-repeat: no-repeat;
+  background-size: 40px; 
+}
+#btnPause {
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPause.png') ;  
+  background-repeat: no-repeat;
+  background-size: 40px; 
+}
+
+.avatar.jane {
+  margin-top: 135px;
+}
+
+.avatar.tom {
+  margin-top: 100px;
+}
+
+#btnPause, #btnPlay, #btnR {
+  border-radius: 50px;
+  height: 60px;
+  width: 80px;
+  position: relative;
+  z-index: 2;
+  border: solid 3px white;
+}
+
+#btnP, #btnN {
+  width: 60px;
+  position: relative;
+  z-index: 0;
+}
+
+#playerControls {
+  width: 180px;
+  margin-left: Calc(100% - 50% - 92px);
+}
+
+#playerControls > div {
+  float: left;
+}
+
+#btnPlayDiv {
+  margin: 0px -10px 0px;
+}
+
+#btnPDiv, #btnNDiv {
+  position: relative;
+  margin-top: 15px;
+  z-index: 0;
+}
+
+.cdotBtn2 {
+    background-color: #1899f3 ;
+    color: white;
+    background-position: center; 
+    height: 32px;
+    overflow: hidden;
+    border-color: transparent;
+}
+
+a.btn.cdotBtn2 {
+    background-color: #1899f3 ;
+    color: white;
+    background-position: center; 
+    height: 32px;
+    overflow: hidden;
+    border-color: transparent;
+}
+
+
+.cdotBtn2:hover:not(:disabled) {
+    background-color: #6DBFF8 ;
+    color: white;
+    background-position: center; 
+    height: 32px;
+    overflow: hidden;
+}
+
+a.btn.cdotBtn2.disabled,
+a.btn.cdotBtn2[disabled] {
+    background-color: #CCCCCC ;
+    color: white;
+    background-position: center; 
+    height: 32px;
+}
+
+div.modal-dialog.modal-cdot{
+  width:auto;
+}
+
+#slideContainer .ui-slider-vertical.ui-slider-pips .ui-slider-label{
+  width: 7em;
+}
+
+#sliderContainer{
+  padding-left: 30px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+#slideContainer .ui-state-disabled, .ui-widget-content .ui-state-disabled, 
+  .ui-widget-header .ui-state-disabled{
+  opacity: 1;
+}
+
+/*.cdot_bg, .cdot_quiz, .slide_footer{
+  border: solid 1px #CCC;
+  -moz-box-shadow: 1px 1px 5px #999;
+  -webkit-box-shadow: 1px 1px 5px #999;
+  box-shadow: 1px 1px 5px #999;
+  padding: 5px;
+  border: solid 1px #EFEFEF;
+}
+*/
+.xmodule_HtmlModule {
+  border: solid 1px #CCC;
+  -moz-box-shadow: 1px 1px 5px #999;
+  -webkit-box-shadow: 1px 1px 5px #999;
+  box-shadow: 1px 1px 5px #999;
+  padding: 5px;
+  padding-bottom: 20px;
+}
+
+.cdot_quiz{
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: ;
+}
+
+hr.style-two {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+#panelHighlightContainer{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  padding: 10px;
+}
+
+.cdot_quiz_container{
+  margin-top: -30px; 
+}
