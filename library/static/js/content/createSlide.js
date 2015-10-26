@@ -33,8 +33,6 @@ AVIATION.common = {};
 /*
 AVIATION.common.Player = function(){
   "use strict";
-
-
 };
 */
 // begin a javascript class "Slide"
@@ -99,7 +97,6 @@ AVIATION.common.Slide.prototype = {
     events = {
       /*
       "continuePattern": function(e, data){
-
       },
       */
       "correctAdvance": function(e, data){
@@ -2280,10 +2277,8 @@ AVIATION.common.Slide.prototype = {
       case "csv":
       /**
         player.papaCueEnd(function(){
-
         });
         player.papaCuePause(function(){
-
         });
       **/
         break;
@@ -2652,7 +2647,6 @@ AVIATION.common.Slide.prototype = {
         if(oldActions && typeof oldActions != "function"){
           oldActions = eval(oldActions);
         }
-
         if(oldActions && typeof oldActions === 'function'){
           oldActions();
         }
@@ -3044,7 +3038,6 @@ AVIATION.common.Slide.prototype = {
 
 /*
     $(this).on("checkScanningPattern", function(e, evt){
-
     });
 */
     // new check to see if we've already moved past this advanceWith index

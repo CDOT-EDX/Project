@@ -25,6 +25,9 @@ Published under GPLv3 License.
             roll : 0,
             pitch : 0,
             off_flag: false,
+            ils: false,
+            ils_localizer: 0,
+            ils_glideslope: 0,
             altitude : 0,
             pressure : 30,
             turn : 0,
@@ -42,7 +45,7 @@ Published under GPLv3 License.
         ),
         constants = {
             pitch_bound: 26
-        };
+        }
 
         // Air Speed - Set air speed
         function _setAirSpeed(speed){
@@ -89,6 +92,39 @@ Published under GPLv3 License.
             placeholder.each(function(){
                 $(this).find('div.instrument.attitude div.attitude_off_flag').toggle(visible);
             });
+        }
+
+        // Attitude - Instrument landing system - Set visibility
+        function _setILS(visible){
+        	placeholder.each(function(){
+        		$(this).find('div.instrument.attitude div.attitude_ils').toggle(visible);
+        	});
+        }
+
+		// Attitude - Instrument landing system - Set localizer angle
+        function _setILSLocalizer(angle){
+
+        	var ang = (Math.abs(angle) > 14.5) ? (Math.abs(angle) / angle) * 14.5 : angle;
+
+        	placeholder.each(function(){
+        		$(this).find('div.instrument.attitude div.attitude_ils_localizer').css({
+        			'transform': 'rotate(' + ang + 'deg)',
+        			'transform-origin': 'center top'
+        		});
+        	});
+        }
+
+		// Attitude - Instrument landing system - Set glideslope angle
+        function _setILSGlideslope(angle){
+
+        	var ang = (Math.abs(angle) > 14.5) ? (Math.abs(angle) / angle) * 14.5 : angle;
+
+        	placeholder.each(function(){
+        		$(this).find('div.instrument.attitude div.attitude_ils_glideslope').css({
+        			'transform': 'rotate(' + ang + 'deg)',
+        			'transform-origin': 'center left'
+        		});
+        	});
         }
 
         // Altimeter - Set altitude
@@ -253,7 +289,7 @@ Published under GPLv3 License.
         // Toggle dashboard screws for instrument
         function _toggleScrews(toggle){
             placeholder.each(function(){
-                $(this).find('.indicator_background').toggle(toggle);
+                $(this).find('.indicator_background_screws').toggle(toggle);
             });
         }
 
@@ -276,10 +312,13 @@ Published under GPLv3 License.
                 break
 
                 case 'attitude':
-                    $(this).html('<div class="instrument attitude"><div class="indicator_background"><img src="' + settings.img_directory + 'indicator_background_dashboard.svg" class="box" alt="" /></div><div class="indicator_background_screws"><img src="' + settings.img_directory + 'indicator_background_screws.svg" class="box" alt="" /></div><div class="indicator_inner"><div class="attitude box"><img src="' + settings.img_directory + 'attitude_roll_1.svg" class="box" alt="" /><div class="attitude_pitch box"><img src="' + settings.img_directory + 'attitude_pitch.svg" class="box" alt="" /></div><img src="' + settings.img_directory + 'attitude_roll_2.svg" class="box" alt="" /></div><div class="attitude_foreground"><img src="' + settings.img_directory + 'attitude_foreground.svg" class="box" alt="" /></div><div class="attitude_off_flag"><img src="' + settings.img_directory + 'attitude_off_flag.svg" class="box" alt="" /></div></div><div class="indicator_foreground"><img src="' + settings.img_directory + 'indicator_foreground.svg" class="box" alt="" /></div></div>');
+                    $(this).html('<div class="instrument attitude"><div class="indicator_background"><img src="' + settings.img_directory + 'indicator_background_dashboard.svg" class="box" alt="" /></div><div class="indicator_background_screws"><img src="' + settings.img_directory + 'indicator_background_screws.svg" class="box" alt="" /></div><div class="indicator_inner"><div class="attitude box"><img src="' + settings.img_directory + 'attitude_roll_1.svg" class="box" alt="" /><div class="attitude_pitch box"><img src="' + settings.img_directory + 'attitude_pitch.svg" class="box" alt="" /></div><img src="' + settings.img_directory + 'attitude_roll_2.svg" class="box" alt="" /></div><div class="attitude_foreground_1"><img src="' + settings.img_directory + 'attitude_foreground_1.svg" class="box" alt="" /></div><div class="attitude_ils"><img src="' + settings.img_directory + 'attitude_ils_markings.svg" class="box" alt="" /><div class="attitude_ils_localizer box"><img src="' + settings.img_directory + 'attitude_ils_localizer.svg" class="box" alt="" /></div><div class="attitude_ils_glideslope box"><img src="' + settings.img_directory + 'attitude_ils_glideslope.svg" class="box" alt="" /></div></div><div class="attitude_foreground_2"><img src="' + settings.img_directory + 'attitude_foreground_2.svg" class="box" alt="" /></div><div class="attitude_off_flag"><img src="' + settings.img_directory + 'attitude_off_flag.svg" class="box" alt="" /></div></div><div class="indicator_foreground"><img src="' + settings.img_directory + 'indicator_foreground.svg" class="box" alt="" /></div></div>');
                     _setRoll(settings.roll);
                     _setPitch(settings.pitch);
                     _setOffFlag(settings.off_flag);
+                    _setILS(settings.ils);
+                    _setILSLocalizer(settings.ils_localizer);
+                    _setILSGlideslope(settings.ils_glideslope);
                 break
 
                 case 'altimeter':
@@ -324,11 +363,10 @@ Published under GPLv3 License.
             $(this).find('div.instrument .indicator_background').toggle(settings.showBox);
             $(this).find('div.instrument .indicator_background_screws').toggle(settings.showScrews);
             $(this).find('div.instrument .indicator_inner').toggle(settings.showIndicatorInner);
-
         });
 
         // Public methods
-        this.setAirSpeed =          function(options){ var test = options.airSpeed    ; if(test !== undefined) _setAirSpeed(test);};
+	this.setAirSpeed =          function(options){ var test = options.airSpeed    ; if(test !== undefined) _setAirSpeed(test);};
         //this.setTrueAirSpeed =      function(speed){_setTrueAirSpeed(speed);}
         this.setRoll =              function(options){ var test = options.roll        ; if(test !== undefined) _setRoll(test);};
         this.setPitch =             function(options){ var test = options.pitch       ; if(test !== undefined) _setPitch(test);};
@@ -338,14 +376,16 @@ Published under GPLv3 License.
         this.setTurn =              function(options){ var test = options.turnRate    ; if(test !== undefined) _setTurn(test);};
         this.setSlip =              function(options){ var test = options.yaw         ; if(test !== undefined) _setSlip(test);};
         this.setHeading =           function(options){ var test = options.heading     ; if(test !== undefined) _setHeading(test);};
-        this.setBeaconOne =         function(options){ var test = options.beaconOne   ; if(test !== undefined) _setBeaconOne(test);};
-        this.setBeaconTwo =         function(options){ var test = options.beaconTwo   ; if(test !== undefined) _setBeaconTwo(test);};
+        this.setBeaconOne =         function(options){ var test = options.beaconOne, temp = options.showBeaconOne   ; if(temp == true && test !== undefined ) _setBeaconOne(test,temp);};
+        this.setBeaconTwo =         function(options){ var test = options.beaconTwo, temp = options.showBeaconTwo ; if( temp == true && test !== undefined) _setBeaconTwo(test,temp);};
         this.setVario =             function(options){ var test = options.vario       ; if(test !== undefined) _setVario(test);};
         this.resize =               function(options){ var test = options.resize      ; if(test !== undefined) _resize(test);};
         this.toggleBox =            function(options){ var test = options.toggleBox   ; if(test !== undefined) _toggleBox(test);};
         this.toggleScrews =         function(options){ var test = options.toggleScrews; if(test !== undefined) _toggleScrews(test);};
-        this.toggleIndicatorInner = function(options){ var test = options.toggleInner ; if(test !== undefined) _toggleIndicatorInner(test);};
-
+        this.toggleIndicatorInner = function(options){ var test = options.toggleInner ; if(test !== undefined) _toggleIndicatorInner(test);};        
+        this.setILS =               function(options){ var test = options.setils      ; if(test!== undefined) _setILS(test);};
+        this.setILSLocalizer =      function(options){ var test = options.ilslocalizer, temp = options.ils ; if(temp == true && test !== undefined)  _setILSLocalizer(test);};
+        this.setILSGlideslope =     function(options){ var test = options.ilsglideslope, temp = options.ils ;if(temp == true && test!== undefined) _setILSGlideslope(test);};
         return built;
     };
 

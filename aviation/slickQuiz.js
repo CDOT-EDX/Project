@@ -440,7 +440,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr, questionId){
                 var remidiation = [], i;
                 var singleRemidiation = '';
-
                 for (i in answersPr) {
                     //console.log("questionIndexPr" + );
                     if (answersPr.hasOwnProperty(i)) {

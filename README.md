@@ -16,7 +16,6 @@
 timer (new media option , check the description and the example bellow) 
 add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
 ```
-
 *added default options for SlickQuiz:*
 ```
 	showRemediationOnSuccess
