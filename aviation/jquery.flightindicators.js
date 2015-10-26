@@ -35,9 +35,11 @@ Published under GPLv3 License.
             heading : 0,
             beaconone : 90,
             beacononeshow : false,
-            beacontwo : 0,
+            beacontwo : 30,
             beacontwoshow : false,
             vario : 0,
+            bootstrapFriendly: false,
+            bootstrapClass: "",
             img_directory : 'img/'
             }, options 
         ),
@@ -263,8 +265,8 @@ Published under GPLv3 License.
 
             placeholder.each(function(){
                 $(this).find('div.instrument.vario div.vario_hand')
-                    .css('transform', 'rotate(' + deg + 'deg)')
-                    .css('transition', 'transform 1.0s linear');
+                    .css('transform', 'rotate(' + deg + 'deg)');
+                    //.css('transition', 'transform 1.0s linear');
 
             });    
         }
@@ -332,7 +334,7 @@ Published under GPLv3 License.
                     _setSlip(settings.slip);
                 break;
 
-                case 'heading':-
+                case 'heading':
                     $(this).html('<div class="instrument heading"><div class="indicator_background"><img src="' + settings.img_directory + 'indicator_background_dashboard.svg" class="box" alt="" /></div><div class="indicator_background_screws"><img src="' + settings.img_directory + 'indicator_background_screws.svg" class="box" alt="" /></div><div class="indicator_inner"><div class="heading_background box"><img src="' + settings.img_directory + 'heading_background.svg" class="box" alt="" /></div><div class="heading_yaw box"><img src="' + settings.img_directory + 'heading_yaw.svg" class="box" alt="" /></div><div class="heading_beacon_2 box"><img src="' + settings.img_directory + 'heading_beacon_2.svg" class="box" alt="" /></div><div class="heading_beacon_1 box"><img src="' + settings.img_directory + 'heading_beacon_1.svg" class="box" alt="" /></div><div class="heading_markings box"><img src="' + settings.img_directory + 'heading_markings.svg" class="box" alt="" /></div></div><div class="indicator_foreground"><img src="' + settings.img_directory + 'indicator_foreground.svg" class="box" alt="" /></div></div>');
                     _setHeading(settings.heading);
                     _setBeaconTwo(settings.beacontwo, settings.beacontwoshow);
@@ -350,11 +352,17 @@ Published under GPLv3 License.
 
             }
 
-            _resize(settings.size);
-            _toggleBox(settings.showBox);
-            _toggleScrews(settings.showScrews);
-            _toggleIndicatorInner(settings.showIndicatorInner);
+            if(settings.bootstrapFriendly){
+                $(this).find('div.instrument').parent().addClass(settings.bootstrapClass);
+                var width = $(this).find('div.instrument').parent().width();
+                $(this).find('div.instrument').css({height : width, width : width});
+            } else {
+                $(this).find('div.instrument').css({height : settings.size, width : settings.size});
+            }
 
+            $(this).find('div.instrument .indicator_background').toggle(settings.showBox);
+            $(this).find('div.instrument .indicator_background_screws').toggle(settings.showScrews);
+            $(this).find('div.instrument .indicator_inner').toggle(settings.showIndicatorInner);
         });
 
         // Public methods

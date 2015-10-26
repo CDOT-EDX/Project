@@ -34,7 +34,6 @@ AVIATION.common = {};
 AVIATION.common.Player = function(){
   "use strict";
 
-
 };
 */
 // begin a javascript class "Slide"
@@ -99,7 +98,6 @@ AVIATION.common.Slide.prototype = {
     events = {
       /*
       "continuePattern": function(e, data){
-
       },
       */
       "correctAdvance": function(e, data){
@@ -287,6 +285,15 @@ AVIATION.common.Slide.prototype = {
           }
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
+      },
+      setPosition: function(e, position){
+        if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
+          // if(slide.players[slide.mediaActiveIndex].type === 'audio'){
+          //   slide.players[slide.mediaActiveIndex].player.currentTime(position*1000);
+          // } else {
+            slide.players[slide.mediaActiveIndex].player.currentTime(position); 
+          //}
+        }
       }
     };
 
@@ -363,7 +370,7 @@ AVIATION.common.Slide.prototype = {
     console.log("whos the parent?");
     console.log(parent);
 
-    this.buildAvatars(parent, content.avatar, function(bsSize){
+    this.buildAvatars(parent, content.avatar, function(){
 
       console.log("build avatars callback from HEADER");
       console.log(content);
@@ -439,7 +446,7 @@ AVIATION.common.Slide.prototype = {
       }
 
       if(setupContent && typeof setupContent === 'function'){
-        setupContent(bsSize, callback);
+        setupContent(callback);
       }
 
     });
@@ -638,8 +645,8 @@ AVIATION.common.Slide.prototype = {
   // method for building the content of the slide
   buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback, action){
     "use strict";
-    var outerSlideContent = this.slideContent, slide = this, highlightsAddOnClick = [], buttonsAddOnClick = [], 
-        localClass, contentActiveIndex = index || this.contentActiveIndex, 
+    var outerSlideContent = this.slideContent, slide = this, 
+        contentActiveIndex = index || this.contentActiveIndex, position,
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
     if(index && index !== undefined && action !== 'pattern'){
@@ -647,11 +654,6 @@ AVIATION.common.Slide.prototype = {
     }
 
     outerIndex = outerIndex || this.mediaActiveIndex || 0;
-
-    // console.log("whats the container here?");
-    // console.log(contentContainer);
-    // console.log("and the modal option?");
-    // console.log(this.options.isModal);
 
     if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
 
@@ -669,23 +671,35 @@ AVIATION.common.Slide.prototype = {
       contentContainer = jQuery('<div/>', {
         class: "modal-content"
       }).appendTo(dialogContainer);
-      //contentContainer = $(this.container);
     }
-    
-    // console.log("and the contentainer after?");
-    // console.log(contentContainer);
-    // highlightsAddOnClick = this.initHighlights();
-    // this.buildHighlights(mediaActiveIndex, highlightsAddOnClick);
-    slide.initActionables();
-    // buttonsAddOnClick = this.initButtons();
-    // console.log("buttons ADD ON CLICK!");
-    // console.log(buttonsAddOnClick);
-    // this.buildButtons(mediaActiveIndex, buttonsAddOnClick);
 
-    setupInnerContent = function(classSize, callback){
-      var slideContent = outerSlideContent[contentActiveIndex], slideInner = $(slide.container + " > .cdot_contentText > .slideInner"), 
-          action, contentClasses = "", imageClasses = "", bsClass = classSize || 12, innerContent, innerImage,
-          newSlideInner;// callback = c;b
+    if(slide.slideContent[contentActiveIndex].action !== undefined){
+      // set line or second of media before playing it
+      position = slide.slideContent[contentActiveIndex].action.line || slide.slideContent[contentActiveIndex].action.second;
+      if(position !== undefined){
+        $(slide).trigger("setPosition", position );
+      }
+
+      if(slide.slideContent[contentActiveIndex].action.type !== undefined && 
+          slide.slideContent[contentActiveIndex].action.index !== undefined){
+        slide.mediaActiveIndex = slide.slideContent[contentActiveIndex].action.index;
+        $(slide).trigger(slide.slideContent[contentActiveIndex].action.type);
+      }
+    }
+
+    if(slide.slideContent[contentActiveIndex].setContentIndex !== undefined){
+      slide.contentActiveIndex = parseInt(slide.slideContent[contentActiveIndex].setContentIndex, 10);
+    }
+
+    if(slide.slideContent[contentActiveIndex].setMediaIndex !== undefined){
+      slide.mediaActiveIndex = parseInt(slide.slideContent[contentActiveIndex].setMediaIndex, 10);
+    }
+
+    setupInnerContent = function(callback){
+      // TODO: "slideInner doesn't work if we are in a modal?"
+      var slideContent = outerSlideContent[contentActiveIndex], contentParent = $(slide.options.contentParentId),
+          contentClasses = "", imageClasses = "", innerContent, innerImage, imageParent = $(slide.options.imageParentId),
+          generalParent = $(slide.options.generalContentId);
 
       if(!clearContent){
         if(slideContent.content){
@@ -694,19 +708,43 @@ AVIATION.common.Slide.prototype = {
           action = "replace";
         }
 
-        // lets take care of our highlights
-        //checkHideShowActions(slideContent, slide);
-
         // and the buttons
-        //checkSlideButtons(slideContent.buttons, slide);
         slide.checkHideShowActions(slideContent, slide);
         // let's switch the slider if needed
         slide.setSlider(slideContent);
 
-        newSlideInner = jQuery('<div/>', {
-          id: "slideInner_" + outerIndex,
-          "class": "slideInner col-xs-12" + (slide.options.isModal ? " modal-body" : ""),
-        });
+        console.log("action: " + action);
+
+        console.log("general parent:");
+        console.log(generalParent);
+
+        // check parent of general content
+        if(generalParent.length < 1){
+          generalParent = jQuery('<div/>',{
+            id: "generalContentParent",
+            "class": "slideGeneral row"
+          }).appendTo($(slide.container + " > .cdot_contentText") );
+        }
+        console.log(generalParent);
+
+        console.log("image parent exists?");
+        console.log(imageParent);
+        if(imageParent.length < 1){
+          imageParent =jQuery('<div/>', {
+            id: "imageParent",
+            "class": "slideImage col-xs-12"
+          }).appendTo(generalParent);
+        }
+
+        console.log("content parent exists?");
+        console.log(contentParent);
+        // if image and content parents dont exist, create them
+        if(contentParent.length < 1){
+          contentParent =jQuery('<div/>', {
+            id: "contentParent",
+            "class": "slideContent col-xs-12"
+          }).appendTo(generalParent);
+        }
 
         if (slideContent.content && slideContent.content.html){
           if(slideContent.content.classes){
@@ -714,54 +752,53 @@ AVIATION.common.Slide.prototype = {
           }
 
           innerContent = jQuery('<div/>',{
-            id: "innerContent_" + outerIndex + "_" + contentActiveIndex,
-            "class": contentClasses,
+            id: "innerContent_" + outerIndex + "_" + contentActiveIndex + "_content",
+            "class": contentClasses  + " innerContent",
             html: slideContent.content.html || ""
           });
         } 
 
 
-        // console.log("is there an inner image here?");
         if (slideContent.image && slideContent.image.src) {
           if(slideContent.image.classes){
             imageClasses = slideContent.image.classes.join(" ");
           }
 
           innerImage = jQuery('<img/>',{
-            id: "innerImage_" + outerIndex + "_" + contentActiveIndex,
-            "class": imageClasses,
+            id: "innerImage_" + outerIndex + "_" + contentActiveIndex + "_img",
+            "class": imageClasses + " innerImage",
             src: slideContent.image.src || ""
           });
-
-          // console.log("inner image is: ");
-          // console.log(innerImage);
         }
 
-        console.log("the inner elemnt is...");
-        console.log(slideInner);
-
         if(action === "remove" || action === "replace"){
-          slideInner.children().remove();
-          slideInner.remove();
+          contentParent.children().remove(".innerContent");
+
+          imageParent.children().remove(".innerImage");
         }
 
         if(action === "append" || action === "replace"){
           if(innerContent){
-            innerContent.appendTo(newSlideInner);
+            console.log("is there an inner content");
+            innerContent.appendTo(contentParent);
           }
           if(innerImage){
-            innerImage.appendTo(newSlideInner);
+            console.log("is there an inner image");
+            innerImage.appendTo(imageParent);
           }
 
-          newSlideInner.appendTo(contentContainer);
+          if($().pulseinnerContent){
+            if(innerContent){
+              innerContent.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            }
 
-          if($().pulse){
-            newSlideInner  
-              .pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            if(innerImage){
+              innerImage.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+            }
           }
         }
       } else {
-        slideInner.children().remove();
+        generalParent.children().remove();
       }
 
 
@@ -785,6 +822,8 @@ AVIATION.common.Slide.prototype = {
         console.log("triggering the callback! ****");
         slideContent.callback();
       }
+
+      slide.initActionables();
 
     };
 
@@ -848,7 +887,7 @@ AVIATION.common.Slide.prototype = {
     var parent = parentContainer || $(this.container).parent();
 
     if(this.options.showSlideControls){
-      console.log("!!! ******%%%%%%%%^^^^^^^ BUILDING SLIDE CNTRLS! ***********");
+      console.log("!!! BUILDING SLIDE CNTRLS! ***********");
 
       var slideControlsRow = jQuery('<div/>', {
         "class": "row",
@@ -1123,7 +1162,7 @@ AVIATION.common.Slide.prototype = {
   initActionables: function(){
     "use strict";
     console.log("trying to make buttons highlights");
-    var slide = this, action, $parent, objCount, possibleActions = {}, options = {};
+    var slide = this, action, $parent, objCount, possibleActions = {}, options = {}, appendParent = slide.container;
 
     possibleActions = {
       "button": {
@@ -1175,7 +1214,6 @@ AVIATION.common.Slide.prototype = {
           switch(action){
 
             case "button":
-
               $parent = $(slide[possibleActions[action].container]);
               options.element = '<a/>';
               options.classes = "btn btn-default ";
@@ -1185,7 +1223,6 @@ AVIATION.common.Slide.prototype = {
               break;
 
             case "highlight":
-              $parent = this.options.enablePanel ? $(slide.options.panelHighlightsId) : $(slide.container + " > .cdot_contentText");
               options.element = '<div/>';
               options.classes = "clearClickable ";
               options.dataToggle = "modal";
@@ -1212,7 +1249,7 @@ AVIATION.common.Slide.prototype = {
             $parent = jQuery('<div/>',{
               id: slide[possibleActions[action].container].split("#")[1],
               class: "row"
-            }).appendTo(slide.container);
+            }).appendTo(appendParent);
           }
   
           slide.buildActionables(action, possibleActions[action], $parent, options);
@@ -1242,7 +1279,7 @@ AVIATION.common.Slide.prototype = {
   buildActionables: function(action, obj, parent, options){
     "use strict";
 
-    var act, slide = this, actions = slide[obj.arrayName], $action, callback;
+    var act, slide = this, actions = slide[obj.arrayName], $action, callback, appendParent = slide.container;
     console.log("building actionables");
     console.log(action);
     for( act in actions ){
@@ -1254,7 +1291,32 @@ AVIATION.common.Slide.prototype = {
                    (slide.highlights[act].width ? ";width:" + slide.highlights[act].width : "") + 
                    (slide.highlights[act].height ? ";height:" + slide.highlights[act].height : "") + 
                    (slide.highlights[act].position? ";position:" + slide.highlights[act].position : "") +
-                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );          
+                   (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );
+
+          switch(slide.highlights[act].parent){
+            case "panel":
+              parent = $(slide.options.panelHighlightsId);
+              break;
+            case "content":
+              parent = $(slide.options.contentHighlightsId);
+              appendParent = slide.options.contentParentId;
+              break;
+            case "image":
+              parent = $(slide.options.imageHighlightsId);
+              appendParent = slide.options.imageParentId;
+              break;
+            default:
+              parent = $(slide.options.generalHighlightsId);
+              appendParent = slide.options.generalContentId;
+              break;
+          }
+
+          if(parent.length < 1){
+            parent = jQuery('<div/>', {
+              id: parent.selector.split('#')[1],
+              class: "row"
+            }).appendTo(appendParent);
+          }
         }
 /*
         if(action === 'panelHighlight'){
@@ -1283,16 +1345,12 @@ AVIATION.common.Slide.prototype = {
             callback = [];
           }
 
-          console.log("whats the media index?! : " + actions[act].mediaIndex );
-
           $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]), 
                                 mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
           slide.elementsToDisable[action].push(false);
-          console.log("pusshign onto " + obj.elementArray);
-          console.log($action);
           slide.slideElements[obj.elementArray].push($action);
 
         }
@@ -1454,15 +1512,18 @@ AVIATION.common.Slide.prototype = {
       }
 
       console.log("initing panel!");
-
-      options = {
-        size: 200,
-        showBox: false,
-        showScrews: true,
-        bootstrapFriendly: true,
-        bootstrapClass: "col-xs-" + instBootCol,
-        img_directory: slide.options.apacheServerBaseUrl + 'Project/library/static/img/instruments/'
-      };
+ 	options={
+ 		size: 200,
+ 		beacononeshow: slide.options.panelOverlay,
+ 		beacontwoshow: slide.options.panelOverlay,
+ 		ils: slide.options.panelOverlay,
+        	off_flag: slide.options.offFlag,
+		showBox: false,
+        	showScrews: true,
+        	bootstrapFriendly: true,
+        	bootstrapClass: "col-xs-" + instBootCol,
+        	img_directory: slide.options.apacheServerBaseUrl + 'Project/library/static/img/instruments/'
+        };
 
       // /c4x/Seneca_College/M01S01_Test/asset/
 
@@ -1595,13 +1656,12 @@ AVIATION.common.Slide.prototype = {
 
   setAllInstruments: function( options ){
     "use strict";
-	console.log("################################################These are the options");
-	console.log(options);
+
     var slide = this, instrumentFunctions = {}, instruments = slide.instruments, instrument, i;
 
     instrumentFunctions = {
       airspeed          : [ "setAirSpeed" ],
-      attitude          : [ "setRoll" , "setPitch", /*"setOffFlag"*/ ],
+      attitude          : [ "setRoll" , "setPitch","setILSLocalizer","setILSGlideslope" /*"setOffFlag"*/ ],
       altimeter         : [ "setAltitude", "setPressure" ],
       turn_coordinator  : [ "setTurn", "setSlip" ],
       heading           : [ "setHeading", "setBeaconOne", "setBeaconTwo" ],
@@ -1637,6 +1697,7 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
+	//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
         slide.panelPause = false;
         slide.panelEnd = false;
         this.config.panelPause = false;
@@ -1660,10 +1721,17 @@ AVIATION.common.Slide.prototype = {
               attitude: {
                 pitch: ( flight[i][30] ),
                 roll: ( -( flight[i][31] ) ), //( -(allFlight[i].roll) ) 
-              },
+        	ils: slide.options.panelOverlay,      
+		ilslocalizer: flight[i][56],
+		ilsglideslope: flight[i][57]
+	      },
               heading: {
-                heading: flight[i][33]
-              },
+                heading: flight[i][33],
+              	beaconOne: flight[i][67],//67
+		showBeaconOne: slide.options.panelOverlay,
+		beaconTwo: flight[i][71],//71
+		showBeaconTwo: slide.options.panelOverlay
+	      },
               altimeter: {
                 altitude: flight[i][41],//allFlight[i].altitude
                 pressure: flight[i][19]
@@ -1679,7 +1747,6 @@ AVIATION.common.Slide.prototype = {
                 vario: (parseFloat(flight[i][15]) / 100)//allFlight[i].vario
               }
             };
-
             slide.setAllInstruments( instrumentOptions );
             
             // eval here?
@@ -2211,7 +2278,6 @@ AVIATION.common.Slide.prototype = {
       case "csv":
       /**
         player.papaCueEnd(function(){
-
         });
         player.papaCuePause(function(){
 
@@ -2574,7 +2640,6 @@ AVIATION.common.Slide.prototype = {
         if(oldActions && typeof oldActions != "function"){
           oldActions = eval(oldActions);
         }
-
         if(oldActions && typeof oldActions === 'function'){
           oldActions();
         }
@@ -2640,7 +2705,17 @@ AVIATION.common.Slide.prototype = {
           quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
+	  panelOverlay : false,
+          offFlag: false,
+	  generalContentId : "#generalContentParent",
+          contentParentId : "#contentParent",
+          imageParentId: "#imageParent",
+
           panelHighlightsId: "#panelHighlightContainer",
+          generalHighlightsId: "#generalHighlightContainer",
+          contentHighlightsId: "#contentHighlightContainer",
+          imageHighlightsId: "#imageHighlightContainer",
+
           instStatusId1: "#instStatus1",
           instStatusId2: "#instStatus2",
           scanningPatternArray: [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3 ],
@@ -2694,6 +2769,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
+              parent: 'panel'
             },
             { // #1
               id: "ai",
@@ -2702,6 +2778,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
+              parent: 'panel'
             }, 
             { // #2
               id: "alt",
@@ -2709,7 +2786,8 @@ AVIATION.common.Slide.prototype = {
               name: "Altimeter (ALT)",
               height: "50%",
               classes: ["col-xs-4"],
-              border : "7px ridge yellow",                            
+              border : "7px ridge yellow",
+              parent: 'panel'
             },
             { // #6
               id: "tc",
@@ -2717,7 +2795,8 @@ AVIATION.common.Slide.prototype = {
               name: "Turn Coordinator (TC)",
               height: "50%",
               classes: ["col-xs-4"],
-              border : "7px ridge yellow",                            
+              border : "7px ridge yellow",
+              parent: 'panel'
             },
             { // #3
               id: "hi",
@@ -2726,6 +2805,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",                            
+              parent: 'panel'
             },
             { // #5
               id: "vsi",
@@ -2734,6 +2814,7 @@ AVIATION.common.Slide.prototype = {
               height: "50%",
               classes: ["col-xs-4"],
               border : "7px ridge yellow",
+              parent: 'panel'
             },
           ]}, option;
 
@@ -2942,7 +3023,6 @@ AVIATION.common.Slide.prototype = {
 
 /*
     $(this).on("checkScanningPattern", function(e, evt){
-
     });
 */
     // new check to see if we've already moved past this advanceWith index

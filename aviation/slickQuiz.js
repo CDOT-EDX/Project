@@ -66,7 +66,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     setupQuiz: function () {},
                     startQuiz: function () {},
                     resetQuiz: function () {},
-                   // buildRemediation: function () {},
+                    buildRemediation: function () {},
                     checkAnswer: function () {},
                     nextQuestion: function () {},
                     backToQuestion: function () {},
@@ -440,20 +440,18 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr, questionId){
                 var remidiation = [], i;
                 var singleRemidiation = '';
-                                
                 for (i in answersPr) {
-                    console.log("answersPr:" + answersPr[i]);
+                    //console.log("questionIndexPr" + );
                     if (answersPr.hasOwnProperty(i)) {
-                        var answer = answersPr[i];             
-                        //console.log("answer " + answer.reason);
+                        var answer = answersPr[i];
                         if(answer.reason !== undefined || answer.reason != ''){
                             if (!plugin.config.showRemediationOne){
-                                singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason;
-                                remidiation.push(singleRemidiation);   
-                            }else 
+                                singleRemidiation = '<i>' + 'Q.' + answer.option + '</i><br />' + answer.reason;
+                                remidiation.push(singleRemidiation);
+                            }else
                                 if (i == questionId){
                                     singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason ;
-                                    remidiation.push(singleRemidiation);   
+                                    remidiation.push(singleRemidiation);
                             }
                         }
                         
@@ -467,11 +465,9 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 $(buttonQuestion).before(optionHeader);
                                     
                 var remidiationResponseHTML = $('<ul class="' + responsesClassPr + '"></ul>');
-                for (i in remidiation) {
-                    remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
-                    $(buttonQuestion).before(remidiationResponseHTML);
-                }
-
+                for (i in remidiation)
+                        remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
+                $(buttonQuestion).before(remidiationResponseHTML);
 
             },
 
@@ -493,7 +489,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 answerLIs.addClass(incorrectResponseClass);
                 // Collect the true answers needed for a correct response
                 var trueAnswers = [];
-
                 $(anySlide).off('checkCompleted');
                 $(anySlide).on('checkCompleted', function(evt, data){
                     var correctResponse = data.quiz_result_id.correct;
