@@ -1,27 +1,9 @@
-*last updated on October 10/2015*
+*last updated on October 27/2015*
 
-*highlights have to specify now whether they belong to: `content, image, or panel`*
+*Can enbable the panel Overlay with panelOverlay: true*
+*When you need the offFlag you can call it with offFlag: true* 
 
-*if NO parent specified for a highlight, the highlight will be created in the general body of the slide*
 
-*meaning that if the slides height or width will change so will the highlight*
-
-*buttons can now invoke CSVs or possibly audio*
-
-*check the syntax when declaring buttons, look for `mediaIndex`*
-
-*timer implementation:*
-
-```
-timer (new media option , check the description and the example bellow) 
-add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
-```
-*added default options for SlickQuiz:*
-```
-	showRemediationOnSuccess
-	showRemediationOnFail
-	showRemediationOne
-```
 
 # Aviation Project
 
@@ -86,6 +68,8 @@ Acceptable options and defaults are as follows:
     enableSlider:       false,
     enablePanel:        false, // enable full panel unless "panelType" option is set
     panelType:          { "attitude": "attitude" }, // object that lists 1 or more instruments to display (if not set, full panel)
+    panelOverlay:       false,
+    offFlag:            false,
     readOnlySlider:     true,
     container:          "#slideContainer", // where should we look for the slideContainer?
     statusId:           "#statusBar", // whats the id that we should create for statusBar?
