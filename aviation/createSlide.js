@@ -1728,9 +1728,9 @@ AVIATION.common.Slide.prototype = {
 	      },
               heading: {
                 heading: flight[i][33],
-              	beaconOne: flight[i][67],//67
+              	beaconOne: (-(flight[i][66])),//67 on the other csv
 		showBeaconOne: slide.options.panelOverlay,
-		beaconTwo: flight[i][71],//71
+		beaconTwo: flight[i][70],//71 on the other csv
 		showBeaconTwo: slide.options.panelOverlay
 	      },
               altimeter: {

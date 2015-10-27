@@ -1505,6 +1505,10 @@ AVIATION.common.Slide.prototype = {
 
       options = {
         size: 200,
+	beacononeshow: slide.options.panelOverlay,
+	beacontwoshow: slide.options.panelOverlay,
+	ils: slide.options.panelOverlay,
+	off_flag: slide.options.offFlag,
         showBox: false,
         showScrews: true,
         bootstrapFriendly: true,
@@ -1648,7 +1652,7 @@ AVIATION.common.Slide.prototype = {
 
     instrumentFunctions = {
       airspeed          : [ "setAirSpeed" ],
-      attitude          : [ "setRoll" , "setPitch", /*"setOffFlag"*/ ],
+      attitude          : [ "setRoll" , "setPitch","setILSLocalizer","setILSGlideslope" /*"setOffFlag"*/ ],
       altimeter         : [ "setAltitude", "setPressure" ],
       turn_coordinator  : [ "setTurn", "setSlip" ],
       heading           : [ "setHeading", "setBeaconOne", "setBeaconTwo" ],
@@ -1684,7 +1688,7 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-
+	//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
         if(!this.config.panelPause){
           this.config.pausedIndex = this.index || slide.pausedPanelIndex || 0;
         }
@@ -1712,9 +1716,16 @@ AVIATION.common.Slide.prototype = {
               attitude: {
                 pitch: ( flight[i][30] ),
                 roll: ( -( flight[i][31] ) ),
+                ils: slide.options.panelOverlay,      
+		ilslocalizer: flight[i][56],
+		ilsglideslope: flight[i][57]
               },
-              heading: {
-                heading: flight[i][33]
+	       heading: {
+		heading: flight[i][33],
+               	beaconOne: (-(flight[i][66])),//67 on the other csv
+		showBeaconOne: slide.options.panelOverlay,
+		beaconTwo: flight[i][70],//71 on the other csv
+		showBeaconTwo: slide.options.panelOverlay
               },
               altimeter: {
                 altitude: flight[i][41],
@@ -2722,7 +2733,8 @@ AVIATION.common.Slide.prototype = {
           quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
-
+	  panelOverlay : false,
+	  offFlag: false,
           generalContentId : "#generalContentParent",
           contentParentId : "#contentParent",
           imageParentId: "#imageParent",
