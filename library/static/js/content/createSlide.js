@@ -1968,7 +1968,7 @@ AVIATION.common.Slide.prototype = {
               clearInterval(slideObject._timer);
               
               if(continueId && continueId !== ""){
-                //slideObject.redirectToPage(continueId);
+                slideObject.redirectToPage(continueId);
                 slideObject.setStatus("Redirecting...");
               } else {
                 slideObject.setStatus("Error: continueId is undefined");
