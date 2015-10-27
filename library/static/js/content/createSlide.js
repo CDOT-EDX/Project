@@ -33,8 +33,6 @@ AVIATION.common = {};
 /*
 AVIATION.common.Player = function(){
   "use strict";
-
-
 };
 */
 // begin a javascript class "Slide"
@@ -99,7 +97,6 @@ AVIATION.common.Slide.prototype = {
     events = {
       /*
       "continuePattern": function(e, data){
-
       },
       */
       "correctAdvance": function(e, data){
@@ -147,9 +144,8 @@ AVIATION.common.Slide.prototype = {
         }
       },
       instrumentPause: function(index){
-        slide.pausedPanelIndex = index;
-        slide.setInstrumentStatus2("Instrument panel is paused.");
-        slide.checkSlideControlPlayButtons("pause");
+        slide.setInstrumentStatus2("Instrument panel is paused");
+        //slide.checkSlideControlPlayButtons("pause");
       },
       instrumentResume: function(){
         slide.panelPause = false;
@@ -166,20 +162,24 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("play");  
       },
       contentNext: function(e,data){
+        //slide.checkSlideControlPlayButtons("play");
         if(data && data.mediaIndex !== undefined){
           $(slide).trigger("instrumentResetPlay", data.mediaIndex);
         } else 
         if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
           slide.buildContent(true, slide.contentActiveIndex+1);
+          slide.checkSlideControlPlayButtons("play");
         } else {
           $(slide).trigger("slideEnd");
         }
       },
       slideEnd: function(e, data){
-        $(slide).trigger('reset');
+        console.log("attempting reset");
+        $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
+        console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
         slide.setStatus('Click "Continue" to proceed to the next slide');
-        slide.activateTimer(5, slide.options.autoRedirect);
+        slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
         if(data && data.element && data.element.type !== undefined){
@@ -187,7 +187,7 @@ AVIATION.common.Slide.prototype = {
             // set inst panel status as 'ended'
           }
         }
-        slide.checkSlideControlPlayButtons("pause");
+        //slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
         // check if everything has stopped playing
@@ -206,9 +206,9 @@ AVIATION.common.Slide.prototype = {
 
         var active = slide.mediaActiveIndex, players = slide.players, content = slide.slideContent;
 
-        slide.checkSlideControlPlayButtons("play");
         console.log(players[active]);
         if(players[active] && players[active].player){
+          slide.checkSlideControlPlayButtons("play");
           players[active].player.play();  
         }
       },
@@ -216,10 +216,10 @@ AVIATION.common.Slide.prototype = {
         console.log("!* pause event fired");
 
         var active = slide.mediaActiveIndex, players = slide.players;
-        slide.checkSlideControlPlayButtons("pause");
 
         console.log(players[active]);
         if(players[active] && players[active].player){
+          slide.checkSlideControlPlayButtons("pause");
           console.log("trying to pause ");
           players[active].player.pause();  
         }
@@ -261,13 +261,9 @@ AVIATION.common.Slide.prototype = {
         console.log("!* previous event fired");
         // go to the previous track
         slide.resetStatusBar();
-
         $(slide).trigger("pause");
-
         $(slide).trigger("reset");
-
         slide.mediaActiveIndex--;
-
         $(slide).trigger("play");
       },
       replay: function(e){
@@ -282,13 +278,18 @@ AVIATION.common.Slide.prototype = {
         console.log("!* replayOne event fired");
         $(slide).trigger("previous");
       },
-      reset: function(e){
+      reset: function(e, status){
         console.log("!* reset event fired");
 
         if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
           slide.players[slide.mediaActiveIndex].player.pause();
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
+        console.log("status on reset: " + status);
+        if(status){
+          slide.setStatus(status);
+        }
+        console.log("reset event finished");
       },
       setPosition: function(e, position){
         if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
@@ -1322,6 +1323,7 @@ AVIATION.common.Slide.prototype = {
             class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
             html: actions[act].title,
             "data-toggle": options.dataToggle,
+            "data-target": "#" + actions[act].id + "_modal",
             "data-orderNumber": actions[act].orderNumber,
             role: options.role,
             style: options.style
@@ -1672,7 +1674,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var slide = this, index = this.index || 0, rowNewData = {}, allFlight = [],  
-        instrumentOptions = {}, csvPlayers = [], parsed = 0, c; //runFlight;
+        instrumentOptions = {}, csvPlayers = [], parsed = 0, c, playFirstLine = false; //runFlight;
 
     if(slide.options.enablePanel && !slide.options.noCSV){
 
@@ -1682,63 +1684,72 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-        slide.panelPause = false;
+
+        if(!this.config.panelPause){
+          this.config.pausedIndex = this.index || slide.pausedPanelIndex || 0;
+        }
+
+        if(this.config.line !== undefined){
+          this.config.pausedIndex = this.config.line;
+          this.config.line = undefined;
+        }
+
+        console.log("starting csv at: " + this.config.pausedIndex);
+        
         slide.panelEnd = false;
         this.config.panelPause = false;
-        this.panelEnd = false;
-        if(this.config.line !== undefined){
-          i = this.config.line;
-        } else {
-          i = this.index || slide.pausedPanelIndex || 0;
-        }
-        
+        this.config.panelEnd = false;
 
-        console.log("inside papaComplete - paused: " + slide.panelPause + "index: " + i);
         console.log("this csv is: ");
         console.log(this.config.selfIndex);
 
         function runFlight(flight, slide, end){
+          var i = player.config.pausedIndex;
           slide.setInstrumentStatus2("Instrument panel is playing...");
 
-          if(flight && flight.length > 0 && i < flight.length && !slide.panelPause && !player.config.panelPause){
+          if(flight && flight.length > 0 && i < flight.length && !player.config.panelPause){
             instrumentOptions = {
               attitude: {
                 pitch: ( flight[i][30] ),
-                roll: ( -( flight[i][31] ) ), //( -(allFlight[i].roll) ) 
+                roll: ( -( flight[i][31] ) ),
               },
               heading: {
                 heading: flight[i][33]
               },
               altimeter: {
-                altitude: flight[i][41],//allFlight[i].altitude
+                altitude: flight[i][41],
                 pressure: flight[i][19]
               },
               airspeed: {
-                airSpeed: flight[i][7]//allFlight[i].airSpeed
+                airSpeed: flight[i][7]
               },
               turn_coordinator: {
                 turnRate: ( ( parseFloat(flight[i][28]) * 57.3 ) + (parseFloat(flight[i][31]) ) ),
                 yaw: ( parseFloat( flight[i][29] || 0 ) + 0.5 )
               },
               variometer: {
-                vario: (parseFloat(flight[i][15]) / 100)//allFlight[i].vario
+                vario: (parseFloat(flight[i][15]) / 100)
               }
             };
 
             slide.setAllInstruments( instrumentOptions );
-            
-            // eval here?
-            // if(flight[i][flight[i].length-1]){
-            //   flight[i][flight[i].length-1] 
-            // }
 
             if(flight[i][flight[i].length-1] && typeof flight[i][flight[i].length-1] === 'function'){
               flight[i][flight[i].length-1]();
             }
 
-            i++;
-          } else {
+            player.config.pausedIndex++;
+
+            // if statement to pause if first csv and needs to set panel
+            if(slide.options.setPanel && slide.justLoaded){
+              if(player.config.selfIndex === 0 && player.config.pausedIndex === 1){
+                player.config.panelPause = true;
+                slide.justLoaded = false;
+              }
+            }
+          } else if (i !== 1) {
             if(i < flight.length){
+              player.config.pausedIndex = i;
               $(slide).trigger("instrumentPause", i);
             } else {
               i = 0;
@@ -1747,6 +1758,7 @@ AVIATION.common.Slide.prototype = {
               data.element.index = slide.mediaActiveIndex;
               data.slide = slide;
 
+              player.config.panelEnd = true;
               slide.panelEnd = true;
 
               if(end && typeof end === 'function'){
@@ -1760,8 +1772,6 @@ AVIATION.common.Slide.prototype = {
           }
         }
 
-        //interval = setInterval( function(){runFlight(flight, slide, end); },75 );
-
         interval = setInterval( runFlight.bind(player, flight, slide, end),75 );
       };
 
@@ -1769,8 +1779,8 @@ AVIATION.common.Slide.prototype = {
         console.log("attempting to pause csv: ");
         slide.panelPause = true;
         this.config.panelPause = true;
-        console.log(this);
         console.log("for csv: " + this.config.selfIndex);
+        slide.setInstrumentStatus2("Instrument panel is paused");
       };
 
       var papaCurrentLine = function(index){
@@ -1784,18 +1794,16 @@ AVIATION.common.Slide.prototype = {
         console.log("for csv: " + this.config.selfIndex);
         console.log("reseting csv line: "+ this.config.line);
         this.config.line = line;
-        console.log("2reseting csv line: "+ this.config.line);
       };
 
       var papaCueLine = function(line, callback){
         console.log("csv cueing at line " + line);
-        console.log(this.result);
         this.result.data[line].push(callback);
       };
 
       var papaCueEnd = function(callback){
         console.log("papaparse end event");
-        slide.setInstrumentStatus2("The flight has finished.");
+        slide.setInstrumentStatus2("The flight has finished");
         this.end = callback;
       };
 
@@ -1804,11 +1812,6 @@ AVIATION.common.Slide.prototype = {
       };
 
       var papaSaveObject = function(result){
-        console.log("inside papaSaveObject");
-        console.log("this is: ");
-        console.log(this);
-        console.log(c);
-        console.log(result);
         this.result = result;
         this.play = papaComplete;
         this.pause = papaPause;
@@ -1822,7 +1825,12 @@ AVIATION.common.Slide.prototype = {
         parsed++;
 
         if(parsed === csvs.length){
-          slide.setInstrumentStatus2("Instrument panel ready.");
+          // play the first line of first csv only
+          if(slide.justLoaded && slide.options.setPanel){
+            csvPlayers[0].play();
+          }
+
+          slide.setInstrumentStatus2("Instrument panel ready");
           callback(csvPlayers);
         }
       };
@@ -1838,6 +1846,7 @@ AVIATION.common.Slide.prototype = {
             fastMode: true,
             selfIndex: c,
             panelPause: false,
+            panelEnd: false,
             line: 0
           },
           download: true,
@@ -1920,21 +1929,23 @@ AVIATION.common.Slide.prototype = {
   activateTimer: function(seconds, isAuto){
     "use strict";
 
-    var timer = this._timer, slideObject = this, continueId = slideObject.options.continueId,
-        counter = seconds || 5, // duration of the timer (each 1 point is about a second)
-        statusBar = this.slideElements.statusBar;
+    var slideObject = this, timer = this._timer, continueId = slideObject.options.continueId,
+        counter = seconds || 6, // duration of the timer (each 1 point is about a second)
+        statusBar = slideObject.slideElements.statusBar;
 
     if (!timer){
-      this._timer = "";
-      timer = this._timer;
+      slideObject._timer = "";
+      timer = slideObject._timer;
     }
 
     var resetTimerOnClick = function(e){
       e.preventDefault();
       // console.log("clicked reset on status bar");
       slideObject.resetTimer(true);
+
       if(continueId && continueId !== ""){
-        $(this).on('click', function(){
+        statusBar.off();
+        statusBar.on('click', function(){
           slideObject.redirectToPage(continueId); // any URL
         });
       }
@@ -1943,47 +1954,57 @@ AVIATION.common.Slide.prototype = {
     // enable the status bar because we need to accept clicks
     statusBar.prop("disabled", false);
 
+    statusBar.off();
     statusBar.on('click', resetTimerOnClick);
   
     if(isAuto) {
-      statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
+      slideObject.setStatus("Continuing in " + counter.toString() + "... Click here to cancel");
     
-      this._timer = setInterval( function(){
-          counter--;
-          if(counter < 0) {
-            clearInterval(slideObject._timer);
-            
-            if(continueId && continueId !== ""){
-              slideObject.redirectToPage(continueId);
-              statusBar.text("Redirecting...");
+      if(!slideObject.timerActivated){
+        slideObject.timerActivated = true;
+        slideObject._timer = setInterval( function(){
+            counter--;
+            if(counter < 0) {
+              clearInterval(slideObject._timer);
+              
+              if(continueId && continueId !== ""){
+                //slideObject.redirectToPage(continueId);
+                slideObject.setStatus("Redirecting...");
+              } else {
+                slideObject.setStatus("Error: continueId is undefined");
+              }
             } else {
-              statusBar.text("Error: continueId is undefined");
+              slideObject.setStatus("Continuing in " + counter.toString() + "... Click here to cancel");
             }
-          } else {
-            statusBar.text("Continuing in " + counter.toString() + "... Click here to cancel");
-          }
-      }, 1000);
+        }, 1000);
+      }
+      console.log("timer after setting");
+      console.log(slideObject._timer);
     } else {
-      this._timer = null;
+      slideObject.setStatus('Press "Continue" when ready');
+      slideObject._timer = null;
     }
   },
 
   resetTimer: function( manual ){
     "use strict";
-
-    if(this._timer){
+    var slide = this;
+    if(slide._timer){
       if(manual){
-        this.slideElements.statusBar.text("Continue when ready");
+        slide.setStatus('Press "Continue" when ready');
       }
 
-      clearInterval(this._timer);
+      console.log("trying to resetTimer");
+      console.log(slide._timer);
+      clearInterval(slide._timer);
+      slide.timerActivated = false;
     }
   },
   
   buttonOnClickEvents: function(){
+    var slide = this;
     // check if there is a timer and reset if we click on a control button
-    this.resetTimer();
-
+    slide.resetTimer();
   },
 
   initSlideButtonEvents: function(){
@@ -2256,10 +2277,8 @@ AVIATION.common.Slide.prototype = {
       case "csv":
       /**
         player.papaCueEnd(function(){
-
         });
         player.papaCuePause(function(){
-
         });
       **/
         break;
@@ -2459,6 +2478,10 @@ AVIATION.common.Slide.prototype = {
     var controls = this.slideElements.slideControls, active = this.mediaActiveIndex,
         players = this.players, slide = this, contentActive = this.contentActiveIndex;
 
+    console.log("check button state");
+    console.log(contentActive);
+    console.log(this.slideContent.length);
+
     if(this.options.showSlideControls){
 
       if(active < 1 && players.length > 1){
@@ -2469,7 +2492,6 @@ AVIATION.common.Slide.prototype = {
         controls.next.attr("disabled", false);
         controls.next.removeProp("disabled");
         controls.next.removeAttr("disabled");
-
         //if(this.slideHasListened[active]){
         //}
       } else {
@@ -2477,16 +2499,14 @@ AVIATION.common.Slide.prototype = {
           console.log("active is before the last player");
           controls.previous.prop("disabled", false);
           controls.previous.removeAttr("disabled");
-
           //if(this.slideHasListened[active]){
             //controls.next.prop("disabled", false);
             //controls.next.removeAttr("disabled");
           //} else {
-
-            controls.next.prop("disabled", false);
-            controls.next.attr("disabled", false);
-            controls.next.removeProp("disabled");
-            controls.next.removeAttr("disabled");
+          controls.next.prop("disabled", false);
+          controls.next.attr("disabled", false);
+          controls.next.removeProp("disabled");
+          controls.next.removeAttr("disabled");
           //}
         } else if (active >= players.length - 1){
           console.log("active is the last players length");
@@ -2525,20 +2545,19 @@ AVIATION.common.Slide.prototype = {
   },
 
   setStatus: function(action){
-    var slide = this, status = this.slideElements.statusBar;
+    var slide = this, status = slide.slideElements.statusBar;
+    console.log("setting status to: " + action);
 
     switch(action){
       case "play":
-      case "replay":
         status.text("Playing...");
         break;
       case "pause":
         status.text("Paused");
         break;
-      case "end":
-        break;
       default:
         if(action){
+          console.log("setting custom status to: " + action);
           status.text(action);
         } else {
           status.text("Status is undefined!");
@@ -2628,7 +2647,6 @@ AVIATION.common.Slide.prototype = {
         if(oldActions && typeof oldActions != "function"){
           oldActions = eval(oldActions);
         }
-
         if(oldActions && typeof oldActions === 'function'){
           oldActions();
         }
@@ -2889,6 +2907,9 @@ AVIATION.common.Slide.prototype = {
     this.throttleContainer = options.throttleContainer || "#sliderContainer";
 
     this.panelEnd = false;
+    this.justLoaded = true;
+
+    this.timerActivated = false;
     /* error handling example
     try {
       // if smth might cause an error....
@@ -3017,7 +3038,6 @@ AVIATION.common.Slide.prototype = {
 
 /*
     $(this).on("checkScanningPattern", function(e, evt){
-
     });
 */
     // new check to see if we've already moved past this advanceWith index

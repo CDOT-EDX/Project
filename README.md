@@ -16,7 +16,6 @@
 timer (new media option , check the description and the example bellow) 
 add timer.min.js file into /aviation folder and configure JS assets (check Neil's documentation)
 ```
-
 *added default options for SlickQuiz:*
 ```
 	showRemediationOnSuccess
@@ -65,6 +64,7 @@ Acceptable options and defaults are as follows:
 ```javascript
     serverBaseUrl:      window.location.protocol + "//" + window.location.host + "/",
     apacheServerBaseUrl:window.location.protocol + "//" + window.location.host + ":25080/",
+    setPanel:           false, // makes the first line of the first CSV set panel before CSV plays
     parentSlide:        {},
     development         false, // if running inside a devstack set to true
     showAvatars:        false,

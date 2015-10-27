@@ -1,3 +1,4 @@
+
 /***
   *   Custom library/framework to speed up content development
   *   for the edX Aviation project at CDOT
@@ -33,7 +34,6 @@ AVIATION.common = {};
 /*
 AVIATION.common.Player = function(){
   "use strict";
-
 
 };
 */
@@ -99,7 +99,6 @@ AVIATION.common.Slide.prototype = {
     events = {
       /*
       "continuePattern": function(e, data){
-
       },
       */
       "correctAdvance": function(e, data){
@@ -1514,15 +1513,18 @@ AVIATION.common.Slide.prototype = {
       }
 
       console.log("initing panel!");
-
-      options = {
-        size: 200,
-        showBox: false,
-        showScrews: true,
-        bootstrapFriendly: true,
-        bootstrapClass: "col-xs-" + instBootCol,
-        img_directory: slide.options.apacheServerBaseUrl + 'Project/library/static/img/instruments/'
-      };
+ 	options={
+ 		size: 200,
+ 		beacononeshow: slide.options.panelOverlay,
+ 		beacontwoshow: slide.options.panelOverlay,
+ 		ils: slide.options.panelOverlay,
+        	off_flag: slide.options.offFlag,
+		showBox: false,
+        	showScrews: true,
+        	bootstrapFriendly: true,
+        	bootstrapClass: "col-xs-" + instBootCol,
+        	img_directory: slide.options.apacheServerBaseUrl + 'Project/library/static/img/instruments/'
+        };
 
       // /c4x/Seneca_College/M01S01_Test/asset/
 
@@ -1660,7 +1662,7 @@ AVIATION.common.Slide.prototype = {
 
     instrumentFunctions = {
       airspeed          : [ "setAirSpeed" ],
-      attitude          : [ "setRoll" , "setPitch", /*"setOffFlag"*/ ],
+      attitude          : [ "setRoll" , "setPitch","setILSLocalizer","setILSGlideslope" /*"setOffFlag"*/ ],
       altimeter         : [ "setAltitude", "setPressure" ],
       turn_coordinator  : [ "setTurn", "setSlip" ],
       heading           : [ "setHeading", "setBeaconOne", "setBeaconTwo" ],
@@ -1696,6 +1698,7 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
+	//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
         slide.panelPause = false;
         slide.panelEnd = false;
         this.config.panelPause = false;
@@ -1719,10 +1722,17 @@ AVIATION.common.Slide.prototype = {
               attitude: {
                 pitch: ( flight[i][30] ),
                 roll: ( -( flight[i][31] ) ), //( -(allFlight[i].roll) ) 
-              },
+        	ils: slide.options.panelOverlay,      
+		ilslocalizer: flight[i][56],
+		ilsglideslope: flight[i][57]
+	      },
               heading: {
-                heading: flight[i][33]
-              },
+                heading: flight[i][33],
+              	beaconOne: flight[i][67],//67
+		showBeaconOne: slide.options.panelOverlay,
+		beaconTwo: flight[i][71],//71
+		showBeaconTwo: slide.options.panelOverlay
+	      },
               altimeter: {
                 altitude: flight[i][41],//allFlight[i].altitude
                 pressure: flight[i][19]
@@ -1738,7 +1748,6 @@ AVIATION.common.Slide.prototype = {
                 vario: (parseFloat(flight[i][15]) / 100)//allFlight[i].vario
               }
             };
-
             slide.setAllInstruments( instrumentOptions );
             
             // eval here?
@@ -2270,7 +2279,6 @@ AVIATION.common.Slide.prototype = {
       case "csv":
       /**
         player.papaCueEnd(function(){
-
         });
         player.papaCuePause(function(){
 
@@ -2633,7 +2641,6 @@ AVIATION.common.Slide.prototype = {
         if(oldActions && typeof oldActions != "function"){
           oldActions = eval(oldActions);
         }
-
         if(oldActions && typeof oldActions === 'function'){
           oldActions();
         }
@@ -2699,8 +2706,9 @@ AVIATION.common.Slide.prototype = {
           quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
-
-          generalContentId : "#generalContentParent",
+	  panelOverlay : false,
+          offFlag: false,
+	  generalContentId : "#generalContentParent",
           contentParentId : "#contentParent",
           imageParentId: "#imageParent",
 
@@ -3016,7 +3024,6 @@ AVIATION.common.Slide.prototype = {
 
 /*
     $(this).on("checkScanningPattern", function(e, evt){
-
     });
 */
     // new check to see if we've already moved past this advanceWith index
