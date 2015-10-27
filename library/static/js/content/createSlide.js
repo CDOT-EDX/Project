@@ -234,16 +234,16 @@ AVIATION.common.Slide.prototype = {
         var nextContent = slide.slideContent[slide.contentActiveIndex+1], type;
         console.log("!* next event fired");
         // move on to the next track
-        if(data && data !== undefined){
+        //if(data && data !== undefined){
           if(nextContent && nextContent.media && nextContent.media !== undefined && nextContent.media.type &&
               nextContent.media.type !== undefined){
             type = nextContent.media.type;
             if(type === 'button' || type === 'highlight' || type === 'quiz'){ // or pattern?
-              $(slide).trigger("contentNext");
+              $(slide).trigger("contentNext", data);
               return;
             }
           }
-        }
+        //}
         // if we got this far, we need to increment mediaActiveIndex instead
         $(slide).trigger("nextMedia");
       },
@@ -1968,7 +1968,7 @@ AVIATION.common.Slide.prototype = {
               clearInterval(slideObject._timer);
               
               if(continueId && continueId !== ""){
-                //slideObject.redirectToPage(continueId);
+                slideObject.redirectToPage(continueId);
                 slideObject.setStatus("Redirecting...");
               } else {
                 slideObject.setStatus("Error: continueId is undefined");
@@ -2224,7 +2224,12 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-
+  /***
+    *   This method iterates through all of the slideContent elements
+    *   and assigns them as events to corresponding media
+    *   It also tracks the number of "patterns" that are on the slide
+    *   and maps them to their media items
+    **/
   initMediaEvents : function () {
       "use strict";
 
@@ -2232,7 +2237,7 @@ AVIATION.common.Slide.prototype = {
 
       // TODO: change "slideHasListened" to "isCompleted"??
       var players = this.players, content = this.slideContent, hasListened = this.slideHasListened,
-          slideObject = this, player, i, slide = this, playerInitted = [];
+          slideObject = this, player, i, slide = this, playerInitted = [], patternId = 0;
 
       for(i=0; i < players.length; i++){
         playerInitted.push(false);
@@ -2241,6 +2246,11 @@ AVIATION.common.Slide.prototype = {
       console.log(content);
 
       for(i = 0; i < content.length; i++){
+        if(content[i].advanceWith && content[i].advanceWith.action && content[i].advanceWith.action === 'pattern'){
+          slide.patternMap.push({ "media": content[i].media.index, "id" : patternId});
+          patternId++;
+        }
+
         if(content[i].media && content[i].media.type && 
             (content[i].media.type !== "button" && content[i].media.type !== "highlight") ){
           // case for audio, csv, timer
@@ -2910,6 +2920,8 @@ AVIATION.common.Slide.prototype = {
     this.justLoaded = true;
 
     this.timerActivated = false;
+
+    this.patternMap = [];
     /* error handling example
     try {
       // if smth might cause an error....
@@ -3031,7 +3043,7 @@ AVIATION.common.Slide.prototype = {
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
         allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex, element,
         //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
-        scanPattern = slide.options.scanningPatternArray,
+        scanPattern = slide.options.scanningPatternArray, patternId,
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
 
 //  $(this).trigger("click");
@@ -3109,7 +3121,12 @@ AVIATION.common.Slide.prototype = {
       } else if( (type === 'highlight' || type === 'quiz' ) && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
-        
+        for(i=0; i<slide.patternMap.length; i++){
+          if(mediaActiveIndex === slide.patternMap[i].media){
+            patternId = slide.patternMap[i].id;
+          }
+        }
+        $(slide).trigger("completedQuiz", "pattern", patternId);
         slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
         
         if(type === 'quiz'){
