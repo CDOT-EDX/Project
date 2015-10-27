@@ -234,16 +234,16 @@ AVIATION.common.Slide.prototype = {
         var nextContent = slide.slideContent[slide.contentActiveIndex+1], type;
         console.log("!* next event fired");
         // move on to the next track
-        if(data && data !== undefined){
+        //if(data && data !== undefined){
           if(nextContent && nextContent.media && nextContent.media !== undefined && nextContent.media.type &&
               nextContent.media.type !== undefined){
             type = nextContent.media.type;
             if(type === 'button' || type === 'highlight' || type === 'quiz'){ // or pattern?
-              $(slide).trigger("contentNext");
+              $(slide).trigger("contentNext", data);
               return;
             }
           }
-        }
+        //}
         // if we got this far, we need to increment mediaActiveIndex instead
         $(slide).trigger("nextMedia");
       },
