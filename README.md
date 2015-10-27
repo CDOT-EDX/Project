@@ -1,7 +1,8 @@
 *last updated on October 27/2015*
 
-*Can enbable the panel Overlay with panelOverlay: true*
-*When you need the offFlag you can call it with offFlag: true* 
+*Can enable the panel Overlay with panelOverlay: true*
+
+*When you need the off Flag you can call it with offFlag: true* 
 
 
 
