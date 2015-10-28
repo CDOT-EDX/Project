@@ -1714,8 +1714,17 @@ AVIATION.common.Slide.prototype = {
                 roll: ( -( flight[i][31] ) ),
               },
               heading: {
+<<<<<<< HEAD
                 heading: flight[i][33]
               },
+=======
+                heading: flight[i][33],
+              	beaconOne: (-(flight[i][66])),//67 on the other csv
+		showBeaconOne: slide.options.panelOverlay,
+		beaconTwo: flight[i][70],//71 on the other csv
+		showBeaconTwo: slide.options.panelOverlay
+	      },
+>>>>>>> 37ca835526aefacfd45fe1ff23a6fe8b72052769
               altimeter: {
                 altitude: flight[i][41],
                 pressure: flight[i][19]
