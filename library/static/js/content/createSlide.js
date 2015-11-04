@@ -3140,6 +3140,11 @@ AVIATION.common.Slide.prototype = {
 
       console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
+      for(i=0; i<slide.patternMap.length; i++){
+        if(mediaActiveIndex === slide.patternMap[i].media){
+          patternId = slide.patternMap[i].id;
+        }
+      }
 
       // check the logic
       if(type && index===undefined && advanceWith.action===undefined){
@@ -3152,14 +3157,11 @@ AVIATION.common.Slide.prototype = {
         if(type === 'quiz'){
           $(slide).trigger("correctAdvance");
         } else if( _.contains(advanceWith.index, index) ){
-          for(i=0; i<slide.patternMap.length; i++){
-            if(mediaActiveIndex === slide.patternMap[i].media){
-              patternId = slide.patternMap[i].id;
-            }
-          }
-          $(slide).trigger("completedQuiz", "action", patternId, index);
+
+          $(slide).trigger("completedQuiz", "action", patternId, true);
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
+          $(slide).trigger("completedQuiz", "action", patternId, false);
           $(slide).trigger("wrongAdvance");
         }
 
@@ -3171,17 +3173,14 @@ AVIATION.common.Slide.prototype = {
       } else if( (type === 'highlight' || type === 'quiz' ) && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
-        for(i=0; i<slide.patternMap.length; i++){
-          if(mediaActiveIndex === slide.patternMap[i].media){
-            patternId = slide.patternMap[i].id;
-          }
-        }
-        $(slide).trigger("completedQuiz", "action", patternId, index);
+
         slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
         
         if(type === 'quiz'){
           // all good, let's wait for next input...
         } else if( scanPattern[overallScanIndex+1] === index){
+          $(slide).trigger("completedQuiz", "action", patternId, true);
+
           if(element !== undefined){
             //$(element).pulse('destroy');
 
@@ -3226,6 +3225,7 @@ AVIATION.common.Slide.prototype = {
             }
           }
         } else {
+          $(slide).trigger("completedQuiz", "action", patternId, false);
           unsuccesfulAttempts++;
           if(element !== undefined){
             //$(element).pulse('destroy');
