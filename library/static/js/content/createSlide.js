@@ -484,7 +484,16 @@ AVIATION.common.Slide.prototype = {
         class: "row",
       }).appendTo(slide.container);
     }
+
     this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
+
+
+    if(this.options.studentGraph){
+      callback();
+      this.buildGraph();
+      return;
+    }
+
 
     slide.initPanel(slide.options.panelType);
     
@@ -504,9 +513,15 @@ AVIATION.common.Slide.prototype = {
     
   },
 
-  buildRetryModal: function(){
+  // will generate the graph of KCs for student and their progress
+  buildGraph: function(){
     "use strict";
 
+  },
+
+  // modal that will prompt user to retry/review/continue
+  buildRetryModal: function(){
+    "use strict";
 
   },  
 
