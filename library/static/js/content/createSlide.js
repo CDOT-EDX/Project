@@ -2164,6 +2164,23 @@ AVIATION.common.Slide.prototype = {
     return timers;
   },
 
+  initAltMedia: function(callback){
+    "use strict";
+
+    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], slide.altMedia = [];
+
+    if(altMediaFiles){
+      altMedia = slide.buildSlideAudios(altMediaFiles);
+
+      for(i=0; i < altMedia.length; i++){
+        slide.altPlayers.push({ type: "audio", player: altMedia[i] });
+      }
+    }
+
+    //slide.initAltMediaEvents();
+
+  },
+
   initMedia: function(callback){
     "use strict";
 
@@ -2174,7 +2191,6 @@ AVIATION.common.Slide.prototype = {
         medias = {};
 
     if(mediaFiles){
-
       for(i=0; mediaFiles && i < mediaFiles.length; i++){
         switch(mediaFiles[i].type){
           case "audio":
