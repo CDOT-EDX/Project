@@ -3151,10 +3151,17 @@ AVIATION.common.Slide.prototype = {
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
           $(slide).trigger("correctAdvance");
-        } else if( _.contains(advanceWith.index, index) )
+        } else if( _.contains(advanceWith.index, index) ){
+          for(i=0; i<slide.patternMap.length; i++){
+            if(mediaActiveIndex === slide.patternMap[i].media){
+              patternId = slide.patternMap[i].id;
+            }
+          }
+          $(slide).trigger("completedQuiz", "action", patternId, index);
           $(slide).trigger("correctAdvance", advanceWith);
-        else
+        } else {
           $(slide).trigger("wrongAdvance");
+        }
 
       } else if(type === 'csv' && slide.completedScan >= slide.options.minScan){
         $(slide).trigger("correctAdvance", advanceWith);
@@ -3169,7 +3176,7 @@ AVIATION.common.Slide.prototype = {
             patternId = slide.patternMap[i].id;
           }
         }
-        $(slide).trigger("completedQuiz", "pattern", patternId);
+        $(slide).trigger("completedQuiz", "action", patternId, index);
         slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
         
         if(type === 'quiz'){
