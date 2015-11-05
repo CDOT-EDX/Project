@@ -507,7 +507,7 @@ AVIATION.common.Slide.prototype = {
       slide.buildFooter();
       slide.buildModals();
       slide.resetSlide();
-      slide.initAltmedia();
+      slide.initAltMedia();
 
       // finished thus activate the slide
       slide.activateSlide();
