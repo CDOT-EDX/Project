@@ -118,7 +118,7 @@ AVIATION.common.Slide.prototype = {
         console.log("!* wrong advance triggered");
         console.log("!* wrong advance data");
         console.log(data);
-        if(data && data.onFail && data.onFail.index && data.onFail.index !== undefined){
+        if(data && data.onFail && data.onFail.index !== undefined){
           $(slide).trigger("pause");
           $(slide).trigger("reset");
           $(slide).trigger("playAltIndex", data.onFail);
