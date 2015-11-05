@@ -3158,10 +3158,10 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("correctAdvance");
         } else if( _.contains(advanceWith.index, index) ){
 
-          $(slide).trigger("completedQuiz", "action", patternId, true);
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: true} );
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
-          $(slide).trigger("completedQuiz", "action", patternId, false);
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: false} );
           $(slide).trigger("wrongAdvance");
         }
 
@@ -3179,8 +3179,7 @@ AVIATION.common.Slide.prototype = {
         if(type === 'quiz'){
           // all good, let's wait for next input...
         } else if( scanPattern[overallScanIndex+1] === index){
-          $(slide).trigger("completedQuiz", "action", patternId, true);
-
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: true} );
           if(element !== undefined){
             //$(element).pulse('destroy');
 
@@ -3225,7 +3224,7 @@ AVIATION.common.Slide.prototype = {
             }
           }
         } else {
-          $(slide).trigger("completedQuiz", "action", patternId, false);
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: true} );
           unsuccesfulAttempts++;
           if(element !== undefined){
             //$(element).pulse('destroy');
