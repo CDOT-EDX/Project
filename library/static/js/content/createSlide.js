@@ -116,6 +116,8 @@ AVIATION.common.Slide.prototype = {
       },
       "wrongAdvance": function(e, data){
         console.log("!* wrong advance triggered");
+        console.log("!* wrong advance data");
+        console.log(data);
         if(data && data.onFail && data.onFail.index && data.onFail.index !== undefined){
           $(slide).trigger("pause");
           $(slide).trigger("reset");
@@ -127,7 +129,7 @@ AVIATION.common.Slide.prototype = {
         var index = data.index, altPlayer = slide.altPlayers;
 
         console.log("!* playAltIndex triggered");
-
+        console.log("!* altIndex: " + index);
         slide.checkSlideControlPlayButtons("play");
         // TODO: or disable all buttons
 
