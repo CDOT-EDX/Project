@@ -129,6 +129,8 @@ AVIATION.common.Slide.prototype = {
         console.log("!* playAltIndex triggered");
 
         slide.checkSlideControlPlayButtons("play");
+        // TODO: or disable all buttons
+
 
         if(altPlayer[index] && altPlayer[index].player){
           altPlayer[index].player.play();
@@ -3144,7 +3146,7 @@ AVIATION.common.Slide.prototype = {
       console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
       for(i=0; i<slide.patternMap.length; i++){
-        if(mediaActiveIndex === slide.patternMap[i].media){
+        if(slide.mediaActiveIndex === slide.patternMap[i].media){
           patternId = slide.patternMap[i].id;
         }
       }
@@ -3154,18 +3156,18 @@ AVIATION.common.Slide.prototype = {
         if( _.contains(advanceWith.type, type) )
           $(slide).trigger("correctAdvance", advanceWith);
         else
-          $(slide).trigger("wrongAdvance");
+          $(slide).trigger("wrongAdvance", advanceWith);
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
-          $(slide).trigger("correctAdvance");
+          $(slide).trigger("correctAdvance", advanceWith);
         } else if( _.contains(advanceWith.index, index) ){
 
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: true} );
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: false} );
-          $(slide).trigger("wrongAdvance");
+          $(slide).trigger("wrongAdvance", advanceWith);
         }
 
       } else if(type === 'csv' && slide.completedScan >= slide.options.minScan){
@@ -3243,7 +3245,7 @@ AVIATION.common.Slide.prototype = {
           }
         }
       } else {
-        $(slide).trigger("wrongAdvance");
+        $(slide).trigger("wrongAdvance", advanceWith);
       }
 
       slide.patternInnerIndex = innerIndex;
