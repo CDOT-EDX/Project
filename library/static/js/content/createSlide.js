@@ -2175,6 +2175,8 @@ AVIATION.common.Slide.prototype = {
 
     var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [];
 
+    console.log("initting altmedia");
+
     slide.altPlayers = [];
 
     if(altMediaFiles){
@@ -2913,6 +2915,8 @@ AVIATION.common.Slide.prototype = {
     this.extraActiveIndex = options.extraActiveIndex || 0;
 
     this.mediaFiles = options.mediaFiles;
+
+    this.altMediaFiles = options.altMediaFiles;
 
     console.log("** AUDIO FILES? ****");
     console.log(this.mediaFiles);
