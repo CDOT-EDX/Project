@@ -2298,8 +2298,7 @@ AVIATION.common.Slide.prototype = {
       console.log(content);
 
       for(i = 0; i < content.length; i++){
-        if( (content[i].advanceWith && content[i].advanceWith.action && content[i].advanceWith.action === 'pattern' ) || 
-              (content[i].advanceWith && content[i].advanceWith.type && (content[i].advanceWith.type === 'highlight' || content[i].advanceWith.type === 'button' ) ) ){
+        if( (content[i].advanceWith && content[i].advanceWith.evaluate){
           slide.patternMap.push({ "media": content[i].media.index, "id" : patternId});
           patternId++;
         }

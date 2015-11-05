@@ -2,6 +2,7 @@
 
 *new option `"studentGraph": true` is available to show students KC scores at the end of a Snap*
 
+*new option `"evaluate": true` is available on advanceWith to let the frontend know that this advanceWith is marked
 
 *Can enable the panel Overlay with panelOverlay: true*
 
@@ -303,6 +304,7 @@ Acceptable options and defaults are as follows:
         callback: (function(){ console.log("this is a callback function"); }),
         "advanceWith": {
             "action": "pattern",
+            "evaluate": true,
             // for both properties below, anything to do with the contentIndex will only rebuild the content for that
             // index and not replay the media associated with the content
             // BUT, anything to do with mediaIndex, will restart the media and run all of the content associated with that media again
