@@ -2167,7 +2167,9 @@ AVIATION.common.Slide.prototype = {
   initAltMedia: function(callback){
     "use strict";
 
-    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], slide.altMedia = [];
+    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [];
+
+    slide.altPlayers = [];
 
     if(altMediaFiles){
       altMedia = slide.buildSlideAudios(altMediaFiles);
