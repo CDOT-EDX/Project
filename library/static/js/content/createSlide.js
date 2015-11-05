@@ -484,7 +484,16 @@ AVIATION.common.Slide.prototype = {
         class: "row",
       }).appendTo(slide.container);
     }
+
     this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
+
+
+    if(this.options.studentGraph){
+      callback();
+      this.buildGraph();
+      return;
+    }
+
 
     slide.initPanel(slide.options.panelType);
     
@@ -504,9 +513,15 @@ AVIATION.common.Slide.prototype = {
     
   },
 
-  buildRetryModal: function(){
+  // will generate the graph of KCs for student and their progress
+  buildGraph: function(){
     "use strict";
 
+  },
+
+  // modal that will prompt user to retry/review/continue
+  buildRetryModal: function(){
+    "use strict";
 
   },  
 
@@ -2149,6 +2164,25 @@ AVIATION.common.Slide.prototype = {
     return timers;
   },
 
+  initAltMedia: function(callback){
+    "use strict";
+
+    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [];
+
+    slide.altPlayers = [];
+
+    if(altMediaFiles){
+      altMedia = slide.buildSlideAudios(altMediaFiles);
+
+      for(i=0; i < altMedia.length; i++){
+        slide.altPlayers.push({ type: "audio", player: altMedia[i] });
+      }
+    }
+
+    //slide.initAltMediaEvents();
+
+  },
+
   initMedia: function(callback){
     "use strict";
 
@@ -2159,7 +2193,6 @@ AVIATION.common.Slide.prototype = {
         medias = {};
 
     if(mediaFiles){
-
       for(i=0; mediaFiles && i < mediaFiles.length; i++){
         switch(mediaFiles[i].type){
           case "audio":
@@ -3109,6 +3142,11 @@ AVIATION.common.Slide.prototype = {
 
       console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
+      for(i=0; i<slide.patternMap.length; i++){
+        if(mediaActiveIndex === slide.patternMap[i].media){
+          patternId = slide.patternMap[i].id;
+        }
+      }
 
       // check the logic
       if(type && index===undefined && advanceWith.action===undefined){
@@ -3120,10 +3158,14 @@ AVIATION.common.Slide.prototype = {
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
           $(slide).trigger("correctAdvance");
-        } else if( _.contains(advanceWith.index, index) )
+        } else if( _.contains(advanceWith.index, index) ){
+
+          $(slide).trigger("completedQuiz", "action", patternId, true);
           $(slide).trigger("correctAdvance", advanceWith);
-        else
+        } else {
+          $(slide).trigger("completedQuiz", "action", patternId, false);
           $(slide).trigger("wrongAdvance");
+        }
 
       } else if(type === 'csv' && slide.completedScan >= slide.options.minScan){
         $(slide).trigger("correctAdvance", advanceWith);
@@ -3133,17 +3175,14 @@ AVIATION.common.Slide.prototype = {
       } else if( (type === 'highlight' || type === 'quiz' ) && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
-        for(i=0; i<slide.patternMap.length; i++){
-          if(mediaActiveIndex === slide.patternMap[i].media){
-            patternId = slide.patternMap[i].id;
-          }
-        }
-        $(slide).trigger("completedQuiz", "pattern", patternId);
+
         slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
         
         if(type === 'quiz'){
           // all good, let's wait for next input...
         } else if( scanPattern[overallScanIndex+1] === index){
+          $(slide).trigger("completedQuiz", "action", patternId, true);
+
           if(element !== undefined){
             //$(element).pulse('destroy');
 
@@ -3188,6 +3227,7 @@ AVIATION.common.Slide.prototype = {
             }
           }
         } else {
+          $(slide).trigger("completedQuiz", "action", patternId, false);
           unsuccesfulAttempts++;
           if(element !== undefined){
             //$(element).pulse('destroy');
