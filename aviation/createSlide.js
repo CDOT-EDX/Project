@@ -574,7 +574,7 @@ AVIATION.common.Slide.prototype = {
     };
 
     bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
-      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
       animation: false,
     });
 
@@ -632,7 +632,7 @@ AVIATION.common.Slide.prototype = {
     };
 
     bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
-      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
       animation: false,
     });
 
