@@ -1,9 +1,15 @@
-*last updated on October 27/2015*
+*last updated on November 5/2015*
+
+*experimental conditional version, needs testing*
+
+*new option `"studentGraph": true` is available to show students KC scores at the end of a Snap*
+
+*new option `"evaluate": true` is available on advanceWith to let the frontend know that this advanceWith is marked
+
 
 *Can enable the panel Overlay with panelOverlay: true*
 
 *When you need the off Flag you can call it with offFlag: true* 
-
 
 
 # Aviation Project
@@ -301,6 +307,7 @@ Acceptable options and defaults are as follows:
         callback: (function(){ console.log("this is a callback function"); }),
         "advanceWith": {
             "action": "pattern",
+            "evaluate": true,
             // for both properties below, anything to do with the contentIndex will only rebuild the content for that
             // index and not replay the media associated with the content
             // BUT, anything to do with mediaIndex, will restart the media and run all of the content associated with that media again
@@ -313,7 +320,11 @@ Acceptable options and defaults are as follows:
                 "callback": "(function(){ console.log('You did smth right'); })" // optional
             },
             "onFail": { ** optional if needed and currently under development
-                "index": 2, // which altMediaFile should be played (currently sound only)
+                "reviewId": "", // 
+                "showChoices": true, //
+                "maxFails": 1, //
+                "index": 2, // which altMediaFile should be played (currently sound only),
+                
                 "status": "That's not correct. Let's try this again", // what msg should we display in the status bar?
                 "resetContentIndex": 0 // which slideContent index do we need show as altMedia starts to play?
                 "resetMediaIndex": 0 // which media index do we need to play after altMedia?
