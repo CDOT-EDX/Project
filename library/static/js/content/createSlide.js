@@ -501,10 +501,15 @@ AVIATION.common.Slide.prototype = {
 
     if(this.options.studentGraph){
       callback();
-      this.buildGraph();
+      this.buildStudentGraph();
       return;
     }
 
+    if(this.options.instructorGraph){
+      callback();
+      this.buildInstructorGraph();
+      return;
+    }
 
     slide.initPanel(slide.options.panelType);
     
@@ -527,8 +532,116 @@ AVIATION.common.Slide.prototype = {
   },
 
   // will generate the graph of KCs for student and their progress
-  buildGraph: function(){
+  buildStudentGraph: function(){
     "use strict";
+
+    var helpers = Chart.helpers, canvas = document.getElementById('studentGraph'), randomScalingFactor, barChartData, bar, legendHolder;
+    randomScalingFactor = function() {
+      return Math.round(Math.random() * 100);
+    };
+    
+    barChartData = {
+        labels: ["Student Knowledge Components"],
+        datasets: [{
+          label: "KC3",
+          fillColor: "#949FB1",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC8",
+          fillColor: "#4D5360",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC11",
+          fillColor: "#F7464A",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC15",
+          fillColor: "#46BFBD",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC16",
+          fillColor: "#FDB45C",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }]
+    };
+
+    bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
+      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      animation: false,
+    });
+
+    legendHolder = document.createElement('div');
+    legendHolder.innerHTML = bar.generateLegend();
+
+    document.getElementById('legend').appendChild(legendHolder.firstChild);
+
+  },
+
+
+  buildInstructorGraph: function(){
+    "use strict";
+
+    var helpers = Chart.helpers, canvas = document.getElementById('instructorGraph'), randomScalingFactor, barChartData, bar, legendHolder;
+    
+    randomScalingFactor = function() {
+      return Math.round(Math.random() * 100);
+    };
+
+    barChartData = {
+      labels: ["Student 1", "Student 2", "Student 3", "Student 4"],
+      datasets: [{
+        label: "KC3",
+        fillColor: "#949FB1",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      }, {
+        label: "KC8",
+        fillColor: "#4D5360",
+        strokeColor: "rgba(151,187,205,0.8)",
+        highlightStroke: "rgba(151,187,205,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      },{
+        label: "KC11",
+        fillColor: "#F7464A",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      }, {
+        label: "KC15",
+        fillColor: "#46BFBD",
+        strokeColor: "rgba(151,187,205,0.8)",
+        highlightStroke: "rgba(151,187,205,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      },{
+        label: "KC16",
+        fillColor: "#FDB45C",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      }]
+
+    };
+
+    bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
+      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      animation: false,
+    });
+
+    legendHolder = document.createElement('div');
+    legendHolder.innerHTML = bar.generateLegend();
+
+    document.getElementById('legend').appendChild(legendHolder.firstChild);
 
   },
 
