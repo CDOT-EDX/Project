@@ -498,19 +498,6 @@ AVIATION.common.Slide.prototype = {
 
     this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
 
-
-    if(this.options.studentGraph){
-      callback();
-      this.buildStudentGraph();
-      return;
-    }
-
-    if(this.options.instructorGraph){
-      callback();
-      this.buildInstructorGraph();
-      return;
-    }
-
     slide.initPanel(slide.options.panelType);
     
     callback = function(){
@@ -523,8 +510,19 @@ AVIATION.common.Slide.prototype = {
 
       // finished thus activate the slide
       slide.activateSlide();
-  
     };
+
+    if(this.options.studentGraph){
+      callback();
+      this.buildStudentGraph();
+      return;
+    }
+
+    if(this.options.instructorGraph){
+      callback();
+      this.buildInstructorGraph();
+      return;
+    }
 
     console.log("inside build slide before init media");
     slide.initMedia(callback);
