@@ -197,10 +197,7 @@ AVIATION.common.Slide.prototype = {
           }
 
         }
-<<<<<<< HEAD
-=======
 
->>>>>>> 028535347488d3c235520f55747e18c0bd4837c1
         //slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
@@ -1668,13 +1665,10 @@ AVIATION.common.Slide.prototype = {
 
       options = {
         size: 200,
-<<<<<<< HEAD
-=======
 	beacononeshow: slide.options.panelOverlay,
 	beacontwoshow: slide.options.panelOverlay,
 	ils: slide.options.panelOverlay,
 	off_flag: slide.options.offFlag,
->>>>>>> 028535347488d3c235520f55747e18c0bd4837c1
         showBox: false,
         showScrews: true,
         bootstrapFriendly: true,
@@ -1818,7 +1812,7 @@ AVIATION.common.Slide.prototype = {
 
     instrumentFunctions = {
       airspeed          : [ "setAirSpeed" ],
-      attitude          : [ "setRoll" , "setPitch", /*"setOffFlag"*/ ],
+      attitude          : [ "setRoll" , "setPitch","setILSLocalizer","setILSGlideslope" /*"setOffFlag"*/ ],
       altimeter         : [ "setAltitude", "setPressure" ],
       turn_coordinator  : [ "setTurn", "setSlip" ],
       heading           : [ "setHeading", "setBeaconOne", "setBeaconTwo" ],
@@ -1854,11 +1848,7 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-<<<<<<< HEAD
-
-=======
 	//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
->>>>>>> 028535347488d3c235520f55747e18c0bd4837c1
         if(!this.config.panelPause){
           this.config.pausedIndex = this.index || slide.pausedPanelIndex || 0;
         }
@@ -1886,21 +1876,6 @@ AVIATION.common.Slide.prototype = {
               attitude: {
                 pitch: ( flight[i][30] ),
                 roll: ( -( flight[i][31] ) ),
-<<<<<<< HEAD
-              },
-              heading: {
-<<<<<<< HEAD
-                heading: flight[i][33]
-              },
-=======
-                heading: flight[i][33],
-              	beaconOne: (-(flight[i][66])),//67 on the other csv
-		showBeaconOne: slide.options.panelOverlay,
-		beaconTwo: flight[i][70],//71 on the other csv
-		showBeaconTwo: slide.options.panelOverlay
-	      },
->>>>>>> 37ca835526aefacfd45fe1ff23a6fe8b72052769
-=======
                 ils: slide.options.panelOverlay,      
 		ilslocalizer: flight[i][56],
 		ilsglideslope: flight[i][57]
@@ -1912,7 +1887,6 @@ AVIATION.common.Slide.prototype = {
 		beaconTwo: flight[i][70],//71 on the other csv
 		showBeaconTwo: slide.options.panelOverlay
               },
->>>>>>> 028535347488d3c235520f55747e18c0bd4837c1
               altimeter: {
                 altitude: flight[i][41],
                 pressure: flight[i][19]
@@ -2479,11 +2453,7 @@ AVIATION.common.Slide.prototype = {
       console.log(content);
 
       for(i = 0; i < content.length; i++){
-<<<<<<< HEAD
-        if(content[i].advanceWith && content[i].advanceWith.action && content[i].advanceWith.action === 'pattern'){
-=======
         if(content[i].advanceWith && content[i].advanceWith.evaluate){
->>>>>>> 028535347488d3c235520f55747e18c0bd4837c1
           slide.patternMap.push({ "media": content[i].media.index, "id" : patternId});
           patternId++;
         }
@@ -2960,12 +2930,8 @@ AVIATION.common.Slide.prototype = {
           quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
-<<<<<<< HEAD
-
-=======
 	  panelOverlay : false,
 	  offFlag: false,
->>>>>>> 028535347488d3c235520f55747e18c0bd4837c1
           generalContentId : "#generalContentParent",
           contentParentId : "#contentParent",
           imageParentId: "#imageParent",
@@ -3375,16 +3341,7 @@ AVIATION.common.Slide.prototype = {
       } else if( (type === 'highlight' || type === 'quiz' ) && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
-<<<<<<< HEAD
-        for(i=0; i<slide.patternMap.length; i++){
-          if(mediaActiveIndex === slide.patternMap[i].media){
-            patternId = slide.patternMap[i].id;
-          }
-        }
-        $(slide).trigger("completedQuiz", "pattern", patternId);
-=======
 
->>>>>>> 028535347488d3c235520f55747e18c0bd4837c1
         slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");      
         
         if(type === 'quiz'){
