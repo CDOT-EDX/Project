@@ -116,7 +116,9 @@ AVIATION.common.Slide.prototype = {
       },
       "wrongAdvance": function(e, data){
         console.log("!* wrong advance triggered");
-        if(data && data.onFail && data.onFail.index && data.onFail.index !== undefined){
+        console.log("!* wrong advance data");
+        console.log(data);
+        if(data && data.onFail && data.onFail.index !== undefined){
           $(slide).trigger("pause");
           $(slide).trigger("reset");
           $(slide).trigger("playAltIndex", data.onFail);
@@ -127,8 +129,10 @@ AVIATION.common.Slide.prototype = {
         var index = data.index, altPlayer = slide.altPlayers;
 
         console.log("!* playAltIndex triggered");
-
+        console.log("!* altIndex: " + index);
         slide.checkSlideControlPlayButtons("play");
+        // TODO: or disable all buttons
+
 
         if(altPlayer[index] && altPlayer[index].player){
           altPlayer[index].player.play();
@@ -186,7 +190,14 @@ AVIATION.common.Slide.prototype = {
           if(data.element.type === 'csv'){
             // set inst panel status as 'ended'
           }
+          if(data.element.type === 'altAudio'){
+            $(slide).trigger("reset");
+            $(slide).trigger("play");
+            return;
+          }
+
         }
+
         //slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
@@ -490,10 +501,15 @@ AVIATION.common.Slide.prototype = {
 
     if(this.options.studentGraph){
       callback();
-      this.buildGraph();
+      this.buildStudentGraph();
       return;
     }
 
+    if(this.options.instructorGraph){
+      callback();
+      this.buildInstructorGraph();
+      return;
+    }
 
     slide.initPanel(slide.options.panelType);
     
@@ -502,7 +518,9 @@ AVIATION.common.Slide.prototype = {
       slide.buildQuizzes();
       slide.buildFooter();
       slide.buildModals();
-      slide.resetSlide();  
+      slide.resetSlide();
+      slide.initAltMedia();
+
       // finished thus activate the slide
       slide.activateSlide();
   
@@ -514,8 +532,116 @@ AVIATION.common.Slide.prototype = {
   },
 
   // will generate the graph of KCs for student and their progress
-  buildGraph: function(){
+  buildStudentGraph: function(){
     "use strict";
+
+    var helpers = Chart.helpers, canvas = document.getElementById('studentGraph'), randomScalingFactor, barChartData, bar, legendHolder;
+    randomScalingFactor = function() {
+      return Math.round(Math.random() * 100);
+    };
+    
+    barChartData = {
+        labels: ["Student Knowledge Components"],
+        datasets: [{
+          label: "KC3",
+          fillColor: "#949FB1",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC8",
+          fillColor: "#4D5360",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC11",
+          fillColor: "#F7464A",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC15",
+          fillColor: "#46BFBD",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC16",
+          fillColor: "#FDB45C",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }]
+    };
+
+    bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
+      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      animation: false,
+    });
+
+    legendHolder = document.createElement('div');
+    legendHolder.innerHTML = bar.generateLegend();
+
+    document.getElementById('legend').appendChild(legendHolder.firstChild);
+
+  },
+
+
+  buildInstructorGraph: function(){
+    "use strict";
+
+    var helpers = Chart.helpers, canvas = document.getElementById('instructorGraph'), randomScalingFactor, barChartData, bar, legendHolder;
+    
+    randomScalingFactor = function() {
+      return Math.round(Math.random() * 100);
+    };
+
+    barChartData = {
+      labels: ["Student 1", "Student 2", "Student 3", "Student 4"],
+      datasets: [{
+        label: "KC3",
+        fillColor: "#949FB1",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      }, {
+        label: "KC8",
+        fillColor: "#4D5360",
+        strokeColor: "rgba(151,187,205,0.8)",
+        highlightStroke: "rgba(151,187,205,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      },{
+        label: "KC11",
+        fillColor: "#F7464A",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      }, {
+        label: "KC15",
+        fillColor: "#46BFBD",
+        strokeColor: "rgba(151,187,205,0.8)",
+        highlightStroke: "rgba(151,187,205,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      },{
+        label: "KC16",
+        fillColor: "#FDB45C",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+      }]
+
+    };
+
+    bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
+      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      animation: false,
+    });
+
+    legendHolder = document.createElement('div');
+    legendHolder.innerHTML = bar.generateLegend();
+
+    document.getElementById('legend').appendChild(legendHolder.firstChild);
 
   },
 
@@ -945,9 +1071,9 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  buildSlideAudios: function(audioFiles){
+  buildSlideAudios: function(audioFiles, altMedia){
     "use strict";
-    var slideObject = this, localAudios, parentContainer;
+    var slideObject = this, localAudios, parentContainer, gatheredAudios = [];
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
     if(audioFiles && typeof audioFiles !== 'undefined' && audioFiles.length > 0){ //|| (modalAudios && parent) ){
@@ -965,7 +1091,7 @@ AVIATION.common.Slide.prototype = {
       localAudios.forEach( function(audio, a){
         //if(audio && typeof audio !== 'undefined'){
           // lets make sure that the filename provided is without the extension
-          var split = audio.src.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
+          var split = audio.src.split("."), filename = "", tempArray = [], addedSlideAudio, audioId, 
               extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
           // console.log("audio files here: " + audio); 
@@ -996,20 +1122,25 @@ AVIATION.common.Slide.prototype = {
             console.log("error while trying to parse audio filename");
           }
 
+          audioId = (altMedia ? (a+"_alt") : a);
+
           addedSlideAudio = jQuery('<audio/>',{
-            id: "audio_" + a,
+            id: "audio_" + (altMedia ? (a+"_alt") : a),
             html: "Your browser doesn't support audio"
           }).appendTo(parentContainer);
 
           for(i=0; i<extensions.length; i++){
-            source = jQuery('<source/>', {
+            jQuery('<source/>', {
               src: slideObject.options.apacheServerBaseUrl + filename + extensions[i],
               type: types[i]
             }).appendTo(addedSlideAudio);
           }
           try {
-            slideObject.slideAudios.push(Popcorn("#audio_" + a));
-            slideObject.slideHasListened.push(false);
+            gatheredAudios.push(Popcorn("#audio_" + audioId));
+            //slideObject.slideAudios.push(Popcorn("#audio_" + a));
+            if(!altMedia){
+              slideObject.slideHasListened.push(false);
+            }
           } catch(error) {
             // was popcorn initialized ok?
             console.log("slide audio init error: ");
@@ -1018,7 +1149,8 @@ AVIATION.common.Slide.prototype = {
       });
     }
 
-    return slideObject.slideAudios;
+    //return slideObject.slideAudios;
+    return gatheredAudios;
   },
 
   buildStatusBar: function(parent){
@@ -1131,18 +1263,31 @@ AVIATION.common.Slide.prototype = {
       content.advanceWith.index = [content.advanceWith.index];
     }
 
-    if(content.advanceWith){
-      for(advance in content.advanceWith){
-        if(content.advanceWith.hasOwnProperty(advance)){
-          slide.checkActionables(element.type, element.index, event, content.advanceWith, slide.contentActiveIndex);
-          // TODO: better solution over a break?
-          break;
+    if( (content.media.type !== element.type || content.media.index !== element.index) && content.advanceWith){
+    // check to see if the actual audio is triggering, if so, and there is an advance with, wait for action
+      if(content.advanceWith){
+        for(advance in content.advanceWith){
+          if(content.advanceWith.hasOwnProperty(advance)){
+            slide.checkActionables(element.type, element.index, event, content.advanceWith, slide.contentActiveIndex);
+            // TODO: better solution over a break?
+            break;
+          }
         }
+      } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
+        $(slide).trigger("contentNext", event.data.element);
+      } else {
+        $(slide).trigger("next");
       }
-    } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
-      $(slide).trigger("contentNext", event.data.element);
     } else {
-      $(slide).trigger("next");
+      if(content.advanceWith && _.contains(content.advanceWith.type,element.type) && _.contains(content.advanceWith.index, element.index) ){
+        $(slide).trigger("next");
+        return;
+      }
+      if(!content.advanceWith){
+        $(slide).trigger("next");
+        return;
+      }
+      slide.checkSlideControlPlayButtons("pause");
     }
   },
 
@@ -2169,17 +2314,35 @@ AVIATION.common.Slide.prototype = {
 
     var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [];
 
+    console.log("initting altmedia");
+
     slide.altPlayers = [];
 
     if(altMediaFiles){
-      altMedia = slide.buildSlideAudios(altMediaFiles);
+      altMedia = slide.buildSlideAudios(altMediaFiles, true);
 
       for(i=0; i < altMedia.length; i++){
+        altMedia[i].on("ended", function(e){
+          console.log("ended pop");
+          console.log(altMedia[i]);
+          var data = {};
+          data.element = {};
+          data.element.type = "altAudio";
+          data.element.index = i;
+
+          data.slide = slide;
+
+          console.log("audio ended event");
+          $(slide).trigger("end", data);
+        });
+
         slide.altPlayers.push({ type: "audio", player: altMedia[i] });
       }
     }
 
     //slide.initAltMediaEvents();
+
+
 
   },
 
@@ -2290,7 +2453,7 @@ AVIATION.common.Slide.prototype = {
       console.log(content);
 
       for(i = 0; i < content.length; i++){
-        if(content[i].advanceWith && content[i].advanceWith.action && content[i].advanceWith.action === 'pattern'){
+        if(content[i].advanceWith && content[i].advanceWith.evaluate){
           slide.patternMap.push({ "media": content[i].media.index, "id" : patternId});
           patternId++;
         }
@@ -2343,6 +2506,7 @@ AVIATION.common.Slide.prototype = {
           var data = {};
           data.element = {};
           data.element.type = "audio";
+          data.element.index = content.media.index;
           data.slide = slide;
 
           console.log("audio ended event");
@@ -2907,6 +3071,8 @@ AVIATION.common.Slide.prototype = {
 
     this.mediaFiles = options.mediaFiles;
 
+    this.altMediaFiles = options.altMediaFiles;
+
     console.log("** AUDIO FILES? ****");
     console.log(this.mediaFiles);
     console.log(this);
@@ -3143,7 +3309,7 @@ AVIATION.common.Slide.prototype = {
       console.log("Clicked index: " + index + " Expected index: " + scanPattern[overallScanIndex+1] + " overallScanIndex: " + overallScanIndex);
 
       for(i=0; i<slide.patternMap.length; i++){
-        if(mediaActiveIndex === slide.patternMap[i].media){
+        if(slide.mediaActiveIndex === slide.patternMap[i].media){
           patternId = slide.patternMap[i].id;
         }
       }
@@ -3153,18 +3319,18 @@ AVIATION.common.Slide.prototype = {
         if( _.contains(advanceWith.type, type) )
           $(slide).trigger("correctAdvance", advanceWith);
         else
-          $(slide).trigger("wrongAdvance");
+          $(slide).trigger("wrongAdvance", advanceWith);
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
-          $(slide).trigger("correctAdvance");
+          $(slide).trigger("correctAdvance", advanceWith);
         } else if( _.contains(advanceWith.index, index) ){
 
-          $(slide).trigger("completedQuiz", "action", patternId, true);
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
-          $(slide).trigger("completedQuiz", "action", patternId, false);
-          $(slide).trigger("wrongAdvance");
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "False"} );
+          $(slide).trigger("wrongAdvance", advanceWith);
         }
 
       } else if(type === 'csv' && slide.completedScan >= slide.options.minScan){
@@ -3181,8 +3347,7 @@ AVIATION.common.Slide.prototype = {
         if(type === 'quiz'){
           // all good, let's wait for next input...
         } else if( scanPattern[overallScanIndex+1] === index){
-          $(slide).trigger("completedQuiz", "action", patternId, true);
-
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
           if(element !== undefined){
             //$(element).pulse('destroy');
 
@@ -3227,7 +3392,7 @@ AVIATION.common.Slide.prototype = {
             }
           }
         } else {
-          $(slide).trigger("completedQuiz", "action", patternId, false);
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "False"} );
           unsuccesfulAttempts++;
           if(element !== undefined){
             //$(element).pulse('destroy');
@@ -3243,7 +3408,7 @@ AVIATION.common.Slide.prototype = {
           }
         }
       } else {
-        $(slide).trigger("wrongAdvance");
+        $(slide).trigger("wrongAdvance", advanceWith);
       }
 
       slide.patternInnerIndex = innerIndex;
