@@ -1,6 +1,9 @@
-*last updated on November 4/2015*
+*last updated on November 5/2015*
+
+*experimental conditional version, needs testing*
 
 *new option `"studentGraph": true` is available to show students KC scores at the end of a Snap*
+
 
 
 *Can enable the panel Overlay with panelOverlay: true*

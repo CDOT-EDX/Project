@@ -190,7 +190,14 @@ AVIATION.common.Slide.prototype = {
           if(data.element.type === 'csv'){
             // set inst panel status as 'ended'
           }
+          if(data.element.type === 'altAudio'){
+            $(slide).trigger("reset");
+            $(slide).trigger("play");
+            return;
+          }
+
         }
+
         //slide.checkSlideControlPlayButtons("pause");
         console.log("!* end event fired");
         console.log(data);
@@ -951,9 +958,9 @@ AVIATION.common.Slide.prototype = {
     }
   },
 
-  buildSlideAudios: function(audioFiles){
+  buildSlideAudios: function(audioFiles, altMedia){
     "use strict";
-    var slideObject = this, localAudios, parentContainer;
+    var slideObject = this, localAudios, parentContainer, gatheredAudios = [];
     // check hasPlayer parameter if has been loaded/listend to previously
     // and if matches the # of audioFiles... if so set var to true and restrict pushing hasListened
     if(audioFiles && typeof audioFiles !== 'undefined' && audioFiles.length > 0){ //|| (modalAudios && parent) ){
@@ -971,7 +978,7 @@ AVIATION.common.Slide.prototype = {
       localAudios.forEach( function(audio, a){
         //if(audio && typeof audio !== 'undefined'){
           // lets make sure that the filename provided is without the extension
-          var split = audio.src.split("."), filename = "", tempArray = [], addedSlideAudio, source, 
+          var split = audio.src.split("."), filename = "", tempArray = [], addedSlideAudio, audioId, 
               extensions = [".mp3", ".wav", ".ogg"], types = [ "audio/mpeg", "audio/wav", "audio/ogg"], i;
 
           // console.log("audio files here: " + audio); 
@@ -1002,20 +1009,25 @@ AVIATION.common.Slide.prototype = {
             console.log("error while trying to parse audio filename");
           }
 
+          audioId = (altMedia ? (a+"_alt") : a);
+
           addedSlideAudio = jQuery('<audio/>',{
-            id: "audio_" + a,
+            id: "audio_" + (altMedia ? (a+"_alt") : a),
             html: "Your browser doesn't support audio"
           }).appendTo(parentContainer);
 
           for(i=0; i<extensions.length; i++){
-            source = jQuery('<source/>', {
+            jQuery('<source/>', {
               src: slideObject.options.apacheServerBaseUrl + filename + extensions[i],
               type: types[i]
             }).appendTo(addedSlideAudio);
           }
           try {
-            slideObject.slideAudios.push(Popcorn("#audio_" + a));
-            slideObject.slideHasListened.push(false);
+            gatheredAudios.push(Popcorn("#audio_" + audioId));
+            //slideObject.slideAudios.push(Popcorn("#audio_" + a));
+            if(!altMedia){
+              slideObject.slideHasListened.push(false);
+            }
           } catch(error) {
             // was popcorn initialized ok?
             console.log("slide audio init error: ");
@@ -1024,7 +1036,8 @@ AVIATION.common.Slide.prototype = {
       });
     }
 
-    return slideObject.slideAudios;
+    //return slideObject.slideAudios;
+    return gatheredAudios;
   },
 
   buildStatusBar: function(parent){
@@ -1137,18 +1150,31 @@ AVIATION.common.Slide.prototype = {
       content.advanceWith.index = [content.advanceWith.index];
     }
 
-    if(content.advanceWith){
-      for(advance in content.advanceWith){
-        if(content.advanceWith.hasOwnProperty(advance)){
-          slide.checkActionables(element.type, element.index, event, content.advanceWith, slide.contentActiveIndex);
-          // TODO: better solution over a break?
-          break;
+    if( (content.media.type !== element.type || content.media.index !== element.index) && content.advanceWith){
+    // check to see if the actual audio is triggering, if so, and there is an advance with, wait for action
+      if(content.advanceWith){
+        for(advance in content.advanceWith){
+          if(content.advanceWith.hasOwnProperty(advance)){
+            slide.checkActionables(element.type, element.index, event, content.advanceWith, slide.contentActiveIndex);
+            // TODO: better solution over a break?
+            break;
+          }
         }
+      } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
+        $(slide).trigger("contentNext", event.data.element);
+      } else {
+        $(slide).trigger("next");
       }
-    } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
-      $(slide).trigger("contentNext", event.data.element);
     } else {
-      $(slide).trigger("next");
+      if(content.advanceWith && _.contains(content.advanceWith.type,element.type) && _.contains(content.advanceWith.index, element.index) ){
+        $(slide).trigger("next");
+        return;
+      }
+      if(!content.advanceWith){
+        $(slide).trigger("next");
+        return;
+      }
+      slide.checkSlideControlPlayButtons("pause");
     }
   },
 
@@ -2180,14 +2206,30 @@ AVIATION.common.Slide.prototype = {
     slide.altPlayers = [];
 
     if(altMediaFiles){
-      altMedia = slide.buildSlideAudios(altMediaFiles);
+      altMedia = slide.buildSlideAudios(altMediaFiles, true);
 
       for(i=0; i < altMedia.length; i++){
+        altMedia[i].on("ended", function(e){
+          console.log("ended pop");
+          console.log(altMedia[i]);
+          var data = {};
+          data.element = {};
+          data.element.type = "altAudio";
+          data.element.index = i;
+
+          data.slide = slide;
+
+          console.log("audio ended event");
+          $(slide).trigger("end", data);
+        });
+
         slide.altPlayers.push({ type: "audio", player: altMedia[i] });
       }
     }
 
     //slide.initAltMediaEvents();
+
+
 
   },
 
@@ -2352,6 +2394,7 @@ AVIATION.common.Slide.prototype = {
           var data = {};
           data.element = {};
           data.element.type = "audio";
+          data.element.index = content.media.index;
           data.slide = slide;
 
           console.log("audio ended event");
