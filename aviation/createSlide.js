@@ -132,6 +132,7 @@ AVIATION.common.Slide.prototype = {
         if(result){
           $(slide).trigger("correctAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
         } else {
+          $(slide).trigger("resetSlickQuiz");
           $(slide).trigger("wrongAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
         }
       },
