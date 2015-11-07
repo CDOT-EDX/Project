@@ -207,6 +207,10 @@ AVIATION.common.Slide.prototype = {
             $(slide).trigger("reset");
             $(slide).trigger("play");
             // if quiz, lets reset it
+            console.log("can we reset quiz here?");
+
+            console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
+
             if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
               console.log("resetting quiz inside wrongAdvance");
               if(slide.resetSlickQuiz){
