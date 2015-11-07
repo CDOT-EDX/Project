@@ -3328,7 +3328,7 @@ AVIATION.common.Slide.prototype = {
             } else {
               $(slide).trigger("wrongAdvance", advanceWith);
             }
-          };
+          });
         } else if( _.contains(advanceWith.index, index) ){
 
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
