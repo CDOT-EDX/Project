@@ -125,6 +125,15 @@ AVIATION.common.Slide.prototype = {
         }
         // TODO: tell the student that the action was a wrong one...
       },
+      "checkQuizResult": function(e, result){
+        console.log("result of quiz.... ");
+        console.log(result);
+        if(result){
+          $(slide).trigger("correctAdvance", slide.content[slide.contentActive].advanceWith);
+        } else {
+          $(slide).trigger("wrongAdvance", slide.content[slide.contentActive].advanceWith);
+        }
+      },
       "playAltIndex": function(e, data){
         var index = data.index, altPlayer = slide.altPlayers;
 
@@ -2851,17 +2860,6 @@ AVIATION.common.Slide.prototype = {
     console.log("building quizzes");
 
     console.log(quizzes);
-
-    $(slide).off("checkQuizResult");
-    $(slide).on("checkQuizResult", function(e, result){
-      console.log("result of quiz.... ");
-      console.log(result);
-      if(result){
-        $(slide).trigger("correctAdvance", advanceWith);
-      } else {
-        $(slide).trigger("wrongAdvance", advanceWith);
-      }
-    });
 
     advancePattern = function(index){
       return function(){
