@@ -209,7 +209,10 @@ AVIATION.common.Slide.prototype = {
             // if quiz, lets reset it
             if(slide.slideContent[slide.contentActiveIndex] === 'quiz'){
               console.log("resetting quiz inside wrongAdvance");
-              $(slide).trigger("resetSlickQuiz");
+              if(slide.resetSlickQuiz){
+                console.log("we have a reset avail");
+                slide.resetSlideQuiz();
+              }
             }
             return;
           }
