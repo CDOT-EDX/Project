@@ -206,6 +206,11 @@ AVIATION.common.Slide.prototype = {
           if(data.element.type === 'altAudio'){
             $(slide).trigger("reset");
             $(slide).trigger("play");
+            // if quiz, lets reset it
+            if(slide.slideContent[slide.contentActiveIndex] === 'quiz'){
+              console.log("resetting quiz inside wrongAdvance");
+              $(slide).trigger("resetSlickQuiz");
+            }
             return;
           }
 
