@@ -2349,6 +2349,11 @@ AVIATION.common.Slide.prototype = {
       altMedia = slide.buildSlideAudios(altMediaFiles, true);
 
       for(i=0; i < altMedia.length; i++){
+
+        altMedia[i].on("playing", function(e){
+          slide.checkSlideControlPlayButtonsState(null, true);
+        });
+
         altMedia[i].on("ended", function(e){
           console.log("ended pop");
           console.log(altMedia[i]);
@@ -2366,11 +2371,6 @@ AVIATION.common.Slide.prototype = {
         slide.altPlayers.push({ type: "audio", player: altMedia[i] });
       }
     }
-
-    //slide.initAltMediaEvents();
-
-
-
   },
 
   initMedia: function(callback){
@@ -2719,7 +2719,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   // constrols the state of the Previous/Next 'player' buttons
-  checkSlideControlPlayButtonsState: function(action){
+  checkSlideControlPlayButtonsState: function(action, disableAll){
     var controls = this.slideElements.slideControls, active = this.mediaActiveIndex,
         players = this.players, slide = this, contentActive = this.contentActiveIndex;
 
@@ -2727,7 +2727,7 @@ AVIATION.common.Slide.prototype = {
     console.log(contentActive);
     console.log(this.slideContent.length);
 
-    if(this.options.showSlideControls){
+    if(this.options.showSlideControls && !disableAll){
 
       if(active < 1 && players.length > 1){
         console.log("first audio, no way back");
@@ -2737,6 +2737,14 @@ AVIATION.common.Slide.prototype = {
         controls.next.attr("disabled", false);
         controls.next.removeProp("disabled");
         controls.next.removeAttr("disabled");
+        controls.play.prop("disabled", true);
+        controls.play.attr("disabled", true);
+        controls.play.removeProp("disabled");
+        controls.play.removeAttr("disabled");
+        controls.pause.removeProp("disabled");
+        controls.pause.removeAttr("disabled");
+        controls.pause.prop("disabled", true);
+        controls.pause.attr("disabled", true);
         //if(this.slideHasListened[active]){
         //}
       } else {
@@ -2780,6 +2788,17 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
+    }
+
+    if(disableAll){
+      controls.next.attr("disabled", true);
+      controls.next.prop("disabled", true);
+      controls.previous.attr("disabled", true);
+      controls.previous.prop("disabled", true);
+      controls.play.attr("disabled", true);
+      controls.play.prop("disabled", true);
+      controls.pause.attr("disabled", true);
+      controls.pause.prop("disabled", true);
     }
 
   },
