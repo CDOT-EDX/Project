@@ -201,7 +201,8 @@ AVIATION.common.Slide.prototype = {
       end: function(e, data){
         console.log("can we reset quiz here?");
         console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
-        console.log(contentActiveIndex);
+        console.log(slide.slideContent[slide.contentActiveIndex+1].advanceWith.type);
+        console.log(slide.contentActiveIndex);
         //console.log(slide.slideContent[slide.mediaActiveIndex].advanceWith.type);
         if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
           console.log("resetting quiz inside wrongAdvance");
