@@ -2760,6 +2760,15 @@ AVIATION.common.Slide.prototype = {
 
     if(this.options.showSlideControls && !disableAll){
 
+      controls.play.prop("disabled", false);
+      controls.play.attr("disabled", false);
+      controls.play.removeProp("disabled");
+      controls.play.removeAttr("disabled");
+      controls.pause.removeProp("disabled");
+      controls.pause.removeAttr("disabled");
+      controls.pause.prop("disabled", false);
+      controls.pause.attr("disabled", false);
+
       if(active < 1 && players.length > 1){
         console.log("first audio, no way back");
         controls.previous.prop("disabled", true);
@@ -2768,14 +2777,6 @@ AVIATION.common.Slide.prototype = {
         controls.next.attr("disabled", false);
         controls.next.removeProp("disabled");
         controls.next.removeAttr("disabled");
-        controls.play.prop("disabled", true);
-        controls.play.attr("disabled", true);
-        controls.play.removeProp("disabled");
-        controls.play.removeAttr("disabled");
-        controls.pause.removeProp("disabled");
-        controls.pause.removeAttr("disabled");
-        controls.pause.prop("disabled", true);
-        controls.pause.attr("disabled", true);
         //if(this.slideHasListened[active]){
         //}
       } else {
