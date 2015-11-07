@@ -105,7 +105,7 @@ AVIATION.common.Slide.prototype = {
           if(data.onSuccess.contentIndex !== undefined){
             slide.contentActiveIndex = data.onSuccess.contentIndex;
 
-            slide.mediaActiveIndex = slide.content[slide.contentActive].media.index;
+            slide.mediaActiveIndex = slide.content[slide.contentActiveIndex].media.index;
           } else if (data.onSuccess.mediaIndex !== undefined){
             slide.mediaActiveIndex = data.onSuccess.mediaIndex;
             $(slide).trigger("play");
@@ -128,10 +128,11 @@ AVIATION.common.Slide.prototype = {
       "checkQuizResult": function(e, result){
         console.log("result of quiz.... ");
         console.log(result);
+        //console.log(slide.content[slide.contentActive]);
         if(result){
-          $(slide).trigger("correctAdvance", slide.content[slide.contentActive].advanceWith);
+          $(slide).trigger("correctAdvance", slide.content[slide.contentActiveIndex].advanceWith);
         } else {
-          $(slide).trigger("wrongAdvance", slide.content[slide.contentActive].advanceWith);
+          $(slide).trigger("wrongAdvance", slide.content[slide.contentActiveIndex].advanceWith);
         }
       },
       "playAltIndex": function(e, data){
