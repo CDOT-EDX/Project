@@ -122,11 +122,6 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("pause");
           $(slide).trigger("reset");
           $(slide).trigger("playAltIndex", data.onFail);
-
-          if(data.type === 'quiz'){
-            console.log("resetting quiz inside wrongAdvance");
-            $(slide).trigger("resetSlickQuiz");  
-          }
         }
         // TODO: tell the student that the action was a wrong one...
       },

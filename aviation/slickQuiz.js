@@ -774,6 +774,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             });
 
             $(anySlide).on('resetSlickQuiz', function(e){
+                console.log("attempting to reset quiz from slickQuiz");
                 plugin.method.resetQuiz(this, {
                     callback: plugin.config.animationCallbacks.resetQuiz
                 }); 
