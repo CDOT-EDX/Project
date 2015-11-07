@@ -837,8 +837,39 @@ AVIATION.common.Slide.prototype = {
         "class": "modal-dialog modal-cdot"
       }).appendTo(this.container);
 
+      var modalContent = outerSlideContent[contentActiveIndex];
+      var html         = modalContent.content === undefined || modalContent.content === null ? "" : modalContent.content.html;
+      var id           = slide.container      === undefined || slide.container      === null ? "" : slide.container;
+      var instrument   = "";
+
+      switch(id){
+          case "#modal_asi":
+              instrument = "airspeed";
+              break;
+          case "#modal_ai":
+              instrument = "attitude";
+              break;
+          case "#modal_alt":
+              instrument = "altimeter";
+              break;
+          case "#modal_tc":
+              instrument = "turn_coordinator";
+              break;
+          case "#modal_hi":
+              instrument = "heading";
+              break;
+          case "#modal_vsi":
+              instrument = "variometer";
+              break;
+      }
+
+      if(instrument){
+          html += $("#" + instrument + " div").eq(0).clone().css({'height': '500px', 'width': '100%'})[0].outerHTML;
+      }
+
       contentContainer = jQuery('<div/>', {
-        class: "modal-content"
+        class: "modal-content",
+        html: html
       }).appendTo(dialogContainer);
     }
 
@@ -1510,7 +1541,7 @@ AVIATION.common.Slide.prototype = {
             class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
             html: actions[act].title,
             "data-toggle": options.dataToggle,
-            "data-target": "#" + actions[act].id + "_modal",
+            "data-target": "#modal_" + actions[act].id,
             "data-orderNumber": actions[act].orderNumber,
             role: options.role,
             style: options.style
