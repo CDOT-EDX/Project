@@ -773,12 +773,12 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 });
             });
 
-            anySlide.resetSlickQuiz = function(e){
+            anySlide.resetSlickQuiz.push(function(e){
                 console.log("attempting to reset quiz from slickQuiz");
                 plugin.method.resetQuiz(this, {
                     callback: plugin.config.animationCallbacks.resetQuiz
                 });
-            };
+            });
 
             // Bind "check answer" buttons
             $(_element + ' ' + _checkAnswerBtn).on('click', function (e) {

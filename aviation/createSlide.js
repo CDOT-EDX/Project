@@ -206,9 +206,9 @@ AVIATION.common.Slide.prototype = {
         //console.log(slide.slideContent[slide.mediaActiveIndex].advanceWith.type);
         if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz' || slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz'){
           console.log("resetting quiz inside wrongAdvance");
-          if(slide.resetSlickQuiz){
-            console.log("we have a reset avail");
-            slide.resetSlickQuiz();
+          for(i=0; i<slide.resetSlickQuiz.length; i++){
+            console.log("we have a reset avail at: " + i);
+            slide.resetSlickQuiz[i]();
           }
         }
 
@@ -3211,6 +3211,8 @@ AVIATION.common.Slide.prototype = {
     this.timerActivated = false;
 
     this.patternMap = [];
+
+    this.resetSlickQuiz = [];
     /* error handling example
     try {
       // if smth might cause an error....
