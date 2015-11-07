@@ -778,7 +778,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 plugin.method.resetQuiz(this, {
                     callback: plugin.config.animationCallbacks.resetQuiz
                 });
-            });
+            };
 
             // Bind "check answer" buttons
             $(_element + ' ' + _checkAnswerBtn).on('click', function (e) {
