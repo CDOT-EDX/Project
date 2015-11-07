@@ -199,6 +199,10 @@ AVIATION.common.Slide.prototype = {
         slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
+        console.log("can we reset quiz here?");
+        console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
+        console.log(contentActiveIndex);
+        //console.log(slide.slideContent[slide.mediaActiveIndex].advanceWith.type);
         if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
           console.log("resetting quiz inside wrongAdvance");
           if(slide.resetSlickQuiz){
@@ -215,9 +219,7 @@ AVIATION.common.Slide.prototype = {
             $(slide).trigger("reset");
             $(slide).trigger("play");
             // if quiz, lets reset it
-            console.log("can we reset quiz here?");
 
-            console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
 
             return;
           }
