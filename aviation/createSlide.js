@@ -211,13 +211,13 @@ AVIATION.common.Slide.prototype = {
 
             console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
 
-            if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
-              console.log("resetting quiz inside wrongAdvance");
-              if(slide.resetSlickQuiz){
-                console.log("we have a reset avail");
-                slide.resetSlideQuiz();
-              }
+            //if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
+            console.log("resetting quiz inside wrongAdvance");
+            if(slide.resetSlickQuiz){
+              console.log("we have a reset avail");
+              slide.resetSlideQuiz();
             }
+            //}
             return;
           }
 
