@@ -122,6 +122,11 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("pause");
           $(slide).trigger("reset");
           $(slide).trigger("playAltIndex", data.onFail);
+
+          if(data.type === 'quiz'){
+            console.log("resetting quiz inside wrongAdvance");
+            $(slide).trigger("resetSlickQuiz");  
+          }
         }
         // TODO: tell the student that the action was a wrong one...
       },
@@ -134,7 +139,6 @@ AVIATION.common.Slide.prototype = {
         } else {
           $(slide).trigger("wrongAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
           console.log("resetting quiz...");
-          $(slide).trigger("resetSlickQuiz");
           console.log("triggered but does it work?");
           console.log( $(slide) );
         }
