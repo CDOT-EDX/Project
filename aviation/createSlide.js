@@ -199,6 +199,14 @@ AVIATION.common.Slide.prototype = {
         slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
+        if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
+          console.log("resetting quiz inside wrongAdvance");
+          if(slide.resetSlickQuiz){
+            console.log("we have a reset avail");
+            slide.resetSlickQuiz();
+          }
+        }
+
         if(data && data.element && data.element.type !== undefined){
           if(data.element.type === 'csv'){
             // set inst panel status as 'ended'
@@ -211,13 +219,6 @@ AVIATION.common.Slide.prototype = {
 
             console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
 
-            //if(slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
-            console.log("resetting quiz inside wrongAdvance");
-            if(slide.resetSlickQuiz){
-              console.log("we have a reset avail");
-              slide.resetSlideQuiz();
-            }
-            //}
             return;
           }
 
