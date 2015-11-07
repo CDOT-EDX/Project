@@ -696,6 +696,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     }
                 });
 
+                console.log("quiz end inside slickQuiz");
+                console.log(resultStatus);
                 $(anySlide).trigger("checkQuizResult", plugin.config.resultStatus);
                 // reset result back to false;
                 plugin.config.resultStatus = false;

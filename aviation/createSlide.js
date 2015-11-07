@@ -2852,12 +2852,23 @@ AVIATION.common.Slide.prototype = {
 
     console.log(quizzes);
 
+    $(slide).off("checkQuizResult");
+    $(slide).on("checkQuizResult", function(e, result){
+      console.log("result of quiz.... ");
+      console.log(result);
+      if(result){
+        $(slide).trigger("correctAdvance", advanceWith);
+      } else {
+        $(slide).trigger("wrongAdvance", advanceWith);
+      }
+    });
+
     advancePattern = function(index){
       return function(){
         console.log("trying to advance on quiz complete with index: " + index);
         console.log("on quiz end contentIndex: "+ slide.contentActiveIndex);
 
-        $(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.checkAdvanceWith);
+        //$(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.checkAdvanceWith);
 
         /*
         if(oldActions && typeof oldActions != "function"){
@@ -3321,16 +3332,7 @@ AVIATION.common.Slide.prototype = {
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
-          $(slide).off("checkQuizResult");
-          $(slide).on("checkQuizResult", function(e, result){
-            console.log("result of quiz.... ");
-            console.log(result);
-            if(result){
-              $(slide).trigger("correctAdvance", advanceWith);
-            } else {
-              $(slide).trigger("wrongAdvance", advanceWith);
-            }
-          });
+          // checked through "checkQuizResult" event
         } else if( _.contains(advanceWith.index, index) ){
 
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
