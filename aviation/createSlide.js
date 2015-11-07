@@ -122,6 +122,8 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("pause");
           $(slide).trigger("reset");
           $(slide).trigger("playAltIndex", data.onFail);
+        } else {
+          $(slide).trigger("next", data);
         }
         // TODO: tell the student that the action was a wrong one...
       },
