@@ -496,10 +496,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                     if(correctResponse && correctResponse === "true"){
                         correctResponse = true;
-                        resultStatus = true;
+                        plugin.config.resultStatus = true;
                     } else {
                         correctResponse = false;
-                        resultStatus = false;
+                        plugin.config.resultStatus = false;
                     }
 
                     if (correctResponse) {
