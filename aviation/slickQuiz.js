@@ -696,7 +696,9 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     }
                 });
 
-                $(slide).trigger("checkQuizResult", plugin.config.resultStatus);
+                $(anySlide).trigger("checkQuizResult", plugin.config.resultStatus);
+                // reset result back to false;
+                plugin.config.resultStatus = false;
 
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
 
