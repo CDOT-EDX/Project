@@ -3323,6 +3323,8 @@ AVIATION.common.Slide.prototype = {
         if(type === 'quiz'){
           $(slide).off("checkQuizResult");
           $(slide).on("checkQuizResult", function(e, result){
+            console.log("result of quiz.... ");
+            console.log(result);
             if(result){
               $(slide).trigger("correctAdvance", advanceWith);
             } else {
