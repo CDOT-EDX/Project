@@ -61,6 +61,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 completionResponseMessaging: false,
                 displayQuestionCount: true, // Deprecate?
                 displayQuestionNumber: true, // Deprecate?
+                resultStatus: false,
                 //..
                 animationCallbacks: { // only for the methods that have jQuery animations offering callback
                     setupQuiz: function () {},
@@ -495,8 +496,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                     if(correctResponse && correctResponse === "true"){
                         correctResponse = true;
+                        resultStatus = true;
                     } else {
                         correctResponse = false;
+                        resultStatus = false;
                     }
 
                     if (correctResponse) {
@@ -692,6 +695,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         $quizResults.fadeIn(500, kN(key, 1)); // 1st notch on key must be on both sides of if/else, otherwise key won't turn
                     }
                 });
+
+                $(slide).trigger("checkQuizResult", plugin.config.resultStatus);
 
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
 

@@ -3321,7 +3321,14 @@ AVIATION.common.Slide.prototype = {
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
-          $(slide).trigger("correctAdvance", advanceWith);
+          $(slide).off("checkQuizResult");
+          $(slide).on("checkQuizResult", function(e, result){
+            if(result){
+              $(slide).trigger("correctAdvance", advanceWith);
+            } else {
+              $(slide).trigger("wrongAdvance", advanceWith);
+            }
+          };
         } else if( _.contains(advanceWith.index, index) ){
 
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
