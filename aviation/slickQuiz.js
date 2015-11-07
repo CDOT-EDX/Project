@@ -773,7 +773,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 });
             });
 
-            anySlide.resetSlickQuiz: function(e){
+            anySlide.resetSlickQuiz = function(e){
                 console.log("attempting to reset quiz from slickQuiz");
                 plugin.method.resetQuiz(this, {
                     callback: plugin.config.animationCallbacks.resetQuiz
