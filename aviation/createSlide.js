@@ -201,10 +201,10 @@ AVIATION.common.Slide.prototype = {
         slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
-        console.log("can we reset quiz here?");
-        console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
-        console.log(slide.slideContent[slide.contentActiveIndex+1].advanceWith.type);
-        console.log(slide.contentActiveIndex);
+        //console.log("can we reset quiz here?");
+        //console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
+        //console.log(slide.slideContent[slide.contentActiveIndex+1].advanceWith.type);
+        //console.log(slide.contentActiveIndex);
         //console.log(slide.slideContent[slide.mediaActiveIndex].advanceWith.type);
         if(slide.slideContent[slide.contentActiveIndex].advanceWith && 
             (slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz' || 
