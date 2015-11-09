@@ -1,10 +1,12 @@
-*last updated on November 5/2015*
+*last updated on November 9/2015*
 
 *experimental conditional version, needs testing*
 
 *new option `"studentGraph": true` is available to show students KC scores at the end of a Snap*
 
-*new option `"evaluate": true` is available on advanceWith to let the frontend know that this advanceWith is marked
+*new option `"instructorGraph": true` is available to show students KC scores at the end of a Snap*
+
+*new option `"evaluate": true` is available on advanceWith to let the frontend know that this advanceWith is marked*
 
 
 *Can enable the panel Overlay with panelOverlay: true*
