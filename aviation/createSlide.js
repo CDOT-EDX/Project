@@ -1244,7 +1244,7 @@ AVIATION.common.Slide.prototype = {
 
   // builds controls that go at the very bottom of the slide (back/continue) and status bar
   buildCourseControls: function(parentContainer){
-    var controls = $(this.options.footerId + " .controls"), parent = parentContainer || $(this.container).parent();
+    var controls = $(this.options.footerId + " .controls"), parent = parentContainer || $(this.container).parent(), slide = this;
 
     if(this.options.showControls){ //&& (!controls || controls.length < 1) ){
 
@@ -1267,6 +1267,16 @@ AVIATION.common.Slide.prototype = {
         back: $("#btnB").data("action", "back"),
         "continue": $("#btnC").data("action", "continue")
       };
+
+      if(slide.options.backId === ""){
+        slide.slideElements.courseControls.back.attr("disabled", true);
+        slide.slideElements.courseControls.back.prop("disabled", true);
+      }
+
+      if(slide.options.continueId === ""){
+        slide.slideElements.courseControls.continue.attr("disabled", true);
+        slide.slideElements.courseControls.continue.prop("disabled", true);
+      }
 
       this.initCourseButtonEvents();
     } else {
@@ -2302,12 +2312,12 @@ AVIATION.common.Slide.prototype = {
       switch(action){
         case "back":
           console.log("back clicked");
-          slide.redirectToPage(slide.options.backId);
+          slide.redirectToPage(slide.options.backId.trim());
           break;
 
         case "continue":
           console.log("continue clicked");
-          slide.redirectToPage(slide.options.continueId);
+          slide.redirectToPage(slide.options.continueId.trim());
           break;
 
         default:
@@ -2321,8 +2331,6 @@ AVIATION.common.Slide.prototype = {
         buttons[button].on("click", assignBtnAction);
       }
     }
-
-
   },
   
   initHighlightClickEvents: function(){
@@ -2371,34 +2379,38 @@ AVIATION.common.Slide.prototype = {
   initAltMedia: function(callback){
     "use strict";
 
-    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [];
+    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [], buttonStateToggle,
+        mediaEndAction;
+
+    buttonStateToggle = function(e){
+      slide.checkSlideControlPlayButtonsState(null, true);
+    };
 
     console.log("initting altmedia");
 
     slide.altPlayers = [];
 
+    mediaEndAction = function(e){
+      console.log("ended pop");
+      console.log(altMedia[i]);
+      var data = {};
+      data.element = {};
+      data.element.type = "altAudio";
+      data.element.index = i;
+
+      data.slide = slide;
+
+      console.log("audio ended event");
+      $(slide).trigger("end", data);
+    };
+
     if(altMediaFiles){
       altMedia = slide.buildSlideAudios(altMediaFiles, true);
 
       for(i=0; i < altMedia.length; i++){
+        altMedia[i].on("playing", buttonStateToggle);
 
-        altMedia[i].on("playing", function(e){
-          slide.checkSlideControlPlayButtonsState(null, true);
-        });
-
-        altMedia[i].on("ended", function(e){
-          console.log("ended pop");
-          console.log(altMedia[i]);
-          var data = {};
-          data.element = {};
-          data.element.type = "altAudio";
-          data.element.index = i;
-
-          data.slide = slide;
-
-          console.log("audio ended event");
-          $(slide).trigger("end", data);
-        });
+        altMedia[i].on("ended", mediaEndAction);
 
         slide.altPlayers.push({ type: "audio", player: altMedia[i] });
       }
