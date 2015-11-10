@@ -826,7 +826,7 @@ AVIATION.common.Slide.prototype = {
   buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback, action){
     "use strict";
     var outerSlideContent = this.slideContent, slide = this, 
-        contentActiveIndex = index || this.contentActiveIndex, position,
+        contentActiveIndex = index || this.contentActiveIndex, position, previouslyPaused,
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
     if(index && index !== undefined && action !== 'pattern'){
@@ -888,7 +888,11 @@ AVIATION.common.Slide.prototype = {
       // set line or second of media before playing it
       position = slide.slideContent[contentActiveIndex].action.line || slide.slideContent[contentActiveIndex].action.second;
       if(position !== undefined){
-        $(slide).trigger("setPosition", position );
+        if(position === 'paused'){
+          position = slide.players[slide.slideContent[contentActiveIndex].action.index].player.config.pausedIndex || 
+            slide.players[slide.slideContent[contentActiveIndex].action.index].player.config.previouslyPaused || 0;
+        }
+        slide.players[slide.slideContent[contentActiveIndex].action.index].player.currentTime(position);
       }
 
       if(slide.slideContent[contentActiveIndex].action.type !== undefined && 
@@ -2054,6 +2058,7 @@ AVIATION.common.Slide.prototype = {
       var papaResetLine = function(line){
         console.log("for csv: " + this.config.selfIndex);
         console.log("reseting csv line: "+ this.config.line);
+        this.config.previousPause = this.config.line;
         this.config.line = line;
       };
 
