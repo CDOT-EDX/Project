@@ -1,4 +1,4 @@
-*last updated on November 9/2015*
+*last updated on November 10/2015*
 
 *experimental conditional version, needs testing*
 
@@ -389,6 +389,8 @@ Acceptable options and defaults are as follows:
           "type": "play",
           "index": 2 // can only be a mediaIndex (not contentIndex)
           "line": 1001 // in this case its a csv
+          // OR
+          "line": "paused" // to resume from a previously paused animation by user
           // in the case of an audio we can specify "second": 10.1 and not 'line'
         }
     },
