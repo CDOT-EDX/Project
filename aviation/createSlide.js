@@ -207,7 +207,7 @@ AVIATION.common.Slide.prototype = {
               slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz') || 
                 (slide.slideContent[slide.contentActiveIndex+1] &&
                   slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
-                    slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') fkjkgjlskdj){
+                    slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') ){
           console.log("resetting quiz inside wrongAdvance");
           for(i=0; i<slide.resetSlickQuiz.length; i++){
             console.log("we have a reset avail at: " + i);
