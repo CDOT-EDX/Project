@@ -202,14 +202,12 @@ AVIATION.common.Slide.prototype = {
       },
       end: function(e, data){
         //console.log("can we reset quiz here?");
-        //console.log(slide.slideContent[slide.contentActiveIndex].advanceWith.type);
-        //console.log(slide.slideContent[slide.contentActiveIndex+1].advanceWith.type);
-        //console.log(slide.contentActiveIndex);
-        //console.log(slide.slideContent[slide.mediaActiveIndex].advanceWith.type);
+
         if( (slide.slideContent[slide.contentActiveIndex].advanceWith && 
               slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz') || 
-                (slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
-                  slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') ){
+                (slide.slideContent[slide.contentActiveIndex+1] &&
+                  slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
+                    slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') fkjkgjlskdj){
           console.log("resetting quiz inside wrongAdvance");
           for(i=0; i<slide.resetSlickQuiz.length; i++){
             console.log("we have a reset avail at: " + i);
@@ -220,13 +218,11 @@ AVIATION.common.Slide.prototype = {
         if(data && data.element && data.element.type !== undefined){
           if(data.element.type === 'csv'){
             // set inst panel status as 'ended'
+            slide.setInstrumentStatus2("Instrument panel is ended");
           }
           if(data.element.type === 'altAudio'){
             $(slide).trigger("reset");
             $(slide).trigger("play");
-            // if quiz, lets reset it
-
-
             return;
           }
 
