@@ -118,10 +118,20 @@ AVIATION.common.Slide.prototype = {
         console.log("!* wrong advance triggered");
         console.log("!* wrong advance data");
         console.log(data);
-        if(data && data.onFail && data.onFail.index !== undefined){
+        if(data && data.onFail){
           $(slide).trigger("pause");
           $(slide).trigger("reset");
-          $(slide).trigger("playAltIndex", data.onFail);
+          if(data.onFail.resetMediaIndex !== undefined){
+            slide.mediaActiveIndex = data.onFail.resetMediaIndex;
+          }
+          if(data.onFail.resetContentIndex !== undefined){
+            slide.contentActiveIndex = data.onFail.resetContentIndex;
+          }
+          if(data.onFail.index !== undefined){
+            $(slide).trigger("playAltIndex", data.onFail);
+          } else {
+            $(slide).trigger("play");  
+          }
         } else {
           $(slide).trigger("next", data);
         }
@@ -201,8 +211,8 @@ AVIATION.common.Slide.prototype = {
         slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
-        //console.log("can we reset quiz here?");
-
+        var i;
+        
         if( (slide.slideContent[slide.contentActiveIndex].advanceWith && 
               slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz') || 
                 (slide.slideContent[slide.contentActiveIndex+1] &&
@@ -1630,9 +1640,20 @@ AVIATION.common.Slide.prototype = {
     console.log(content.media.index);
 
     slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].off();
-    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', { element: { type: content.media.type, index: content.media.index }, 
-      slide: slide }, function(){ $(slide).trigger("end", { callbacks: oldActions,  onSuccess: function(){ slide.buildContent(true, index); },
-        element: { type: content.media.type, index: content.media.index }, slide: slide });
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', { 
+      element: { type: content.media.type, index: content.media.index }, 
+      slide: slide 
+    }, function(evt){
+      console.log("executing actionable here");
+      console.log(evt);
+      $(slide).trigger("end", { 
+        callbacks: oldActions,  
+        onSuccess: function(){ 
+          slide.buildContent(true, index); 
+        },
+        element: { type: content.media.type, index: content.media.index }, 
+        slide: slide 
+      });
     });
 
     console.log("assigning EVENTS to ACTS: ");
@@ -1734,10 +1755,10 @@ AVIATION.common.Slide.prototype = {
 
       options = {
         size: 200,
-	beacononeshow: slide.options.panelOverlay,
-	beacontwoshow: slide.options.panelOverlay,
-	ils: slide.options.panelOverlay,
-	off_flag: slide.options.offFlag,
+      	beacononeshow: slide.options.panelOverlay,
+      	beacontwoshow: slide.options.panelOverlay,
+      	ils: slide.options.panelOverlay,
+      	off_flag: slide.options.offFlag,
         showBox: false,
         showScrews: true,
         bootstrapFriendly: true,
@@ -1917,7 +1938,7 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-	//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
+	      //apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
         if(!this.config.panelPause){
           this.config.pausedIndex = this.index || slide.pausedPanelIndex || 0;
         }
@@ -1946,15 +1967,15 @@ AVIATION.common.Slide.prototype = {
                 pitch: ( flight[i][30] ),
                 roll: ( -( flight[i][31] ) ),
                 ils: slide.options.panelOverlay,      
-		ilslocalizer: flight[i][56],
-		ilsglideslope: flight[i][57]
+                ilslocalizer: flight[i][56],
+                ilsglideslope: flight[i][57]
               },
-	       heading: {
-		heading: flight[i][33],
+	            heading: {
+                heading: flight[i][33],
                	beaconOne: (-(flight[i][66])),//67 on the other csv
-		showBeaconOne: slide.options.panelOverlay,
-		beaconTwo: flight[i][70],//71 on the other csv
-		showBeaconTwo: slide.options.panelOverlay
+                showBeaconOne: slide.options.panelOverlay,
+                beaconTwo: flight[i][70],//71 on the other csv
+                showBeaconTwo: slide.options.panelOverlay
               },
               altimeter: {
                 altitude: flight[i][41],
@@ -3304,6 +3325,7 @@ AVIATION.common.Slide.prototype = {
               slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
               slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
               slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
+              slide.slideElements[possibleActions[action].elements][i].css('pointer-events', 'auto');
             } else {
               slide.slideElements[possibleActions[action].elements][i].show();              
               // only disable the ones we show (btn, quizzes only)
@@ -3323,8 +3345,9 @@ AVIATION.common.Slide.prototype = {
               slide.slideElements[possibleActions[action].elements][i].css("border", "");
               slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
               slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+              slide.slideElements[possibleActions[action].elements][i].css('pointer-events', 'none');
               slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
-            } else {
+            } else {  
               slide.slideElements[possibleActions[action].elements][i].hide();              
             }
           }
