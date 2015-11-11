@@ -425,7 +425,7 @@ Acceptable options and defaults are as follows:
     modals: [{ 
               "id": "ai", 
               "title": "Attitude Indicator", 
-              "content": {html: "This is the MODAL custom HTML" },
+              "content": {"html": "This is the MODAL custom HTML" },
               "buttons": [],
               "highlights": [],
             }, 

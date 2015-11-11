@@ -843,9 +843,20 @@ AVIATION.common.Slide.prototype = {
 
     if(!contentContainer || contentContainer.length === 0){
       contentContainer = jQuery('<div/>', {
-        id: this.bodyId.split("#")[1],
-        "class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
+        id: this.bodyId.split("#")[1]
+        //"class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
       }).appendTo(slide.container);
+
+      if(slide.options.isModal){
+        contentContainer.addClass("modal-body");
+      } else {
+        if(slide.options.showAvatars || slide.options.enableSlider){
+          contentContainer.addClass("col-xs-8");
+        } else {
+          contentContainer.addClass("col-xs-12");
+        }
+      }
+      contentContainer.addClass("cdot_contentText");
     }
       // what do we need here? modal dialog, modal content, modal header?
 
@@ -1077,13 +1088,12 @@ AVIATION.common.Slide.prototype = {
 
       footer = jQuery('<div/>', {
         id: this.options.footerId.split("#")[1],
-        class: "slide_footer " + (this.options.isModal ? "modal-footer" : "row")
+        class: "slide_footer " + (this.options.isModal ? "modal-footer" : "row"),
+        "html": this.options.isModal ? "Footer Test" : ""
       });
 
       if(this.options.isModal){
-        console.log("trying to find container");
-        footer.appendTo( this.container + " > .modal-dialog > .modal-content");
-        console.log( $(this.container + " > .modal-dialog > .modal-content") );
+        footer.appendTo(this.container);
       } else {
         footer.appendTo( $(this.container).parent() );  
       }
@@ -2174,6 +2184,7 @@ AVIATION.common.Slide.prototype = {
             statusId: "#modal_status_" + this.modals[i].id,
             headerId: "#modal_header_" + this.modals[i].id,
             footerId: "#modal_footer_" + this.modals[i].id,
+            bodyId: "#modal_body_" + this.modals[i].id,
             panelHighlightsId: "#panelHighlightContainer",
             generalHighlightsId: "#generalHighlightContainer",
             contentHighlightsId: "#contentHighlightContainer",
@@ -2197,19 +2208,20 @@ AVIATION.common.Slide.prototype = {
         // conform to what the buildContent expects
         modalDialog = jQuery('<div/>', {
             class: "modal-dialog",
-            role: "content",
+            role: "document",
         }).appendTo(modal);
 
         modalHeader = jQuery('<div/>', {
             id: modalOptions.container.split("#")[1],
             class: "modal-content",
-            role: "content",
         }).appendTo(modalDialog);
 
         newModal = new AVIATION.common.Slide(modalOptions);
         console.log("this is the modal slide: ");
         console.log(newModal);
         newModal.constructor();
+
+        // need to build content for modals!!!
 
         slide.modalSlides.push(newModal);
       }
@@ -2976,6 +2988,8 @@ AVIATION.common.Slide.prototype = {
     function centerModal(){
       $(this).attr("style", "top: -90px !important");
       $(this).css('display', 'block');
+      $(this).css('overflow', 'visible');
+      //$(this).css('overflow-y', 'auto');
 
       var $dialog  = $(this).find(".modal-dialog"),
       offset       = ($(window).height() - $dialog.height()) / 2,
