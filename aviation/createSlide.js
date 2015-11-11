@@ -844,44 +844,50 @@ AVIATION.common.Slide.prototype = {
         "class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
       }).appendTo(this.container);
     } else if (this.options.isModal) {
-      var dialogContainer = jQuery('<div/>', {
-        "class": "modal-dialog modal-cdot"
-      }).appendTo(this.container);
-
       var modalContent = outerSlideContent[contentActiveIndex];
       var html         = modalContent.content === undefined || modalContent.content === null ? "" : modalContent.content.html;
       var id           = slide.container      === undefined || slide.container      === null ? "" : slide.container;
       var instrument   = "";
 
-      switch(id){
-          case "#modal_asi":
-              instrument = "airspeed";
-              break;
-          case "#modal_ai":
-              instrument = "attitude";
-              break;
-          case "#modal_alt":
-              instrument = "altimeter";
-              break;
-          case "#modal_tc":
-              instrument = "turn_coordinator";
-              break;
-          case "#modal_hi":
-              instrument = "heading";
-              break;
-          case "#modal_vsi":
-              instrument = "variometer";
-              break;
-      }
-
-      if(instrument){
-          html += $("#" + instrument + " div").eq(0).clone().css({'height': '500px', 'width': '100%'})[0].outerHTML;
-      }
+      var dialogContainer = jQuery('<div/>', {
+        "class": "modal-dialog modal-cdot"
+      }).appendTo(this.container);
 
       contentContainer = jQuery('<div/>', {
         class: "modal-content",
-        html: html
-      }).appendTo(dialogContainer);
+      })
+
+      var newHeader = jQuery('<div/>', {
+        id: slide.headerId.split("#")[1],
+      }).appendTo(contentContainer);
+
+      switch(id){
+        case "#modal_asi":
+          instrument = "airspeed";
+        break;
+        case "#modal_ai":
+          instrument = "attitude";
+          break;
+        case "#modal_alt":
+          instrument = "altimeter";
+          break;
+        case "#modal_tc":
+          instrument = "turn_coordinator";
+          break;
+        case "#modal_hi":
+          instrument = "heading";
+          break;
+        case "#modal_vsi":
+          instrument = "variometer";
+          break;
+      }
+
+      if(instrument){
+        $("#" + instrument + " div").eq(0).clone().css({'height': '500px', 'width': '100%'}).appendTo(contentContainer);
+      }
+
+      contentContainer.append(html);
+      contentContainer.appendTo(dialogContainer);
     }
 
     if(slide.slideContent[contentActiveIndex].action !== undefined){
