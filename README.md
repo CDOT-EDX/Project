@@ -423,13 +423,15 @@ Acceptable options and defaults are as follows:
     }],
     // default models that we want to be set-up in the background
     modals: [{ 
-              id: "ai", 
-              title: "Attitude Indicator", 
-              content: {html: "This is the MODAL custom HTML" },
+              "id": "ai", 
+              "title": "Attitude Indicator", 
+              "content": {html: "This is the MODAL custom HTML" },
+              "buttons": [],
+              "highlights": [],
             }, 
             {
-              id: "alt", 
-              title: "Altimeter", 
+              "id": "alt", 
+              "title": "Altimeter", 
             }
     ],
     // these audioFiles are for the slide only

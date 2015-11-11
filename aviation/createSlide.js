@@ -412,7 +412,7 @@ AVIATION.common.Slide.prototype = {
 
 
   // build titles on the slide
-  buildHeader: function(parent, content, setupContent, clearTitle, callback){
+  buildHeader: function(parent, content, setupContent, clearTitle){
     "use strict";
     var headerElement = $(this.headerId), slide = this,
         xButton;
@@ -498,7 +498,7 @@ AVIATION.common.Slide.prototype = {
       }
 
       if(setupContent && typeof setupContent === 'function'){
-        setupContent(callback);
+        setupContent();
       }
 
     });
@@ -536,7 +536,7 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(slide.container);
     }
 
-    this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
+    this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, true);
 
     slide.initPanel(slide.options.panelType);
     
@@ -823,72 +823,79 @@ AVIATION.common.Slide.prototype = {
   },
 
   // method for building the content of the slide
-  buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback, action){
+  buildContent: function(correctAudio, index, outerIndex, clearContent, action){
     "use strict";
     var outerSlideContent = this.slideContent, slide = this, 
-        contentActiveIndex = index || this.contentActiveIndex, position, previouslyPaused,
+        contentActiveIndex = index || this.contentActiveIndex, position,
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
     if(index && index !== undefined && action !== 'pattern'){
-      this.contentActiveIndex = index;
+      slide.contentActiveIndex = index;
     }
 
     outerIndex = outerIndex || this.mediaActiveIndex || 0;
 
-    if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
+    // let's figure out where we have to put our content/header
+    // shouldn't matter if modal or slide, both have custom options for IDs for content and header
+    // if(!this.options.isModal){
 
-      this.initSlider(contentActiveIndex);
+    slide.initSlider(contentActiveIndex);
 
+    if(!contentContainer || contentContainer.length === 0){
       contentContainer = jQuery('<div/>', {
         id: this.bodyId.split("#")[1],
         "class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
-      }).appendTo(this.container);
-    } else if (this.options.isModal) {
-      var modalContent = outerSlideContent[contentActiveIndex];
-      var html         = modalContent.content === undefined || modalContent.content === null ? "" : modalContent.content.html;
-      var id           = slide.container      === undefined || slide.container      === null ? "" : slide.container;
-      var instrument   = "";
+      }).appendTo(slide.container);
+    }
+      // what do we need here? modal dialog, modal content, modal header?
 
-      var dialogContainer = jQuery('<div/>', {
+      // var modalContent = outerSlideContent[contentActiveIndex];
+      // var html         = modalContent.content === undefined || modalContent.content === null ? "" : modalContent.content.html;
+      // var id           = slide.container      === undefined || slide.container      === null ? "" : slide.container;
+      // var instrument   = "";
+
+      /*
+      jQuery('<div/>', {
         "class": "modal-dialog modal-cdot"
       }).appendTo(this.container);
 
       contentContainer = jQuery('<div/>', {
         class: "modal-content",
-      })
+      });
 
-      var newHeader = jQuery('<div/>', {
+      jQuery('<div/>', {
         id: slide.headerId.split("#")[1],
       }).appendTo(contentContainer);
+      */
 
-      switch(id){
-        case "#modal_asi":
-          instrument = "airspeed";
-        break;
-        case "#modal_ai":
-          instrument = "attitude";
-          break;
-        case "#modal_alt":
-          instrument = "altimeter";
-          break;
-        case "#modal_tc":
-          instrument = "turn_coordinator";
-          break;
-        case "#modal_hi":
-          instrument = "heading";
-          break;
-        case "#modal_vsi":
-          instrument = "variometer";
-          break;
-      }
+      // switch(id){
+      //   case "#modal_asi":
+      //     instrument = "airspeed";
+      //   break;
+      //   case "#modal_ai":
+      //     instrument = "attitude";
+      //     break;
+      //   case "#modal_alt":
+      //     instrument = "altimeter";
+      //     break;
+      //   case "#modal_tc":
+      //     instrument = "turn_coordinator";
+      //     break;
+      //   case "#modal_hi":
+      //     instrument = "heading";
+      //     break;
+      //   case "#modal_vsi":
+      //     instrument = "variometer";
+      //     break;
+      // }
 
-      if(instrument){
-        $("#" + instrument + " div").eq(0).clone().css({'height': '500px', 'width': '100%'}).appendTo(contentContainer);
-      }
+      // if(instrument){
+      //   $("#" + instrument + " div").eq(0).clone().css({'height': '500px', 'width': '100%'}).appendTo(contentContainer);
+      // }
 
-      contentContainer.append(html);
-      contentContainer.appendTo(dialogContainer);
-    }
+      // contentContainer.append(html);
+      // contentContainer.appendTo(dialogContainer);
+    //}
 
     if(slide.slideContent[contentActiveIndex].action !== undefined){
       // set line or second of media before playing it
@@ -1010,21 +1017,21 @@ AVIATION.common.Slide.prototype = {
       }
 
 
-      if(callback && typeof callback != 'function'){
+      if(callback && typeof callback !== 'function'){
         console.log("reassigning eval");
         callback = eval(callback);
-      }      
+      }
 
       if(callback && typeof callback === 'function'){
         console.log("running eval");
         callback();
       }
 
-      if(triggerCallback && slideContent.callback && typeof slideContent.callback != 'function'){
+      if(slideContent.callback && typeof slideContent.callback != 'function'){
         slideContent.callback = eval(slideContent.callback);
       }
-
-      if(triggerCallback && slideContent.callback && typeof slideContent.callback === 'function'){
+      
+      if(slideContent.callback && typeof slideContent.callback === 'function'){
         console.log("triggering the callback! ****");
         slideContent.callback();
       }
@@ -1035,9 +1042,9 @@ AVIATION.common.Slide.prototype = {
     };
 
     if ( (!this.slideContent[contentActiveIndex].second && !this.slideContent[contentActiveIndex].audio) || correctAudio ){
-      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, false, triggerCallback);
+      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, false);
     } else if ( clearContent ){
-      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, clearContent, triggerCallback);
+      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, clearContent);
     }
     
   },
@@ -2052,6 +2059,7 @@ AVIATION.common.Slide.prototype = {
         this.config.panelPause = true;
         console.log("for csv: " + this.config.selfIndex);
         slide.setInstrumentStatus2("Instrument panel is paused");
+        slide.checkSlideControlPlayButtons("pause");
       };
 
       var papaCurrentLine = function(index){
@@ -2134,15 +2142,15 @@ AVIATION.common.Slide.prototype = {
     return csvPlayers;
   },
 
-  buildModals: function(modalOptions){
-    "use strict"; // added on July 16
+  buildModals: function(){
+    "use strict";
 
-    var newModal, slide = this, i;
+    var newModal, slide = this, i, modalOptions, modal, modalDialog, modalHeader;
     // modals are basically slides with an extra option
     // build constrained inside a modal window
     if(this.options.enableModals && this.options.enableHighlights){
       for(i = 0; i < this.modals.length; i++){
-        jQuery('<div/>', {
+        modal = jQuery('<div/>', {
             id: "modal_" + this.modals[i].id,
             class : "modal fade",
             "tab-index" : "-1",
@@ -2151,43 +2159,60 @@ AVIATION.common.Slide.prototype = {
             "aria-hidden" : true,
             "data-backdrop": "static",
             "data-keyboard": false
-        }).appendTo(this.container);
+        }).appendTo(slide.container);
 
-        newModal = new AVIATION.common.Slide({
-               showAvatars: false,
-               showSlideControls: false,
-               showStatus: true,
-               showControls: false,
-               development: true,
-               isModal: true,
-               parent: slide,
-               noAudio: this.modals[i].audio && this.modals[i].audio.length  > 0 ? false : true,
-               container: "#modal_" + this.modals[i].id,
-               statusId: "#modal_status_" + this.modals[i].id,
-               headerId: "#modal_header_" + this.modals[i].id,
-               footerId: "#modal_footer_" + this.modals[i].id
-             },
-             [{
-               title: this.modals[i].title,
-               content: this.modals[i].content,
-               image: this.modals[i].image,
-               callback: this.modals[i].callback,
-             }],
-             this.modals[i].audio
-        );
+        modalOptions = {
+            showAvatars: false,
+            showSlideControls: false,
+            showStatus: true,
+            showControls: false,
+            development: true,
+            isModal: true,
+            parent: slide,
+            noAudio: this.modals[i].audio && this.modals[i].audio.length  > 0 ? false : true,
+            container: "#modal_container_" + this.modals[i].id,
+            statusId: "#modal_status_" + this.modals[i].id,
+            headerId: "#modal_header_" + this.modals[i].id,
+            footerId: "#modal_footer_" + this.modals[i].id,
+            panelHighlightsId: "#panelHighlightContainer",
+            generalHighlightsId: "#generalHighlightContainer",
+            contentHighlightsId: "#contentHighlightContainer",
+            imageHighlightsId: "#imageHighlightContainer",
+            "buttons": slide.modals[i].buttons,
+            // not 100% sure if we need status on modals
+            instStatusId1: "#instStatus1",
+            instStatusId2: "#instStatus2",
+            "highlights": slide.modals[i].highlights,
+            "slideContent": [{
+              title: this.modals[i].title,
+              content: this.modals[i].content,
+              image: this.modals[i].image,
+              callback: this.modals[i].callback,
+            }],
+            "mediaFiles": slide.modals[i].media
+        };
+        // highlights and audios should be handles automatically by slide functions
 
+        // lets create the rest of the modal body where we can add our content and make sure that the IDs
+        // conform to what the buildContent expects
+        modalDialog = jQuery('<div/>', {
+            class: "modal-dialog",
+            role: "content",
+        }).appendTo(modal);
+
+        modalHeader = jQuery('<div/>', {
+            id: modalOptions.container.split("#")[1],
+            class: "modal-content",
+            role: "content",
+        }).appendTo(modalDialog);
+
+        newModal = new AVIATION.common.Slide(modalOptions);
         console.log("this is the modal slide: ");
         console.log(newModal);
-
-        // where do we include highlights?!
-
         newModal.constructor();
 
-        this.modalSlides.push(newModal);
+        slide.modalSlides.push(newModal);
       }
-      // itirate through modals and create each one with a unique id and launch the 
-      // build content with the modified this.container id so that content gets appended to the modal
-      // how do we handle audio though?
     }
   },
   
@@ -3053,8 +3078,8 @@ AVIATION.common.Slide.prototype = {
           quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
-	  panelOverlay : false,
-	  offFlag: false,
+          panelOverlay : false,
+          offFlag: false,
           generalContentId : "#generalContentParent",
           contentParentId : "#contentParent",
           imageParentId: "#imageParent",
@@ -3489,7 +3514,7 @@ AVIATION.common.Slide.prototype = {
               console.log("index provided: " + index);
               console.log("inner index: " + innerIndex);
               innerIndex++;
-              slide.buildContent(true, (slide.contentActiveIndex + innerIndex), this.mediaActiveIndex, false, null, false, advanceWith.action );
+              slide.buildContent(true, (slide.contentActiveIndex + innerIndex), this.mediaActiveIndex, false, advanceWith.action );
               //this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
 
             } else if (advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] && 
