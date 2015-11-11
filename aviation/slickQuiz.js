@@ -380,6 +380,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
+                $("h2.incorrect").hide();
                 function start(options) {
                     var firstQuestion = $(_element + ' ' + _questions + ' li').first();
                     if (firstQuestion.length) {
