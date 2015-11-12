@@ -105,7 +105,7 @@ AVIATION.common.Slide.prototype = {
           if(data.onSuccess.contentIndex !== undefined){
             slide.contentActiveIndex = data.onSuccess.contentIndex;
 
-            slide.mediaActiveIndex = slide.content[slide.contentActive].media.index;
+            slide.mediaActiveIndex = slide.slideContent[slide.contentActiveIndex].media.index;
           } else if (data.onSuccess.mediaIndex !== undefined){
             slide.mediaActiveIndex = data.onSuccess.mediaIndex;
             $(slide).trigger("play");
@@ -118,12 +118,37 @@ AVIATION.common.Slide.prototype = {
         console.log("!* wrong advance triggered");
         console.log("!* wrong advance data");
         console.log(data);
-        if(data && data.onFail && data.onFail.index !== undefined){
+        if(data && data.onFail){
           $(slide).trigger("pause");
           $(slide).trigger("reset");
-          $(slide).trigger("playAltIndex", data.onFail);
+          if(data.onFail.resetMediaIndex !== undefined){
+            slide.mediaActiveIndex = data.onFail.resetMediaIndex;
+          }
+          if(data.onFail.resetContentIndex !== undefined){
+            slide.contentActiveIndex = data.onFail.resetContentIndex;
+          }
+          if(data.onFail.index !== undefined){
+            $(slide).trigger("playAltIndex", data.onFail);
+          } else {
+            $(slide).trigger("play");  
+          }
+        } else {
+          $(slide).trigger("next", data);
         }
         // TODO: tell the student that the action was a wrong one...
+      },
+      "checkQuizResult": function(e, result){
+        console.log("result of quiz.... ");
+        console.log(result);
+        //console.log(slide.content[slide.contentActive]);
+        if(result){
+          $(slide).trigger("correctAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
+        } else {
+          $(slide).trigger("wrongAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
+          console.log("resetting quiz...");
+          console.log("triggered but does it work?");
+          console.log( $(slide) );
+        }
       },
       "playAltIndex": function(e, data){
         var index = data.index, altPlayer = slide.altPlayers;
@@ -186,9 +211,24 @@ AVIATION.common.Slide.prototype = {
         slide.activateTimer(6, slide.options.autoRedirect);
       },
       end: function(e, data){
+        var i;
+        
+        if( (slide.slideContent[slide.contentActiveIndex].advanceWith && 
+              slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz') || 
+                (slide.slideContent[slide.contentActiveIndex+1] &&
+                  slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
+                    slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') ){
+          console.log("resetting quiz inside wrongAdvance");
+          for(i=0; i<slide.resetSlickQuiz.length; i++){
+            console.log("we have a reset avail at: " + i);
+            slide.resetSlickQuiz[i]();
+          }
+        }
+
         if(data && data.element && data.element.type !== undefined){
           if(data.element.type === 'csv'){
             // set inst panel status as 'ended'
+            slide.setInstrumentStatus2("Instrument panel is ended");
           }
           if(data.element.type === 'altAudio'){
             $(slide).trigger("reset");
@@ -372,7 +412,7 @@ AVIATION.common.Slide.prototype = {
 
 
   // build titles on the slide
-  buildHeader: function(parent, content, setupContent, clearTitle, callback){
+  buildHeader: function(parent, content, setupContent, clearTitle){
     "use strict";
     var headerElement = $(this.headerId), slide = this,
         xButton;
@@ -458,7 +498,7 @@ AVIATION.common.Slide.prototype = {
       }
 
       if(setupContent && typeof setupContent === 'function'){
-        setupContent(callback);
+        setupContent();
       }
 
     });
@@ -496,7 +536,7 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(slide.container);
     }
 
-    this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
+    this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, true);
 
     slide.initPanel(slide.options.panelType);
     
@@ -539,42 +579,42 @@ AVIATION.common.Slide.prototype = {
     };
     
     barChartData = {
-        labels: ["Student Knowledge Components"],
-        datasets: [{
-          label: "KC3",
-          fillColor: "#949FB1",
-          strokeColor: "rgba(220,220,220,0.8)",
-          highlightStroke: "rgba(220,220,220,1)",
-          data: [randomScalingFactor()]
-        }, {
-          label: "KC8",
-          fillColor: "#4D5360",
-          strokeColor: "rgba(151,187,205,0.8)",
-          highlightStroke: "rgba(151,187,205,1)",
-          data: [randomScalingFactor()]
-        },{
-          label: "KC11",
-          fillColor: "#F7464A",
-          strokeColor: "rgba(220,220,220,0.8)",
-          highlightStroke: "rgba(220,220,220,1)",
-          data: [randomScalingFactor()]
-        }, {
-          label: "KC15",
-          fillColor: "#46BFBD",
-          strokeColor: "rgba(151,187,205,0.8)",
-          highlightStroke: "rgba(151,187,205,1)",
-          data: [randomScalingFactor()]
-        },{
-          label: "KC16",
-          fillColor: "#FDB45C",
-          strokeColor: "rgba(220,220,220,0.8)",
-          highlightStroke: "rgba(220,220,220,1)",
-          data: [randomScalingFactor()]
-        }]
+      labels: ["Student Knowledge Components"],
+      datasets: [{
+        label: "KC3 - Knowledge of instruments principles of operation and functions",
+        fillColor: "#949FB1",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor()]
+      }, {
+        label: "KC8 - Full panel instrument malfunction recognition",
+        fillColor: "#4D5360",
+        strokeColor: "rgba(151,187,205,0.8)",
+        highlightStroke: "rgba(151,187,205,1)",
+        data: [randomScalingFactor()]
+      },{
+        label: "KC11 - Scanning dynamic (changing indications) instruments",
+        fillColor: "#F7464A",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor()]
+      }, {
+        label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
+        fillColor: "#46BFBD",
+        strokeColor: "rgba(151,187,205,0.8)",
+        highlightStroke: "rgba(151,187,205,1)",
+        data: [randomScalingFactor()]
+      },{
+        label: "KC16 - Selecting corrective action when departing from cleared flightpath",
+        fillColor: "#FDB45C",
+        strokeColor: "rgba(220,220,220,0.8)",
+        highlightStroke: "rgba(220,220,220,1)",
+        data: [randomScalingFactor()]
+      }]
     };
 
     bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
-      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
       animation: false,
     });
 
@@ -598,31 +638,31 @@ AVIATION.common.Slide.prototype = {
     barChartData = {
       labels: ["Student 1", "Student 2", "Student 3", "Student 4"],
       datasets: [{
-        label: "KC3",
+        label: "KC3 - Knowledge of instruments principles of operation and functions",
         fillColor: "#949FB1",
         strokeColor: "rgba(220,220,220,0.8)",
         highlightStroke: "rgba(220,220,220,1)",
         data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
       }, {
-        label: "KC8",
+        label: "KC8 - Full panel instrument malfunction recognition",
         fillColor: "#4D5360",
         strokeColor: "rgba(151,187,205,0.8)",
         highlightStroke: "rgba(151,187,205,1)",
         data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
       },{
-        label: "KC11",
+        label: "KC11 - Scanning dynamic (changing indications) instruments",
         fillColor: "#F7464A",
         strokeColor: "rgba(220,220,220,0.8)",
         highlightStroke: "rgba(220,220,220,1)",
         data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
       }, {
-        label: "KC15",
+        label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
         fillColor: "#46BFBD",
         strokeColor: "rgba(151,187,205,0.8)",
         highlightStroke: "rgba(151,187,205,1)",
         data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
       },{
-        label: "KC16",
+        label: "KC16 - Selecting corrective action when departing from cleared flightpath",
         fillColor: "#FDB45C",
         strokeColor: "rgba(220,220,220,0.8)",
         highlightStroke: "rgba(220,220,220,1)",
@@ -632,7 +672,7 @@ AVIATION.common.Slide.prototype = {
     };
 
     bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
-      multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>",
+      multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
       animation: false,
     });
 
@@ -783,41 +823,100 @@ AVIATION.common.Slide.prototype = {
   },
 
   // method for building the content of the slide
-  buildContent: function(correctAudio, index, outerIndex, clearContent, cb, triggerCallback, action){
+  buildContent: function(correctAudio, index, outerIndex, clearContent, action){
     "use strict";
     var outerSlideContent = this.slideContent, slide = this, 
         contentActiveIndex = index || this.contentActiveIndex, position,
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
     if(index && index !== undefined && action !== 'pattern'){
-      this.contentActiveIndex = index;
+      slide.contentActiveIndex = index;
     }
 
     outerIndex = outerIndex || this.mediaActiveIndex || 0;
 
-    if( !this.options.isModal && (!contentContainer || contentContainer.length === 0) ){
+    // let's figure out where we have to put our content/header
+    // shouldn't matter if modal or slide, both have custom options for IDs for content and header
+    // if(!this.options.isModal){
 
-      this.initSlider(contentActiveIndex);
+    slide.initSlider(contentActiveIndex);
 
+    if(!contentContainer || contentContainer.length === 0){
       contentContainer = jQuery('<div/>', {
-        id: this.bodyId.split("#")[1],
-        "class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
-      }).appendTo(this.container);
-    } else if (this.options.isModal) {
-      var dialogContainer = jQuery('<div/>', {
+        id: this.bodyId.split("#")[1]
+        //"class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
+      }).appendTo(slide.container);
+
+      if(slide.options.isModal){
+        contentContainer.addClass("modal-body");
+      } else {
+        if(slide.options.showAvatars || slide.options.enableSlider){
+          contentContainer.addClass("col-xs-8");
+        } else {
+          contentContainer.addClass("col-xs-12");
+        }
+      }
+      contentContainer.addClass("cdot_contentText");
+    }
+      // what do we need here? modal dialog, modal content, modal header?
+
+      // var modalContent = outerSlideContent[contentActiveIndex];
+      // var html         = modalContent.content === undefined || modalContent.content === null ? "" : modalContent.content.html;
+      // var id           = slide.container      === undefined || slide.container      === null ? "" : slide.container;
+      // var instrument   = "";
+
+      /*
+      jQuery('<div/>', {
         "class": "modal-dialog modal-cdot"
       }).appendTo(this.container);
 
       contentContainer = jQuery('<div/>', {
-        class: "modal-content"
-      }).appendTo(dialogContainer);
-    }
+        class: "modal-content",
+      });
+
+      jQuery('<div/>', {
+        id: slide.headerId.split("#")[1],
+      }).appendTo(contentContainer);
+      */
+
+      // switch(id){
+      //   case "#modal_asi":
+      //     instrument = "airspeed";
+      //   break;
+      //   case "#modal_ai":
+      //     instrument = "attitude";
+      //     break;
+      //   case "#modal_alt":
+      //     instrument = "altimeter";
+      //     break;
+      //   case "#modal_tc":
+      //     instrument = "turn_coordinator";
+      //     break;
+      //   case "#modal_hi":
+      //     instrument = "heading";
+      //     break;
+      //   case "#modal_vsi":
+      //     instrument = "variometer";
+      //     break;
+      // }
+
+      // if(instrument){
+      //   $("#" + instrument + " div").eq(0).clone().css({'height': '500px', 'width': '100%'}).appendTo(contentContainer);
+      // }
+
+      // contentContainer.append(html);
+      // contentContainer.appendTo(dialogContainer);
+    //}
 
     if(slide.slideContent[contentActiveIndex].action !== undefined){
       // set line or second of media before playing it
       position = slide.slideContent[contentActiveIndex].action.line || slide.slideContent[contentActiveIndex].action.second;
       if(position !== undefined){
-        $(slide).trigger("setPosition", position );
+        if(position === 'paused'){
+          position = slide.players[slide.slideContent[contentActiveIndex].action.index].player.config.pausedIndex || 
+            slide.players[slide.slideContent[contentActiveIndex].action.index].player.config.previouslyPaused || 0;
+        }
+        slide.players[slide.slideContent[contentActiveIndex].action.index].player.currentTime(position);
       }
 
       if(slide.slideContent[contentActiveIndex].action.type !== undefined && 
@@ -929,21 +1028,21 @@ AVIATION.common.Slide.prototype = {
       }
 
 
-      if(callback && typeof callback != 'function'){
+      if(callback && typeof callback !== 'function'){
         console.log("reassigning eval");
         callback = eval(callback);
-      }      
+      }
 
       if(callback && typeof callback === 'function'){
         console.log("running eval");
         callback();
       }
 
-      if(triggerCallback && slideContent.callback && typeof slideContent.callback != 'function'){
+      if(slideContent.callback && typeof slideContent.callback != 'function'){
         slideContent.callback = eval(slideContent.callback);
       }
-
-      if(triggerCallback && slideContent.callback && typeof slideContent.callback === 'function'){
+      
+      if(slideContent.callback && typeof slideContent.callback === 'function'){
         console.log("triggering the callback! ****");
         slideContent.callback();
       }
@@ -954,9 +1053,9 @@ AVIATION.common.Slide.prototype = {
     };
 
     if ( (!this.slideContent[contentActiveIndex].second && !this.slideContent[contentActiveIndex].audio) || correctAudio ){
-      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, false, triggerCallback);
+      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, false);
     } else if ( clearContent ){
-      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, clearContent, triggerCallback);
+      this.buildHeader( contentContainer, this.slideContent[contentActiveIndex], setupInnerContent, clearContent);
     }
     
   },
@@ -989,13 +1088,12 @@ AVIATION.common.Slide.prototype = {
 
       footer = jQuery('<div/>', {
         id: this.options.footerId.split("#")[1],
-        class: "slide_footer " + (this.options.isModal ? "modal-footer" : "row")
+        class: "slide_footer " + (this.options.isModal ? "modal-footer" : "row"),
+        "html": this.options.isModal ? "Footer Test" : ""
       });
 
       if(this.options.isModal){
-        console.log("trying to find container");
-        footer.appendTo( this.container + " > .modal-dialog > .modal-content");
-        console.log( $(this.container + " > .modal-dialog > .modal-content") );
+        footer.appendTo(this.container);
       } else {
         footer.appendTo( $(this.container).parent() );  
       }
@@ -1183,7 +1281,7 @@ AVIATION.common.Slide.prototype = {
 
   // builds controls that go at the very bottom of the slide (back/continue) and status bar
   buildCourseControls: function(parentContainer){
-    var controls = $(this.options.footerId + " .controls"), parent = parentContainer || $(this.container).parent();
+    var controls = $(this.options.footerId + " .controls"), parent = parentContainer || $(this.container).parent(), slide = this;
 
     if(this.options.showControls){ //&& (!controls || controls.length < 1) ){
 
@@ -1206,6 +1304,16 @@ AVIATION.common.Slide.prototype = {
         back: $("#btnB").data("action", "back"),
         "continue": $("#btnC").data("action", "continue")
       };
+
+      if(slide.options.backId === ""){
+        slide.slideElements.courseControls.back.attr("disabled", true);
+        slide.slideElements.courseControls.back.prop("disabled", true);
+      }
+
+      if(slide.options.continueId === ""){
+        slide.slideElements.courseControls.continue.attr("disabled", true);
+        slide.slideElements.courseControls.continue.prop("disabled", true);
+      }
 
       this.initCourseButtonEvents();
     } else {
@@ -1481,7 +1589,7 @@ AVIATION.common.Slide.prototype = {
             class: options.classes + (actions[act].classes ? actions[act].classes.join(" ") : "" ),
             html: actions[act].title,
             "data-toggle": options.dataToggle,
-            "data-target": "#" + actions[act].id + "_modal",
+            "data-target": "#modal_" + actions[act].id,
             "data-orderNumber": actions[act].orderNumber,
             role: options.role,
             style: options.style
@@ -1559,9 +1667,20 @@ AVIATION.common.Slide.prototype = {
     console.log(content.media.index);
 
     slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].off();
-    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', { element: { type: content.media.type, index: content.media.index }, 
-      slide: slide }, function(){ $(slide).trigger("end", { callbacks: oldActions,  onSuccess: function(){ slide.buildContent(true, index); },
-        element: { type: content.media.type, index: content.media.index }, slide: slide });
+    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', { 
+      element: { type: content.media.type, index: content.media.index }, 
+      slide: slide 
+    }, function(evt){
+      console.log("executing actionable here");
+      console.log(evt);
+      $(slide).trigger("end", { 
+        callbacks: oldActions,  
+        onSuccess: function(){ 
+          slide.buildContent(true, index); 
+        },
+        element: { type: content.media.type, index: content.media.index }, 
+        slide: slide 
+      });
     });
 
     console.log("assigning EVENTS to ACTS: ");
@@ -1663,10 +1782,10 @@ AVIATION.common.Slide.prototype = {
 
       options = {
         size: 200,
-	beacononeshow: slide.options.panelOverlay,
-	beacontwoshow: slide.options.panelOverlay,
-	ils: slide.options.panelOverlay,
-	off_flag: slide.options.offFlag,
+      	beacononeshow: slide.options.panelOverlay,
+      	beacontwoshow: slide.options.panelOverlay,
+      	ils: slide.options.panelOverlay,
+      	off_flag: slide.options.offFlag,
         showBox: false,
         showScrews: true,
         bootstrapFriendly: true,
@@ -1846,7 +1965,7 @@ AVIATION.common.Slide.prototype = {
         // columns are
         // pitch: 30, roll: 31 (negative), heading: 33, altitude: 41, pressure : 12, airSpeed: 7, turnRate: 28 + 31,
         // yaw: 29, vario: 15/1000
-	//apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
+	      //apperentaly the glidescope is Nav 1 h-def: 57, localizer is Nav 1 v-def: 56, beacon 1 is ADF_1 r-brg:67 beacon2 is ADF_2 r-brg: 71
         if(!this.config.panelPause){
           this.config.pausedIndex = this.index || slide.pausedPanelIndex || 0;
         }
@@ -1875,15 +1994,15 @@ AVIATION.common.Slide.prototype = {
                 pitch: ( flight[i][30] ),
                 roll: ( -( flight[i][31] ) ),
                 ils: slide.options.panelOverlay,      
-		ilslocalizer: flight[i][56],
-		ilsglideslope: flight[i][57]
+                ilslocalizer: flight[i][56],
+                ilsglideslope: flight[i][57]
               },
-	       heading: {
-		heading: flight[i][33],
+	            heading: {
+                heading: flight[i][33],
                	beaconOne: (-(flight[i][66])),//67 on the other csv
-		showBeaconOne: slide.options.panelOverlay,
-		beaconTwo: flight[i][70],//71 on the other csv
-		showBeaconTwo: slide.options.panelOverlay
+                showBeaconOne: slide.options.panelOverlay,
+                beaconTwo: flight[i][70],//71 on the other csv
+                showBeaconTwo: slide.options.panelOverlay
               },
               altimeter: {
                 altitude: flight[i][41],
@@ -1950,6 +2069,7 @@ AVIATION.common.Slide.prototype = {
         this.config.panelPause = true;
         console.log("for csv: " + this.config.selfIndex);
         slide.setInstrumentStatus2("Instrument panel is paused");
+        slide.checkSlideControlPlayButtons("pause");
       };
 
       var papaCurrentLine = function(index){
@@ -1962,6 +2082,7 @@ AVIATION.common.Slide.prototype = {
       var papaResetLine = function(line){
         console.log("for csv: " + this.config.selfIndex);
         console.log("reseting csv line: "+ this.config.line);
+        this.config.previousPause = this.config.line;
         this.config.line = line;
       };
 
@@ -2031,15 +2152,15 @@ AVIATION.common.Slide.prototype = {
     return csvPlayers;
   },
 
-  buildModals: function(modalOptions){
-    "use strict"; // added on July 16
+  buildModals: function(){
+    "use strict";
 
-    var newModal, slide = this, i;
+    var newModal, slide = this, i, modalOptions, modal, modalDialog, modalHeader;
     // modals are basically slides with an extra option
     // build constrained inside a modal window
     if(this.options.enableModals && this.options.enableHighlights){
       for(i = 0; i < this.modals.length; i++){
-        jQuery('<div/>', {
+        modal = jQuery('<div/>', {
             id: "modal_" + this.modals[i].id,
             class : "modal fade",
             "tab-index" : "-1",
@@ -2048,43 +2169,62 @@ AVIATION.common.Slide.prototype = {
             "aria-hidden" : true,
             "data-backdrop": "static",
             "data-keyboard": false
-        }).appendTo(this.container);
+        }).appendTo(slide.container);
 
-        newModal = new AVIATION.common.Slide({
-               showAvatars: false,
-               showSlideControls: false,
-               showStatus: true,
-               showControls: false,
-               development: true,
-               isModal: true,
-               parent: slide,
-               noAudio: this.modals[i].audio && this.modals[i].audio.length  > 0 ? false : true,
-               container: "#modal_" + this.modals[i].id,
-               statusId: "#modal_status_" + this.modals[i].id,
-               headerId: "#modal_header_" + this.modals[i].id,
-               footerId: "#modal_footer_" + this.modals[i].id
-             },
-             [{
-               title: this.modals[i].title,
-               content: this.modals[i].content,
-               image: this.modals[i].image,
-               callback: this.modals[i].callback,
-             }],
-             this.modals[i].audio
-        );
+        modalOptions = {
+            showAvatars: false,
+            showSlideControls: false,
+            showStatus: true,
+            showControls: false,
+            development: true,
+            isModal: true,
+            parent: slide,
+            noAudio: this.modals[i].audio && this.modals[i].audio.length  > 0 ? false : true,
+            container: "#modal_container_" + this.modals[i].id,
+            statusId: "#modal_status_" + this.modals[i].id,
+            headerId: "#modal_header_" + this.modals[i].id,
+            footerId: "#modal_footer_" + this.modals[i].id,
+            bodyId: "#modal_body_" + this.modals[i].id,
+            panelHighlightsId: "#panelHighlightContainer",
+            generalHighlightsId: "#generalHighlightContainer",
+            contentHighlightsId: "#contentHighlightContainer",
+            imageHighlightsId: "#imageHighlightContainer",
+            "buttons": slide.modals[i].buttons,
+            // not 100% sure if we need status on modals
+            instStatusId1: "#instStatus1",
+            instStatusId2: "#instStatus2",
+            "highlights": slide.modals[i].highlights,
+            "slideContent": [{
+              title: this.modals[i].title,
+              content: this.modals[i].content,
+              image: this.modals[i].image,
+              callback: this.modals[i].callback,
+            }],
+            "mediaFiles": slide.modals[i].media
+        };
+        // highlights and audios should be handles automatically by slide functions
 
+        // lets create the rest of the modal body where we can add our content and make sure that the IDs
+        // conform to what the buildContent expects
+        modalDialog = jQuery('<div/>', {
+            class: "modal-dialog",
+            role: "document",
+        }).appendTo(modal);
+
+        modalHeader = jQuery('<div/>', {
+            id: modalOptions.container.split("#")[1],
+            class: "modal-content",
+        }).appendTo(modalDialog);
+
+        newModal = new AVIATION.common.Slide(modalOptions);
         console.log("this is the modal slide: ");
         console.log(newModal);
-
-        // where do we include highlights?!
-
         newModal.constructor();
 
-        this.modalSlides.push(newModal);
+        // need to build content for modals!!!
+
+        slide.modalSlides.push(newModal);
       }
-      // itirate through modals and create each one with a unique id and launch the 
-      // build content with the modified this.container id so that content gets appended to the modal
-      // how do we handle audio though?
     }
   },
   
@@ -2241,12 +2381,12 @@ AVIATION.common.Slide.prototype = {
       switch(action){
         case "back":
           console.log("back clicked");
-          slide.redirectToPage(slide.options.backId);
+          slide.redirectToPage(slide.options.backId.trim());
           break;
 
         case "continue":
           console.log("continue clicked");
-          slide.redirectToPage(slide.options.continueId);
+          slide.redirectToPage(slide.options.continueId.trim());
           break;
 
         default:
@@ -2260,8 +2400,6 @@ AVIATION.common.Slide.prototype = {
         buttons[button].on("click", assignBtnAction);
       }
     }
-
-
   },
   
   initHighlightClickEvents: function(){
@@ -2310,38 +2448,42 @@ AVIATION.common.Slide.prototype = {
   initAltMedia: function(callback){
     "use strict";
 
-    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [];
+    var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [], buttonStateToggle,
+        mediaEndAction;
+
+    buttonStateToggle = function(e){
+      slide.checkSlideControlPlayButtonsState(null, true);
+    };
 
     console.log("initting altmedia");
 
     slide.altPlayers = [];
 
+    mediaEndAction = function(e){
+      console.log("ended pop");
+      console.log(altMedia[i]);
+      var data = {};
+      data.element = {};
+      data.element.type = "altAudio";
+      data.element.index = i;
+
+      data.slide = slide;
+
+      console.log("audio ended event");
+      $(slide).trigger("end", data);
+    };
+
     if(altMediaFiles){
       altMedia = slide.buildSlideAudios(altMediaFiles, true);
 
       for(i=0; i < altMedia.length; i++){
-        altMedia[i].on("ended", function(e){
-          console.log("ended pop");
-          console.log(altMedia[i]);
-          var data = {};
-          data.element = {};
-          data.element.type = "altAudio";
-          data.element.index = i;
+        altMedia[i].on("playing", buttonStateToggle);
 
-          data.slide = slide;
-
-          console.log("audio ended event");
-          $(slide).trigger("end", data);
-        });
+        altMedia[i].on("ended", mediaEndAction);
 
         slide.altPlayers.push({ type: "audio", player: altMedia[i] });
       }
     }
-
-    //slide.initAltMediaEvents();
-
-
-
   },
 
   initMedia: function(callback){
@@ -2690,7 +2832,7 @@ AVIATION.common.Slide.prototype = {
   },
 
   // constrols the state of the Previous/Next 'player' buttons
-  checkSlideControlPlayButtonsState: function(action){
+  checkSlideControlPlayButtonsState: function(action, disableAll){
     var controls = this.slideElements.slideControls, active = this.mediaActiveIndex,
         players = this.players, slide = this, contentActive = this.contentActiveIndex;
 
@@ -2698,7 +2840,16 @@ AVIATION.common.Slide.prototype = {
     console.log(contentActive);
     console.log(this.slideContent.length);
 
-    if(this.options.showSlideControls){
+    if(this.options.showSlideControls && !disableAll){
+
+      controls.play.prop("disabled", false);
+      controls.play.attr("disabled", false);
+      controls.play.removeProp("disabled");
+      controls.play.removeAttr("disabled");
+      controls.pause.removeProp("disabled");
+      controls.pause.removeAttr("disabled");
+      controls.pause.prop("disabled", false);
+      controls.pause.attr("disabled", false);
 
       if(active < 1 && players.length > 1){
         console.log("first audio, no way back");
@@ -2751,6 +2902,17 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
+    }
+
+    if(disableAll){
+      controls.next.attr("disabled", true);
+      controls.next.prop("disabled", true);
+      controls.previous.attr("disabled", true);
+      controls.previous.prop("disabled", true);
+      controls.play.attr("disabled", true);
+      controls.play.prop("disabled", true);
+      controls.pause.attr("disabled", true);
+      controls.pause.prop("disabled", true);
     }
 
   },
@@ -2826,6 +2988,8 @@ AVIATION.common.Slide.prototype = {
     function centerModal(){
       $(this).attr("style", "top: -90px !important");
       $(this).css('display', 'block');
+      $(this).css('overflow', 'visible');
+      //$(this).css('overflow-y', 'auto');
 
       var $dialog  = $(this).find(".modal-dialog"),
       offset       = ($(window).height() - $dialog.height()) / 2,
@@ -2857,7 +3021,7 @@ AVIATION.common.Slide.prototype = {
         console.log("trying to advance on quiz complete with index: " + index);
         console.log("on quiz end contentIndex: "+ slide.contentActiveIndex);
 
-        $(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.checkAdvanceWith);
+        //$(slide).trigger("end", { element: { type: "quiz", index: index }, slide: slide }, slide.checkAdvanceWith);
 
         /*
         if(oldActions && typeof oldActions != "function"){
@@ -2928,8 +3092,8 @@ AVIATION.common.Slide.prototype = {
           quizContainerClass: "cdot_quiz_container",
           advanceWith: "audio",
           panelId: "#flightInstruments",
-	  panelOverlay : false,
-	  offFlag: false,
+          panelOverlay : false,
+          offFlag: false,
           generalContentId : "#generalContentParent",
           contentParentId : "#contentParent",
           imageParentId: "#imageParent",
@@ -3131,6 +3295,8 @@ AVIATION.common.Slide.prototype = {
     this.timerActivated = false;
 
     this.patternMap = [];
+
+    this.resetSlickQuiz = [];
     /* error handling example
     try {
       // if smth might cause an error....
@@ -3209,6 +3375,7 @@ AVIATION.common.Slide.prototype = {
               slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
               slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
               slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
+              slide.slideElements[possibleActions[action].elements][i].css('pointer-events', 'auto');
             } else {
               slide.slideElements[possibleActions[action].elements][i].show();              
               // only disable the ones we show (btn, quizzes only)
@@ -3228,8 +3395,9 @@ AVIATION.common.Slide.prototype = {
               slide.slideElements[possibleActions[action].elements][i].css("border", "");
               slide.slideElements[possibleActions[action].elements][i].css("cursor", "default");
               slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+              slide.slideElements[possibleActions[action].elements][i].css('pointer-events', 'none');
               slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
-            } else {
+            } else {  
               slide.slideElements[possibleActions[action].elements][i].hide();              
             }
           }
@@ -3321,7 +3489,7 @@ AVIATION.common.Slide.prototype = {
 
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
-          $(slide).trigger("correctAdvance", advanceWith);
+          // checked through "checkQuizResult" event
         } else if( _.contains(advanceWith.index, index) ){
 
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
@@ -3360,7 +3528,7 @@ AVIATION.common.Slide.prototype = {
               console.log("index provided: " + index);
               console.log("inner index: " + innerIndex);
               innerIndex++;
-              slide.buildContent(true, (slide.contentActiveIndex + innerIndex), this.mediaActiveIndex, false, null, false, advanceWith.action );
+              slide.buildContent(true, (slide.contentActiveIndex + innerIndex), this.mediaActiveIndex, false, advanceWith.action );
               //this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false, null, true);
 
             } else if (advanceWith.content && slide.slideContent[slide.contentActiveIndex+innerIndex+1] && 

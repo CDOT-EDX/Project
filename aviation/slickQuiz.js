@@ -61,6 +61,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 completionResponseMessaging: false,
                 displayQuestionCount: true, // Deprecate?
                 displayQuestionNumber: true, // Deprecate?
+                resultStatus: false,
                 //..
                 animationCallbacks: { // only for the methods that have jQuery animations offering callback
                     setupQuiz: function () {},
@@ -379,6 +380,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
+                $("h2.incorrect").hide();
                 function start(options) {
                     var firstQuestion = $(_element + ' ' + _questions + ' li').first();
                     if (firstQuestion.length) {
@@ -495,8 +497,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                     if(correctResponse && correctResponse === "true"){
                         correctResponse = true;
+                        plugin.config.resultStatus = true;
                     } else {
                         correctResponse = false;
+                        plugin.config.resultStatus = false;
                     }
 
                     if (correctResponse) {
@@ -693,6 +697,12 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     }
                 });
 
+                console.log("quiz end inside slickQuiz");
+                console.log(plugin.config.resultStatus);
+                $(anySlide).trigger("checkQuizResult", plugin.config.resultStatus);
+                // reset result back to false;
+                plugin.config.resultStatus = false;
+
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
 
                 if (plugin.config.events && plugin.config.events.onCompleteQuiz) {
@@ -759,6 +769,13 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             // Bind "try again" button
             $(_element + ' ' + _tryAgainBtn).on('click', function (e) {
                 e.preventDefault();
+                plugin.method.resetQuiz(this, {
+                    callback: plugin.config.animationCallbacks.resetQuiz
+                });
+            });
+
+            anySlide.resetSlickQuiz.push(function(e){
+                console.log("attempting to reset quiz from slickQuiz");
                 plugin.method.resetQuiz(this, {
                     callback: plugin.config.animationCallbacks.resetQuiz
                 });
