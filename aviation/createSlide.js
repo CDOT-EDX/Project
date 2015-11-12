@@ -1875,14 +1875,14 @@ AVIATION.common.Slide.prototype = {
                 pitch: ( flight[i][30] ),
                 roll: ( -( flight[i][31] ) ),
                 ils: slide.options.panelOverlay,      
-		ilslocalizer: flight[i][56],
-		ilsglideslope: flight[i][57]
+		ilslocalizer: flight[i][55],
+		ilsglideslope: flight[i][56]
               },
 	       heading: {
 		heading: flight[i][33],
-               	beaconOne: (-(flight[i][66])),//67 on the other csv
+               	beaconOne: (flight[i][66]) - flight[i][33],//67 on the other csv
 		showBeaconOne: slide.options.panelOverlay,
-		beaconTwo: flight[i][70],//71 on the other csv
+		beaconTwo:flight[i][70] - flight[i][33],//71 on the other csv
 		showBeaconTwo: slide.options.panelOverlay
               },
               altimeter: {
