@@ -1,10 +1,12 @@
-*last updated on November 5/2015*
+*last updated on November 10/2015*
 
 *experimental conditional version, needs testing*
 
 *new option `"studentGraph": true` is available to show students KC scores at the end of a Snap*
 
-*new option `"evaluate": true` is available on advanceWith to let the frontend know that this advanceWith is marked
+*new option `"instructorGraph": true` is available to show students KC scores at the end of a Snap*
+
+*new option `"evaluate": true` is available on advanceWith to let the frontend know that this advanceWith is marked*
 
 
 *Can enable the panel Overlay with panelOverlay: true*
@@ -387,6 +389,8 @@ Acceptable options and defaults are as follows:
           "type": "play",
           "index": 2 // can only be a mediaIndex (not contentIndex)
           "line": 1001 // in this case its a csv
+          // OR
+          "line": "paused" // to resume from a previously paused animation by user
           // in the case of an audio we can specify "second": 10.1 and not 'line'
         }
     },
@@ -419,13 +423,15 @@ Acceptable options and defaults are as follows:
     }],
     // default models that we want to be set-up in the background
     modals: [{ 
-              id: "ai", 
-              title: "Attitude Indicator", 
-              content: {html: "This is the MODAL custom HTML" },
+              "id": "ai", 
+              "title": "Attitude Indicator", 
+              "content": {"html": "This is the MODAL custom HTML" },
+              "buttons": [],
+              "highlights": [],
             }, 
             {
-              id: "alt", 
-              title: "Altimeter", 
+              "id": "alt", 
+              "title": "Altimeter", 
             }
     ],
     // these audioFiles are for the slide only
