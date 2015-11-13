@@ -104,8 +104,8 @@ AVIATION.common.Slide.prototype = {
         if(data && data.onSuccess){
           if(data.onSuccess.contentIndex !== undefined){
             slide.contentActiveIndex = data.onSuccess.contentIndex;
-
-            slide.mediaActiveIndex = slide.slideContent[slide.contentActiveIndex].media.index;
+            slide.buildContent(true, slide.contentActiveIndex);
+            //slide.mediaActiveIndex = slide.slideContent[slide.contentActiveIndex].media.index;
           } else if (data.onSuccess.mediaIndex !== undefined){
             slide.mediaActiveIndex = data.onSuccess.mediaIndex;
             $(slide).trigger("play");
