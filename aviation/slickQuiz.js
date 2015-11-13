@@ -62,6 +62,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 displayQuestionCount: true, // Deprecate?
                 displayQuestionNumber: true, // Deprecate?
                 resultStatus: false,
+                attempts: 0,
                 //..
                 animationCallbacks: { // only for the methods that have jQuery animations offering callback
                     setupQuiz: function () {},
@@ -379,7 +380,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 key = internal.method.getKey(1); // how many notches == how many jQ animations you will run
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
-
+                $("h2.incorrect").hide();
+                plugin.config.attempts += 1;
+                console.log("Attempts");
+                console.log(plugin.config.attempts);
                 function start(options) {
                     var firstQuestion = $(_element + ' ' + _questions + ' li').first();
                     if (firstQuestion.length) {
@@ -487,9 +491,14 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     answers = questions[questionIndex].a,
                     selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
 
-                answerLIs.addClass(incorrectResponseClass);
+                //answerLIs.addClass(incorrectResponseClass);
                 // Collect the true answers needed for a correct response
                 var trueAnswers = [];
+                var attempts = 0;
+                console.log("Attempts test");
+                if (attempts < answerLIs.length)
+                    attempts += 1;
+                console.log(attempts);
                 $(anySlide).off('checkCompleted');
                 $(anySlide).on('checkCompleted', function(evt, data){
                     var correctResponse = data.quiz_result_id.correct;
@@ -513,12 +522,11 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         if (plugin.config.showRemediationOnFail)
                             //"Firing callback"
                             plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId);
- 
-                        questionLI.addClass(incorrectClass);
+                                questionLI.addClass(incorrectClass);
                     }
 
                     // Toggle appropriate response (either for display now and / or on completion)
-                    questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
+                        questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
 
                     // If perQuestionResponseMessaging is enabled, toggle response and navigation now
                     if (plugin.config.perQuestionResponseMessaging) {
