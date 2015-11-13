@@ -1735,7 +1735,7 @@ AVIATION.common.Slide.prototype = {
           first: "label",
           last: "label",
           rest: "label",
-          labels: ["Idle", "Descent/Aprroach", "Cruise" , "Climb" , "Take Off/Full"],
+          labels: ["Idle", "Descent/Approach", "Cruise" , "Climb" , "Take Off/Full"],
           prefix: "",
           suffix: ""
       });
