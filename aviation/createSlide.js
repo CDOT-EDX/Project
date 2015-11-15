@@ -108,6 +108,7 @@ AVIATION.common.Slide.prototype = {
             //slide.mediaActiveIndex = slide.slideContent[slide.contentActiveIndex].media.index;
           } else if (data.onSuccess.mediaIndex !== undefined){
             slide.mediaActiveIndex = data.onSuccess.mediaIndex;
+            console.log("play triggered from correctAdvance");
             $(slide).trigger("play");
           }
           return;
@@ -130,6 +131,7 @@ AVIATION.common.Slide.prototype = {
           if(data.onFail.index !== undefined){
             $(slide).trigger("playAltIndex", data.onFail);
           } else {
+            console.log("play triggered from wrongAdvance");
             $(slide).trigger("play");  
           }
         } else {
@@ -232,6 +234,7 @@ AVIATION.common.Slide.prototype = {
           }
           if(data.element.type === 'altAudio'){
             $(slide).trigger("reset");
+            console.log("play triggered from altMedia");
             $(slide).trigger("play");
             return;
           }
@@ -304,6 +307,7 @@ AVIATION.common.Slide.prototype = {
         slide.mediaActiveIndex++;
         if(slide.slideContent && slide.mediaActiveIndex < slide.players.length){
           $(slide).trigger("play");
+          console.log("play triggered from nextMedia");
         } else {
           $(slide).trigger("slideEnd");
         }
@@ -316,6 +320,7 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("reset");
         slide.mediaActiveIndex--;
         $(slide).trigger("play");
+
       },
       replay: function(e){
         console.log("!* replay event fired");
@@ -2035,7 +2040,7 @@ AVIATION.common.Slide.prototype = {
                 slide.justLoaded = false;
               }
             }
-          } else if (i !== 1) {
+          } else if (i > 1 && !player.config.panelEnd) {
             if(i < flight.length){
               player.config.pausedIndex = i;
               $(slide).trigger("instrumentPause", i);
