@@ -68,7 +68,7 @@ AVIATION.common.Slide = function (options, slideContent, mediaFiles, parentSlide
 };
 
 AVIATION.common.Slide.prototype = {
-  version: "0.1.1",
+  version: "0.2.1",
 
   // constructor which initiates the building process
   constructor: function(options){
@@ -3428,12 +3428,6 @@ AVIATION.common.Slide.prototype = {
         scanPattern = slide.options.scanningPatternArray, patternId,
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
 
-//  $(this).trigger("click");
-
-/*
-    $(this).on("checkScanningPattern", function(e, evt){
-    });
-*/
     // new check to see if we've already moved past this advanceWith index
     console.log("new actionable index: ");
     console.log(activeContent);
@@ -3485,6 +3479,12 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
+      if( !$.isArray(type) ){
+        type = [type];
+        console.log("invoke?");
+        console.log( _.invoke(advanceWith.index, index, 'contains') );
+      }
+
       // check the logic
       if(type && index===undefined && advanceWith.action===undefined){
         if( _.contains(advanceWith.type, type) )
@@ -3495,8 +3495,9 @@ AVIATION.common.Slide.prototype = {
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
           // checked through "checkQuizResult" event
-        } else if( _.contains(advanceWith.index, index) ){
-
+        } else if( _.invoke(advanceWith.index, index, 'contains') ){
+          // 
+          console.log("checking inside if contains...")
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
