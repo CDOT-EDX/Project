@@ -2074,7 +2074,7 @@ AVIATION.common.Slide.prototype = {
         this.config.panelPause = true;
         console.log("for csv: " + this.config.selfIndex);
         slide.setInstrumentStatus2("Instrument panel is paused");
-        slide.checkSlideControlPlayButtons("pause");
+        //slide.checkSlideControlPlayButtons("pause");
       };
 
       var papaCurrentLine = function(index){
