@@ -3479,12 +3479,6 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
-      if( !$.isArray(type) ){
-        type = [type];
-        console.log("invoke?");
-        console.log( _.invoke(advanceWith.index, index, 'contains') );
-      }
-
       // check the logic
       if(type && index===undefined && advanceWith.action===undefined){
         if( _.contains(advanceWith.type, type) )
@@ -3495,9 +3489,8 @@ AVIATION.common.Slide.prototype = {
       } else if(_.contains(advanceWith.type, type) && index !== undefined && advanceWith.action === undefined ){
         if(type === 'quiz'){
           // checked through "checkQuizResult" event
-        } else if( _.invoke(advanceWith.index, index, function(a,b){ console.log("inside func"); console.log(a); console.log(b); return a===b; }) ){
-          // 
-          console.log("checking inside if contains...")
+        } else if( _.contains(advanceWith.index, index) ){
+//        } else if( _.invoke(advanceWith.index, index, function(a,b){ console.log("inside func"); console.log(a); console.log(b); return a===b; }) ){
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
