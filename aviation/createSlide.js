@@ -971,14 +971,14 @@ AVIATION.common.Slide.prototype = {
         // check parent of general content
         if(generalParent.length < 1){
           generalParent = jQuery('<div/>',{
-            id: "generalContentParent",
+            id: slide.options.generalContentId.split("#")[1],
             "class": "slideGeneral row"
           }).appendTo($(slide.container + " > .cdot_contentText") );
         }
 
         if(imageParent.length < 1){
           imageParent =jQuery('<div/>', {
-            id: "imageParent",
+            id: slide.options.imageParentId.split("#")[1],
             "class": "slideImage col-xs-12"
           }).appendTo(generalParent);
         }
@@ -986,7 +986,7 @@ AVIATION.common.Slide.prototype = {
         // if image and content parents dont exist, create them
         if(contentParent.length < 1){
           contentParent =jQuery('<div/>', {
-            id: "contentParent",
+            id: slide.options.contentParentId.split("#")[1],
             "class": "slideContent col-xs-12"
           }).appendTo(generalParent);
         }
@@ -2209,10 +2209,10 @@ AVIATION.common.Slide.prototype = {
             headerId: "#modal_header_" + this.modals[i].id,
             footerId: "#modal_footer_" + this.modals[i].id,
             bodyId: "#modal_body_" + this.modals[i].id,
-            panelHighlightsId: "#panelHighlightContainer",
-            generalHighlightsId: "#generalHighlightContainer",
-            contentHighlightsId: "#contentHighlightContainer",
-            imageHighlightsId: "#imageHighlightContainer",
+            panelHighlightsId: "#panelHighlightContainer_modal_" + this.modals[i].id,
+            generalHighlightsId: "#generalHighlightContainer_modal_" + this.modals[i].id,
+            contentHighlightsId: "#contentHighlightContainer_modal_" + this.modals[i].id,
+            imageHighlightsId: "#imageHighlightContainer_modal_" + this.modals[i].id,
             "buttons": slide.modals[i].buttons,
             // not 100% sure if we need status on modals
             instStatusId1: "#instStatus1",
