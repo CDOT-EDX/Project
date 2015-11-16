@@ -2209,6 +2209,8 @@ AVIATION.common.Slide.prototype = {
             headerId: "#modal_header_" + this.modals[i].id,
             footerId: "#modal_footer_" + this.modals[i].id,
             bodyId: "#modal_body_" + this.modals[i].id,
+            contentParentId : "#contentParent_modal_" + this.modals[i].id`,
+            imageParentId: "#imageParent_modal_" + this.modals[i].id,
             panelHighlightsId: "#panelHighlightContainer_modal_" + this.modals[i].id,
             generalHighlightsId: "#generalHighlightContainer_modal_" + this.modals[i].id,
             contentHighlightsId: "#contentHighlightContainer_modal_" + this.modals[i].id,
