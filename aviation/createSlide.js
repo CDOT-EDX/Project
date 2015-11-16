@@ -834,11 +834,18 @@ AVIATION.common.Slide.prototype = {
         contentActiveIndex = index || this.contentActiveIndex, position,
         contentContainer = $(this.container + " > " + this.bodyId), setupInnerContent;
 
-    if(index && index !== undefined && action !== 'pattern'){
+    if(index !== undefined && action !== 'pattern'){
       slide.contentActiveIndex = index;
+      contentActiveIndex = index;
+    } else {
+      contentActiveIndex = this.contentActiveIndex;
     }
 
-    outerIndex = outerIndex || this.mediaActiveIndex || 0;
+    if(outerIndex === undefined && this.mediaActiveIndex !== undefined){
+      outerIndex = this.mediaActiveIndex;
+    } else {
+      outerIndex = 0;
+    }
 
     // let's figure out where we have to put our content/header
     // shouldn't matter if modal or slide, both have custom options for IDs for content and header
@@ -853,6 +860,9 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(slide.container);
 
       if(slide.options.isModal){
+        console.log("building Modal content...");
+        console.log(this.slideContent[contentActiveIndex]);
+        console.log(this);
         contentContainer.addClass("modal-body");
       } else {
         if(slide.options.showAvatars || slide.options.enableSlider){
@@ -863,6 +873,8 @@ AVIATION.common.Slide.prototype = {
       }
       contentContainer.addClass("cdot_contentText");
     }
+
+
       // what do we need here? modal dialog, modal content, modal header?
 
       // var modalContent = outerSlideContent[contentActiveIndex];
@@ -1050,6 +1062,13 @@ AVIATION.common.Slide.prototype = {
       if(slideContent.callback && typeof slideContent.callback === 'function'){
         console.log("triggering the callback! ****");
         slideContent.callback();
+      }
+
+      if(slide.options.isModal){
+        console.log("inner content of slide:");
+        console.log(slideContent);
+        console.log(innerContent);
+        
       }
 
       slide.initActionables();
@@ -2225,8 +2244,8 @@ AVIATION.common.Slide.prototype = {
         console.log("this is the modal slide: ");
         console.log(newModal);
         newModal.constructor();
-
-        // need to build content for modals!!!
+        // since modals only have one slideContent, lets trigger it to be built
+        newModal.buildContent(true, 0);
 
         slide.modalSlides.push(newModal);
       }
@@ -2888,7 +2907,8 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if( ( (active > players.length - 1) && (contentActive + 1 > this.slideContent.length - 1) ) || (contentActive + 1 > this.slideContent.length - 1) ){
+          if( ( (active > players.length - 1) && 
+              (contentActive + 1 > this.slideContent.length - 1) ) || (contentActive + 1 > this.slideContent.length - 1 || this.slideContent[contentActive].slideEnd) ){
             if(action !== 'replay'){
               $(slide).trigger("slideEnd");
             }
@@ -3511,7 +3531,7 @@ AVIATION.common.Slide.prototype = {
         
         if(type === 'quiz'){
           // all good, let's wait for next input...
-        } else if( scanPattern[overallScanIndex+1] === index){
+        } else if(scanPattern[overallScanIndex+1] === index){
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
           if(element !== undefined){
             //$(element).pulse('destroy');

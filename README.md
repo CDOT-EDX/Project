@@ -1,6 +1,8 @@
-*last updated on November 10/2015*
+*last updated on November 16/2015*
 
 *experimental conditional version, needs testing*
+
+*new option on slideContent - `"slideEnd": true` is available to trigger slideEnd event for sure*
 
 *new option `"studentGraph": true` is available to show students KC scores at the end of a Snap*
 
@@ -411,6 +413,7 @@ Acceptable options and defaults are as follows:
         },
     },
     {
+        "slideEnd": true,
         "media": {
           "type": "button",
           "index": 1
