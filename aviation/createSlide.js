@@ -532,8 +532,8 @@ AVIATION.common.Slide.prototype = {
       panelContainer = jQuery("<div/>", {
         id: slide.options.panelId.split("#")[1],
         class: "instruments " + (this.options.enableSlider ? "col-xs-8" : "col-xs-12"),
-        html: '<div id="'+this.options.panelHighlightsId.split("#")[1]+'"></div><div id="'+this.options.instStatusId1.split("#")[1]+'" class="row">'+
-              '</div><div id="'+this.options.instStatusId2.split("#")[1]+'" class="row"></div>'
+        html: '<div id="'+this.options.panelHighlightsId.split("#")[1]+'"></div><div id="'+this.options.instRow1.split("#")[1]+'" class="row">'+
+              '</div><div id="'+this.options.instRow2.split("#")[1]+'" class="row"></div>'
       }).appendTo(slide.container);
 
       jQuery("<div/>",{
@@ -1824,8 +1824,8 @@ AVIATION.common.Slide.prototype = {
         panelContainer = jQuery("<div/>", {
           id: slide.options.panelId.split("#")[1],
           class: "instruments col-xs-" + bootCol,
-          html: '<div id="'+this.options.panelHighlightsId.split("#")[1]+'"></div><div id="'+this.options.instStatusId1.split("#")[1]+'" class="row">'+
-                '</div><div id="'+this.options.instStatusId2.split("#")[1]+'" class="row"></div>'
+          html: '<div id="'+this.options.panelHighlightsId.split("#")[1]+'"></div><div id="'+this.options.instRow1.split("#")[1]+'" class="row">'+
+                '</div><div id="'+this.options.instRow2.split("#")[1]+'" class="row"></div>'
         }).appendTo(slide.container);
       } else {
         $(slide.options.panelId)
@@ -1854,9 +1854,9 @@ AVIATION.common.Slide.prototype = {
             });
 
             if(i <3){
-              instrumentSpan.appendTo("#instRow1");
+              instrumentSpan.appendTo(this.options.instRow1);
             } else {
-              instrumentSpan.appendTo("#instRow2");
+              instrumentSpan.appendTo(this.options.instRow2);
             }
 
 
@@ -2199,7 +2199,7 @@ AVIATION.common.Slide.prototype = {
         modalOptions = {
             showAvatars: false,
             showSlideControls: false,
-            showStatus: true,
+            showStatus: false,
             showControls: false,
             development: true,
             isModal: true,
@@ -2219,8 +2219,10 @@ AVIATION.common.Slide.prototype = {
             imageHighlightsId: "#imageHighlightContainer_modal_" + this.modals[i].id,
             "buttons": slide.modals[i].buttons,
             // not 100% sure if we need status on modals
+            instRow1: "#modal_instRow1_" + this.modals[i].id,
+            instRow2: "#modal_instRow2_" + this.modals[i].id,
             instStatusId1: "#modal_instStatus1_" + this.modals[i].id,
-            instStatusId2: "#modal_instStatus2" + this.modals[i].id,
+            instStatusId2: "#modal_instStatus2_" + this.modals[i].id,
             "highlights": slide.modals[i].highlights,
             "slideContent": [{
               title: this.modals[i].title,
@@ -2269,8 +2271,10 @@ AVIATION.common.Slide.prototype = {
   resetStatusBar: function(){
     "use strict";
     // console.log("resetting status bar");
-    this.slideElements.statusBar.off();
-    this.slideElements.statusBar.prop("disabled", true);
+    if(slide.options.showStatus){
+      this.slideElements.statusBar.off();
+      this.slideElements.statusBar.prop("disabled", true);
+    }
   },
 
   activateTimer: function(seconds, isAuto){
@@ -2969,25 +2973,27 @@ AVIATION.common.Slide.prototype = {
     var slide = this, status = slide.slideElements.statusBar;
     console.log("setting status to: " + action);
 
-    switch(action){
-      case "play":
-        status.text("Playing...");
-        break;
-      case "pause":
-        status.text("Paused");
-        break;
-      default:
-        if(action){
-          console.log("setting custom status to: " + action);
-          status.text(action);
-        } else {
-          status.text("Status is undefined!");
-        }
+    if(slide.options.showStatus){
+      switch(action){
+        case "play":
+          status.text("Playing...");
+          break;
+        case "pause":
+          status.text("Paused");
+          break;
+        default:
+          if(action){
+            console.log("setting custom status to: " + action);
+            status.text(action);
+          } else {
+            status.text("Status is undefined!");
+          }
 
-        break;
-    }
-    if($().pulse){
-      status.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+          break;
+      }
+      if($().pulse){
+        status.pulse(slide.options.pulseProperties, slide.options.pulseSettings);
+      }
     }
 
   },
@@ -3148,6 +3154,10 @@ AVIATION.common.Slide.prototype = {
 
           instStatusId1: "#instStatus1",
           instStatusId2: "#instStatus2",
+
+          instRow1: "#instRow1",
+          instRow2: "#instRow2",
+
           scanningPatternArray: [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3 ],
           minScan: 1,
           pulseCorrectProp: {
