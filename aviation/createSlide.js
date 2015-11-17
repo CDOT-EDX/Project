@@ -2197,6 +2197,8 @@ AVIATION.common.Slide.prototype = {
         }).appendTo(slide.container);
 
         modalOptions = {
+            serverBaseUrl: slide.options.serverBaseUrl,
+            apacheServerBaseUrl: slide.options.apacheServerBaseUrl,
             showAvatars: false,
             showSlideControls: false,
             showStatus: false,
