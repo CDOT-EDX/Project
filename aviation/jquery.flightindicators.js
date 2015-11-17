@@ -1,4 +1,4 @@
-/* 
+/*
 Skyhawk Flight Instruments (https://github.com/uw-ray/Skyhawk-Flight-Instruments)
 By Raymond Blaga (raymond.blaga@gmail.com), Edward Hanna (edward.hanna@senecacollege.ca), Pavlo Kuzhel (pavlo.kuzhel@senecacollege.ca)
 
@@ -41,11 +41,11 @@ Published under GPLv3 License.
             bootstrapFriendly: false,
             bootstrapClass: "",
             img_directory : 'img/'
-            }, options 
+            }, options
         ),
         constants = {
             pitch_bound: 26
-        }
+        };
 
         // Air Speed - Set air speed
         function _setAirSpeed(speed){
@@ -61,8 +61,8 @@ Published under GPLv3 License.
             placeholder.each(function(){
                 $(this).find('div.instrument.airspeed div.airspeed')
                     .css('transform', 'rotate(' + deg + 'deg)');
-                    
-            });    
+
+            });
 
         }
 
@@ -136,7 +136,7 @@ Published under GPLv3 License.
                 $(this).find('div.instrument.altimeter div.altimeter_hand100').css('transform', 'rotate(' + hand100 + 'deg)');
                 $(this).find('div.instrument.altimeter div.altimeter_hand1000').css('transform', 'rotate(' + hand1000 + 'deg)');
                 $(this).find('div.instrument.altimeter div.altimeter_hand10000').css('transform', 'rotate(' + hand10000 + 'deg)');
-            });    
+            });
         }
 
         // Altimeter - Set pressure (by default inHg; set milibar to true if you wish to use mbar)
@@ -160,10 +160,10 @@ Published under GPLv3 License.
 
             placeholder.each(function(){
                 $(this).find('div.instrument.altimeter div.altimeter_pressurembar').css('transform', 'rotate(' + pressure1 + 'deg)');
-            });    
+            });
             placeholder.each(function(){
                 $(this).find('div.instrument.altimeter div.altimeter_pressureinhg').css('transform', 'rotate(' + -pressure2 + 'deg)');
-            });            
+            });
 
         }
 
@@ -234,24 +234,24 @@ Published under GPLv3 License.
         function _setHeading(heading){
             placeholder.each(function(){
                 $(this).find('div.instrument.heading div.heading_yaw').css('transform', 'rotate(' + -heading + 'deg)');
-            });    
+            });
         }
 
         // Heading - Set beacon one direction
         function _setBeaconOne(heading, visible){
             if (visible) placeholder.each(function(){
                 $(this).find('div.instrument.heading div.heading_beacon_1').show().css('transform', 'rotate(' + heading + 'deg)');
-            });    
+            });
             else placeholder.each(function(){
                 $(this).find('div.instrument.heading div.heading_beacon_1').hide();
             });
-        }        
+        }
 
         // Heading - Set beacon two direction
         function _setBeaconTwo(heading, visible){
             if (visible) placeholder.each(function(){
                 $(this).find('div.instrument.heading div.heading_beacon_2').show().css('transform', 'rotate(' + heading + 'deg)');
-            });    
+            });
             else placeholder.each(function(){
                 $(this).find('div.instrument.heading div.heading_beacon_2').hide();
             });
@@ -268,7 +268,7 @@ Published under GPLv3 License.
                     .css('transform', 'rotate(' + deg + 'deg)');
                     //.css('transition', 'transform 1.0s linear');
 
-            });    
+            });
         }
 
         // Set size of instrument
@@ -309,7 +309,7 @@ Published under GPLv3 License.
                     $(this).html('<div class="instrument airspeed"><div class="indicator_background"><img src="' + settings.img_directory + 'indicator_background_dashboard.svg" class="box" alt="" /></div><div class="indicator_background_screws"><img src="' + settings.img_directory + 'indicator_background_screws.svg" class="box" alt="" /></div><div class="indicator_inner"><div class="airspeed_trueairspeed"><img src="' + settings.img_directory + 'airspeed_trueairspeed.svg" class="box" alt="" /></div><div class="airspeed_markings"><img src="' + settings.img_directory + 'airspeed_markings.svg" class="box" alt="" /></div><div class="airspeed box"><img src="' + settings.img_directory + 'airspeed_hand.svg" class="box" alt="" /></div></div><div class="indicator_foreground"><img src="' + settings.img_directory + 'indicator_foreground.svg" class="box" alt="" /></div></div>');
                     _setAirSpeed(settings.airspeed);
                     _setTrueAirSpeed(settings.trueairspeed);
-                break
+                break;
 
                 case 'attitude':
                     $(this).html('<div class="instrument attitude"><div class="indicator_background"><img src="' + settings.img_directory + 'indicator_background_dashboard.svg" class="box" alt="" /></div><div class="indicator_background_screws"><img src="' + settings.img_directory + 'indicator_background_screws.svg" class="box" alt="" /></div><div class="indicator_inner"><div class="attitude box"><img src="' + settings.img_directory + 'attitude_roll_1.svg" class="box" alt="" /><div class="attitude_pitch box"><img src="' + settings.img_directory + 'attitude_pitch.svg" class="box" alt="" /></div><img src="' + settings.img_directory + 'attitude_roll_2.svg" class="box" alt="" /></div><div class="attitude_foreground_1"><img src="' + settings.img_directory + 'attitude_foreground_1.svg" class="box" alt="" /></div><div class="attitude_ils"><img src="' + settings.img_directory + 'attitude_ils_markings.svg" class="box" alt="" /><div class="attitude_ils_localizer box"><img src="' + settings.img_directory + 'attitude_ils_localizer.svg" class="box" alt="" /></div><div class="attitude_ils_glideslope box"><img src="' + settings.img_directory + 'attitude_ils_glideslope.svg" class="box" alt="" /></div></div><div class="attitude_foreground_2"><img src="' + settings.img_directory + 'attitude_foreground_2.svg" class="box" alt="" /></div><div class="attitude_off_flag"><img src="' + settings.img_directory + 'attitude_off_flag.svg" class="box" alt="" /></div></div><div class="indicator_foreground"><img src="' + settings.img_directory + 'indicator_foreground.svg" class="box" alt="" /></div></div>');
@@ -319,7 +319,7 @@ Published under GPLv3 License.
                     _setILS(settings.ils);
                     _setILSLocalizer(settings.ils_localizer);
                     _setILSGlideslope(settings.ils_glideslope);
-                break
+                break;
 
                 case 'altimeter':
                     $(this).html('<div class="instrument altimeter"><div class="indicator_background"><img src="' + settings.img_directory + 'indicator_background_dashboard.svg" class="box" alt="" /></div><div class="indicator_background_screws"><img src="' + settings.img_directory + 'indicator_background_screws.svg" class="box" alt="" /></div><div class="indicator_inner"><div class="altimeter_pressureinhg box"><img src="' + settings.img_directory + 'altimeter_pressure_inhg.svg" class="box" alt="" /></div><div class="altimeter_pressurembar box"><img src="' + settings.img_directory + 'altimeter_pressure_mbar.svg" class="box" alt="" /></div><div class="altimeter_background box"><img src="' + settings.img_directory + 'altimeter_background.svg" class="box" alt="" /></div><div class="altimeter_hand10000 box"><img src="' + settings.img_directory + 'altimeter_hand_10000ft.svg" class="box" alt="" /></div><div class="altimeter_foreground box"><img src="' + settings.img_directory + 'altimeter_foreground.svg" class="box" alt="" /></div><div class="altimeter_hand1000 box"><img src="' + settings.img_directory + 'altimeter_hand_1000ft.svg" class="box" alt="" /></div><div class="altimeter_hand100 box"><img src="' + settings.img_directory + 'altimeter_hand_100ft.svg" class="box" alt="" /></div></div><div class="indicator_foreground"><img src="' + settings.img_directory + 'indicator_foreground.svg" class="box" alt="" /></div></div>');
@@ -366,7 +366,7 @@ Published under GPLv3 License.
         });
 
         // Public methods
-	this.setAirSpeed =          function(options){ var test = options.airSpeed    ; if(test !== undefined) _setAirSpeed(test);};
+        this.setAirSpeed =          function(options){ var test = options.airSpeed    ; if(test !== undefined) _setAirSpeed(test);};
         //this.setTrueAirSpeed =      function(speed){_setTrueAirSpeed(speed);}
         this.setRoll =              function(options){ var test = options.roll        ; if(test !== undefined) _setRoll(test);};
         this.setPitch =             function(options){ var test = options.pitch       ; if(test !== undefined) _setPitch(test);};
@@ -376,18 +376,18 @@ Published under GPLv3 License.
         this.setTurn =              function(options){ var test = options.turnRate    ; if(test !== undefined) _setTurn(test);};
         this.setSlip =              function(options){ var test = options.yaw         ; if(test !== undefined) _setSlip(test);};
         this.setHeading =           function(options){ var test = options.heading     ; if(test !== undefined) _setHeading(test);};
-        this.setBeaconOne =         function(options){ var test = options.beaconOne, temp = options.showBeaconOne   ; if(temp == true && test !== undefined ) _setBeaconOne(test,temp);};
-        this.setBeaconTwo =         function(options){ var test = options.beaconTwo, temp = options.showBeaconTwo ; if( temp == true && test !== undefined) _setBeaconTwo(test,temp);};
+        this.setBeaconOne =         function(options){ var test = options.beaconOne, temp = options.showBeaconOne   ; if(temp === true && test !== undefined ) _setBeaconOne(test,temp);};
+        this.setBeaconTwo =         function(options){ var test = options.beaconTwo, temp = options.showBeaconTwo ; if( temp === true && test !== undefined) _setBeaconTwo(test,temp);};
         this.setVario =             function(options){ var test = options.vario       ; if(test !== undefined) _setVario(test);};
         this.resize =               function(options){ var test = options.resize      ; if(test !== undefined) _resize(test);};
         this.toggleBox =            function(options){ var test = options.toggleBox   ; if(test !== undefined) _toggleBox(test);};
         this.toggleScrews =         function(options){ var test = options.toggleScrews; if(test !== undefined) _toggleScrews(test);};
-        this.toggleIndicatorInner = function(options){ var test = options.toggleInner ; if(test !== undefined) _toggleIndicatorInner(test);};        
+        this.toggleIndicatorInner = function(options){ var test = options.toggleInner ; if(test !== undefined) _toggleIndicatorInner(test);};
         this.setILS =               function(options){ var test = options.setils      ; if(test!== undefined) _setILS(test);};
-        this.setILSLocalizer =      function(options){ var test = options.ilslocalizer, temp = options.ils ; if(temp == true && test !== undefined)  _setILSLocalizer(test);};
-        this.setILSGlideslope =     function(options){ var test = options.ilsglideslope, temp = options.ils ;if(temp == true && test!== undefined) _setILSGlideslope(test);};
+        this.setILSLocalizer =      function(options){ var test = options.ilslocalizer, temp = options.ils ; if(temp === true && test !== undefined)  _setILSLocalizer(test);};
+        this.setILSGlideslope =     function(options){ var test = options.ilsglideslope, temp = options.ils ;if(temp === true && test!== undefined) _setILSGlideslope(test);};
         return built;
-    };
+    }
 
     // Extension to jQuery
     $.flightIndicator = function(placeholder, type, options){
