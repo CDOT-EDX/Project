@@ -63,6 +63,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 displayQuestionNumber: true, // Deprecate?
                 resultStatus: false,
                 attempts: 0,
+                remediationCount: 0,
                 //..
                 animationCallbacks: { // only for the methods that have jQuery animations offering callback
                     setupQuiz: function () {},
@@ -267,7 +268,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         questionHTML.append('<h3>' + formatQuestion + '</h3>');
 
                         // Count the number of true values
-                        /*
+
                         var truths = 0;
                         for (i in question.a) {
                             if (question.a.hasOwnProperty(i)) {
@@ -277,9 +278,9 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                                 }
                             }
                         }
-                        */
-                        
-                        console.log("----------TRUTHS222 " + question.truths);
+
+
+                        console.log("----------TRUTHS " + truths);
 
                         // Now let's append the answers with checkboxes or radios depending on truth count
                         var answerHTML = $('<ul class="' + answersClass + '"></ul>');
@@ -292,7 +293,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         // prepare a name for the answer inputs based on the question
                         var selectAny = question.select_any ? question.select_any : false,
                             forceCheckbox = question.force_checkbox ? question.force_checkbox : false,
-                            checkbox = (/*plugin.config.numberOfTrueAnswersInQuestions*/question.truths > 1 && !selectAny) || forceCheckbox,
+                            checkbox = (/*plugin.config.numberOfTrueAnswersInQuestions*/truths > 1 && !selectAny) || forceCheckbox,
                             inputName = $element.attr('id') + '_question' + (count - 1),
                             inputType = checkbox ? 'checkbox' : 'radio';
 
@@ -351,12 +352,12 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         }
 
                         // Append question & answers to quiz
+
                         quiz.append(questionHTML);
 
                         count++;
                     }
                 }
-
                 // Add the quiz content to the page
                 $quizArea.append(quiz);
 
@@ -380,6 +381,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 key = internal.method.getKey(1); // how many notches == how many jQ animations you will run
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
+                $(_responses).removeClass(incorrectResponseClass);
                 $("h2.incorrect").hide();
                 plugin.config.attempts += 1;
                 console.log("Attempts");
@@ -424,12 +426,11 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                     $quizLevel.attr('class', 'quizLevel');
                     $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
-                    $(_element + ' ' + _answer).removeClass(correctResponseClass).removeClass(incorrectResponseClass);
+                    $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
 
                     $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
 
                     $(_element + ' ' + _questionCount + ',' + _element + ' ' + _answers + ',' + _element + ' ' + _checkAnswerBtn).show();
-
                     $quizArea.append($(_element + ' ' + _questions)).show();
 
                     kN(key, 1).apply(null, []);
@@ -438,7 +439,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         callback: plugin.config.animationCallbacks.startQuiz
                     }, $quizResults); // TODO: determine why $quizResults is being passed
                 });
-
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
             },
 
@@ -459,16 +459,16 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                                     remidiation.push(singleRemidiation);
                             }
                         }
-                        
+
                     }
                 }
 
                 var optionHeader = '<i><h2 class="' + correctResponseClassPr + '">OK, now let\'s look at what options show:</h2></i>';
-                
+
                 var buttonQuestion = '#question' + questionIndexPr + ' > a.button.nextQuestion'/* + '.lastQuestion'*/;
-                                    
+
                 $(buttonQuestion).before(optionHeader);
-                                    
+
                 var remidiationResponseHTML = $('<ul class="' + responsesClassPr + '"></ul>');
                 for (i in remidiation)
                         remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
@@ -501,6 +501,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 console.log(attempts);
                 $(anySlide).off('checkCompleted');
                 $(anySlide).on('checkCompleted', function(evt, data){
+                    console.log("remediationCount");
+                    console.log(plugin.config.remediationCount);
                     var correctResponse = data.quiz_result_id.correct;
 
                     if(correctResponse && correctResponse === "true"){
@@ -512,19 +514,20 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     }
 
                     if (correctResponse) {
-                        if (plugin.config.showRemediationOnSuccess) 
+                        if (plugin.config.showRemediationOnSuccess)
                             //"Firing callback"
                             plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
 
                         questionLI.addClass(correctClass);
                     } else {
 
-                        if (plugin.config.showRemediationOnFail)
+                        if (plugin.config.showRemediationOnFail){
                             //"Firing callback"
-                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId);
-                                questionLI.addClass(incorrectClass);
-                    }
-
+                            if (plugin.config.remediationCount == 0){
+                              plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId)
+                              questionLI.addClass(incorrectClass);
+                              plugin.config.remediationCount += 1;
+                          }}}
                     // Toggle appropriate response (either for display now and / or on completion)
                         questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
 
@@ -551,9 +554,9 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         kN(key, 1).apply(null, []); // 1st notch on key must be on both sides of if/else, otherwise key won't turn
                         kN(key, 2).apply(null, []); // 2nd notch on key must be on both sides of if/else, otherwise key won't turn
                     }
-                    
 
-                    internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});    
+
+                    internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
 
 
                 });
@@ -564,8 +567,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                     // Verify all/any true answers (and no false ones) were submitted
                 $(anySlide).trigger("completedQuiz");
-                console.log("after completedQuizTrig");  
-               
+                console.log("after completedQuizTrig");
+
             },
 
             // Moves to the next question OR completes the quiz if on last question
@@ -791,6 +794,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             // Bind "check answer" buttons
             $(_element + ' ' + _checkAnswerBtn).on('click', function (e) {
                 e.preventDefault();
+                console.log("Element");
+                console.log();
                 plugin.method.checkAnswer(this, {
                     callback: plugin.config.animationCallbacks.checkAnswer
                 });
