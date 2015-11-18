@@ -1,4 +1,6 @@
-*last updated on November 16/2015*
+*last updated on November 18/2015*
+
+*new option on slideContent - `"clearEvents"` is available, this clears all events on that media or actionable*
 
 *experimental conditional version, needs testing*
 
@@ -13,7 +15,7 @@
 
 *Can enable the panel Overlay with panelOverlay: true*
 
-*When you need the off Flag you can call it with offFlag: true* 
+*When you need the off Flag you can call it with offFlag: true*
 
 
 # Aviation Project
@@ -91,7 +93,7 @@ Acceptable options and defaults are as follows:
     footerId:           "#slideFooter",
     quizId:             "#slideQuiz",   // id of div that contains all quizzes
     quizContainerClass: "cdot_quiz_container", // class thats appended to each individual quiz
-    
+
 
     // new optinal+experimental additions below
     panelId: "#flightInstruments",
@@ -122,7 +124,7 @@ Acceptable options and defaults are as follows:
       duration: 3000,
       pulses: 1
     },
-    
+
     // both options below are used to pull audio/images/csvs from the correct server without running into cross-origin restrictions
     serverBaseUrl: window.location.protocol + "//" + window.location.host + "/", //can be overwritten by a string of the host url
     apacheServerBaseUrl: window.location.protocol + "//" + window.location.host + ":25080/",
@@ -132,7 +134,7 @@ Acceptable options and defaults are as follows:
 
     continueId:         "", // string specifying the next id to redirect to
     backId:             "", // string specifying the previous id to redirect to
-    
+
     panelOptions: { // options passed on to flightInstruments library
         size : 200,             // Sets the size in pixels of the indicator (square)
         showBox : true,         // Sets the visibility of the box behind the instruments
@@ -193,7 +195,7 @@ Acceptable options and defaults are as follows:
         }
       }
     ],
-    avatars: 
+    avatars:
     {
       tom: {
         ~~open: "//online.cdot.senecacollege.ca:25080/aviation/img/tomOpen.png",~~
@@ -207,7 +209,7 @@ Acceptable options and defaults are as follows:
         close: "aviation/img/janeClose.png"
       }
     },
-    
+
     highlights:
     [
       {
@@ -227,7 +229,7 @@ Acceptable options and defaults are as follows:
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
         parent: 'panel'
-      }, 
+      },
       {
         id: "alt",
         orderNumber: 2,
@@ -287,19 +289,19 @@ Acceptable options and defaults are as follows:
         }
     ],
     slideContent: [{
-        title: {html: "No content provided", classes: ["col-md-12"] }, 
+        title: {html: "No content provided", classes: ["col-md-12"] },
         content: {html: "<p<Check your <b>slideContent</b> object</p>", classes: ["text-center"] },
         image: {src: "/someSource/image.png", classes: ["imageClass"] },
-        highlights: [ 
-                        0 , 
-                        { index: 2, onclick: (function(){ console.log("highlight onclick");}) }, 
-                        5 
+        highlights: [
+                        0 ,
+                        { index: 2, onclick: (function(){ console.log("highlight onclick");}) },
+                        5
         ],
         // this is to hide / show buttons just like we do with highlights
         buttons: [
-                    0 , 
-                    { "index": 2, "disable": true, "onclick": "(function(){ console.log('button onclick');})" }, 
-                    3 
+                    0 ,
+                    { "index": 2, "disable": true, "onclick": "(function(){ console.log('button onclick');})" },
+                    3
         ],
         // set slider to any throttle possition from 0-4
         slider: 2,
@@ -324,11 +326,11 @@ Acceptable options and defaults are as follows:
                 "callback": "(function(){ console.log('You did smth right'); })" // optional
             },
             "onFail": { ** optional if needed and currently under development
-                "reviewId": "", // 
+                "reviewId": "", //
                 "showChoices": true, //
                 "maxFails": 1, //
                 "index": 2, // which altMediaFile should be played (currently sound only),
-                
+
                 "status": "That's not correct. Let's try this again", // what msg should we display in the status bar?
                 "resetContentIndex": 0 // which slideContent index do we need show as altMedia starts to play?
                 "resetMediaIndex": 0 // which media index do we need to play after altMedia?
@@ -338,16 +340,16 @@ Acceptable options and defaults are as follows:
     },
     {
       	"media":{
-            "type": "timer", 
+            "type": "timer",
             "index": 1,
-            "second" 1 // timer is a count down , starts at 10 and ends at 1 
-    	}, 
+            "second" 1 // timer is a count down , starts at 10 and ends at 1
+    	},
     	"buttons": [0],
         "content": {
 	   "html": "UH OH, Press that button yo!"
         },
         "advanceWith": {"type": "button", "index": 0}
-    }, 
+    },
     {
         //... another slide content can go here to be triggered at a different time of the audio
         title: {html: "This is a different title / slide"},
@@ -356,7 +358,12 @@ Acceptable options and defaults are as follows:
             "type": "csv",
             "line": 100,
             "index": 2
-        }
+        },
+        // only has been tested for CSVs
+        "clearEvents": {
+          "type": "media", // or actionable
+          "index": 3
+        },
         "advanceWith": {
             "type": "button", // highlight, audio, csv
             "index": 0,
@@ -425,20 +432,20 @@ Acceptable options and defaults are as follows:
         }
     }],
     // default models that we want to be set-up in the background
-    modals: [{ 
-              "id": "ai", 
-              "title": "Attitude Indicator", 
+    modals: [{
+              "id": "ai",
+              "title": "Attitude Indicator",
               "content": {"html": "This is the MODAL custom HTML" },
               "buttons": [],
               "highlights": [],
-            }, 
+            },
             {
-              "id": "alt", 
-              "title": "Altimeter", 
+              "id": "alt",
+              "title": "Altimeter",
             }
     ],
     // these audioFiles are for the slide only
-    mediaFiles: [ 
+    mediaFiles: [
         // since server url options have been added, we can give relative locations to resources omitting the https://online...../
         {type: "audio", src: "someRelativeURL/toAudioFile"},
         {type: "audio", src: "anotherURL/toOtherFile"},
@@ -482,7 +489,7 @@ The rest of this README is being edited at this moment
 
 
     Slide class methods:
-        
+
         new Slide(options, slideContent, audioFiles)
         create( options )
         destroy()
@@ -549,7 +556,7 @@ The rest of this README is being edited at this moment
             title - can include any custom html if needed
                 html (string/html)
                 classes (string array)
-                action (string) - available actions: remove 
+                action (string) - available actions: remove
                 ** if a title is sent in without an action, the default action will be **replace**
             content - can include any custom html if needed
                 html (string/html)
@@ -557,13 +564,13 @@ The rest of this README is being edited at this moment
                 action (string) - available actions: remove, replace, append **replace is default**
 
             //classes (string)
-            image 
+            image
                 classes (string array)
                 src (string)
             second (integer)
             audio (integer starting at index 0)
             callback (custom function to call at end of audio or on specified second)
-            highlights (integer array specifying the index/indices of highlight(s) to show, 
+            highlights (integer array specifying the index/indices of highlight(s) to show,
                         OR object/integer array)
                 index - highlight index that this applies to
                 onclick - function to execute on "click" event
@@ -664,4 +671,3 @@ The rest of this README is being edited at this moment
           highlights: [
 
           ]
-
