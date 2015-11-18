@@ -849,10 +849,6 @@ AVIATION.common.Slide.prototype = {
       outerIndex = 0;
     }
 
-    // let's figure out where we have to put our content/header
-    // shouldn't matter if modal or slide, both have custom options for IDs for content and header
-    // if(!this.options.isModal){
-
     slide.initSlider(contentActiveIndex);
 
     if(!contentContainer || contentContainer.length === 0){
@@ -875,57 +871,6 @@ AVIATION.common.Slide.prototype = {
       }
       contentContainer.addClass("cdot_contentText");
     }
-
-
-      // what do we need here? modal dialog, modal content, modal header?
-
-      // var modalContent = outerSlideContent[contentActiveIndex];
-      // var html         = modalContent.content === undefined || modalContent.content === null ? "" : modalContent.content.html;
-      // var id           = slide.container      === undefined || slide.container      === null ? "" : slide.container;
-      // var instrument   = "";
-
-      /*
-      jQuery('<div/>', {
-        "class": "modal-dialog modal-cdot"
-      }).appendTo(this.container);
-
-      contentContainer = jQuery('<div/>', {
-        class: "modal-content",
-      });
-
-      jQuery('<div/>', {
-        id: slide.headerId.split("#")[1],
-      }).appendTo(contentContainer);
-      */
-
-      // switch(id){
-      //   case "#modal_asi":
-      //     instrument = "airspeed";
-      //   break;
-      //   case "#modal_ai":
-      //     instrument = "attitude";
-      //     break;
-      //   case "#modal_alt":
-      //     instrument = "altimeter";
-      //     break;
-      //   case "#modal_tc":
-      //     instrument = "turn_coordinator";
-      //     break;
-      //   case "#modal_hi":
-      //     instrument = "heading";
-      //     break;
-      //   case "#modal_vsi":
-      //     instrument = "variometer";
-      //     break;
-      // }
-
-      // if(instrument){
-      //   $("#" + instrument + " div").eq(0).clone().css({'height': '500px', 'width': '100%'}).appendTo(contentContainer);
-      // }
-
-      // contentContainer.append(html);
-      // contentContainer.appendTo(dialogContainer);
-    //}
 
     if(slide.slideContent[contentActiveIndex].action !== undefined){
       // set line or second of media before playing it
@@ -2937,7 +2882,9 @@ AVIATION.common.Slide.prototype = {
             controls.previous.removeAttr("disabled");
           }
           if( ( (active > players.length - 1) &&
-              (contentActive + 1 > this.slideContent.length - 1) ) || (contentActive + 1 > this.slideContent.length - 1 || this.slideContent[contentActive].slideEnd) ){
+              (contentActive + 1 > this.slideContent.length - 1) ) ||
+                (contentActive + 1 > this.slideContent.length - 1 ||
+                  this.slideContent[contentActive].slideEnd) ){
             if(action !== 'replay'){
               $(slide).trigger("slideEnd");
             }
@@ -3017,14 +2964,16 @@ AVIATION.common.Slide.prototype = {
   },
 
   resetSlide: function(){
+    "use strict";
+    var slide = this;
 
-    this.mediaActiveIndex = 0;
-    this.contentActiveIndex = 0;
+    slide.mediaActiveIndex = 0;
+    slide.contentActiveIndex = 0;
     // console.log(this.slideElements.slideControls);
-    this.checkSlideControlPlayButtons();
+    slide.checkSlideControlPlayButtons();
 
-    if(this.options.noAudio){
-      this.setStatus('Press "Continue" when ready');
+    if(slide.options.noAudio){
+      slide.setStatus('Press "Continue" when ready');
     }
 
   },
@@ -3056,6 +3005,7 @@ AVIATION.common.Slide.prototype = {
       //$dialog.css("margin-top", offset);
     }
 
+    // TODO: add resizing of instruments for modals inside here?
     $('.modal').on('show.bs.modal', centerModal);
     $(window).on("resize", function () {
         $('.modal:visible').each(centerModal);
