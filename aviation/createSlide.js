@@ -135,9 +135,10 @@ AVIATION.common.Slide.prototype = {
             console.log("play triggered from wrongAdvance");
             $(slide).trigger("play");
           }
-        } else {
+        } else if(data.index.length < 1 && data.type.lenth < 1) {
           $(slide).trigger("next", data);
         }
+        // otherwise we do nothing and wait for user input...
         // TODO: tell the student that the action was a wrong one...
       },
       "checkQuizResult": function(e, result){
@@ -1794,6 +1795,10 @@ AVIATION.common.Slide.prototype = {
       if(numberOfInstrments<3){
         bootCol = (numberOfInstrments * 4);
         bootOffset = (12 - bootCol) / 2;
+        if(this.options.isModal){
+          bootOffset = undefined;
+          bootCol = 12;
+        }
         instBootCol = (12/numberOfInstrments);
       } else {
         instBootCol = 4;
@@ -2220,9 +2225,9 @@ AVIATION.common.Slide.prototype = {
             contentHighlightsId: "#contentHighlightContainer_modal_" + this.modals[i].id,
             imageHighlightsId: "#imageHighlightContainer_modal_" + this.modals[i].id,
             "buttons": slide.modals[i].buttons,
-            // not 100% sure if we need status on modals
             instRow1: "#modal_instRow1_" + this.modals[i].id,
             instRow2: "#modal_instRow2_" + this.modals[i].id,
+            // not 100% sure if we need status on modals
             instStatusId1: "#modal_instStatus1_" + this.modals[i].id,
             instStatusId2: "#modal_instStatus2_" + this.modals[i].id,
             "highlights": slide.modals[i].highlights,
@@ -2261,9 +2266,8 @@ AVIATION.common.Slide.prototype = {
         newModal = new AVIATION.common.Slide(modalOptions);
         console.log("this is the modal slide: ");
         console.log(newModal);
+        // constructor builds the slide/content and media events
         newModal.constructor();
-        // since modals only have one slideContent, lets trigger it to be built
-        //newModal.buildContent(true, 0);
 
         slide.modalSlides.push(newModal);
       }
@@ -2272,6 +2276,7 @@ AVIATION.common.Slide.prototype = {
 
   resetStatusBar: function(){
     "use strict";
+    var slide = this;
     // console.log("resetting status bar");
     if(slide.options.showStatus){
       this.slideElements.statusBar.off();
