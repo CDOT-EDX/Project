@@ -114,7 +114,14 @@ AVIATION.common.Slide.prototype = {
           }
           return;
         }
-        $(slide).trigger("next", data);
+        if(!data || !data.noNext){
+          $(slide).trigger("next", data);
+        } else {
+          if(data.onSuccessCallback){
+            data.onSuccessCallback();
+          }
+          //$(slide).trigger("nextContent", data);
+        }
       },
       "wrongAdvance": function(e, data){
         console.log("!* wrong advance triggered");
@@ -139,20 +146,28 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("next", data);
         }
         // otherwise we do nothing and wait for user input...
-        // TODO: tell the student that the action was a wrong  one...
+        // TODO: tell the student that the action was a wrong one...
       },
       "checkQuizResult": function(e, result){
-        console.log("result of quiz.... ");
-        console.log(result);
-        //console.log(slide.content[slide.contentActive]);
-        if(result){
-          $(slide).trigger("correctAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
+        // but is this a pattern quiz or regular quiz?
+        var slide = this, content = slide.slideContent[slide.contentActiveIndex], data;
+
+        if(content && content.advanceWith && content.advanceWith.action && content.advanceWith.action === 'pattern'){
+          slide.checkActionables("quiz", undefined, e, content.advanceWith);
         } else {
-          $(slide).trigger("wrongAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
-          console.log("resetting quiz...");
-          console.log("triggered but does it work?");
-          console.log( $(slide) );
+          console.log("result of quiz.... ");
+          console.log(result);
+          //console.log(slide.content[slide.contentActive]);
+          if(result){
+            $(slide).trigger("correctAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
+          } else {
+            $(slide).trigger("wrongAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
+            console.log("resetting quiz...");
+            console.log("triggered but does it work?");
+            console.log( $(slide) );
+          }
         }
+
       },
       "playAltIndex": function(e, data){
         var index = data.index, altPlayer = slide.altPlayers;
@@ -838,6 +853,8 @@ AVIATION.common.Slide.prototype = {
 
     if(index !== undefined && action !== 'pattern'){
       slide.contentActiveIndex = index;
+      contentActiveIndex = index;
+    } else if(index !== undefined && action === "pattern") {
       contentActiveIndex = index;
     } else {
       contentActiveIndex = this.contentActiveIndex;
@@ -3473,6 +3490,7 @@ AVIATION.common.Slide.prototype = {
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
         allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex, element,
+        onSuccess = event.data.onSuccess,
         //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
         scanPattern = slide.options.scanningPatternArray, patternId,
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
@@ -3528,6 +3546,10 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
+      if(onSuccess && typeof onSuccess === 'function'){
+        advanceWith.onSuccessCallback = onSuccess;
+      }
+
       // check the logic
       if(type && index===undefined && advanceWith.action===undefined){
         if( _.contains(advanceWith.type, type) )
@@ -3540,9 +3562,13 @@ AVIATION.common.Slide.prototype = {
           // checked through "checkQuizResult" event
         } else if( _.contains(advanceWith.index, index) ){
 //        } else if( _.invoke(advanceWith.index, index, function(a,b){ console.log("inside func"); console.log(a); console.log(b); return a===b; }) ){
+
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
+          if(onSuccess && typeof onSuccess === 'function'){
+            onSuccess();
+          }
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "False"} );
           $(slide).trigger("wrongAdvance", advanceWith);
         }
