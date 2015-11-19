@@ -114,7 +114,7 @@ AVIATION.common.Slide.prototype = {
           }
           return;
         }
-        if(!data || !data.noNext){
+        if(!data || !data.triggerBuild){
           $(slide).trigger("next", data);
         } else {
           if(data.onSuccessCallback){
