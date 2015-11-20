@@ -232,14 +232,23 @@ AVIATION.common.Slide.prototype = {
       end: function(e, data){
         var i;
 
-        if( (slide.slideContent[slide.contentActiveIndex].advanceWith &&
-              slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz') ||
-              (slide.slideContent[slide.contentActiveIndex+1] &&
-                  slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
-                    slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') ){
-          for(i=0; i<slide.resetSlickQuiz.length; i++){
-            console.log("we have a reset avail at: " + i);
-            slide.resetSlickQuiz[i]();
+        console.log("event data before resetting of quiz in end: ");
+        console.log(data);
+
+        if(slide.slideContent[slide.contentActiveIndex].advanceWith &&
+              slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
+          if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index] &&
+            data.element.type === 'quiz'){
+            console.log('resetting same quiz as we are on...');
+            slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index]();
+          }
+        }
+        if(slide.slideContent[slide.contentActiveIndex+1] &&
+          slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
+            slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz'){
+          if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]){
+            console.log('resetting next quiz...');
+            slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]();
           }
         }
 
