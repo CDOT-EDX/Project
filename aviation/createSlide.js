@@ -232,16 +232,22 @@ AVIATION.common.Slide.prototype = {
       end: function(e, data){
         var i;
 
-        if( (slide.slideContent[slide.contentActiveIndex].advanceWith &&
-              slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz') ||
-                (slide.slideContent[slide.contentActiveIndex+1] &&
-                  slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
-                    slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') ){
+        if(slide.slideContent[slide.contentActiveIndex+1] &&
+          slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
+            slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz'){
+          if(slide.slideContent[slide.contentActiveIndex].type === 'quiz' &&
+            slide.slideContent[slide.contentActiveIndex].index !== slide.slideContent[slide.contentActiveIndex+1].advanceWith.index){
+              if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]){
+                slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]();
+              }
+            }
           console.log("resetting quiz inside wrongAdvance");
+          /**
           for(i=0; i<slide.resetSlickQuiz.length; i++){
             console.log("we have a reset avail at: " + i);
             slide.resetSlickQuiz[i]();
           }
+          **/
         }
 
         if(data && data.element && data.element.type !== undefined){
@@ -3576,8 +3582,8 @@ AVIATION.common.Slide.prototype = {
       } else if(type === 'csv' && slide.completedScan >= slide.options.minScan){
         $(slide).trigger("correctAdvance", advanceWith);
       } else if(type === 'csv') {
-        $(slide).trigger("wrongAdvance", advanceWith);
-
+        //$(slide).trigger("wrongAdvance", advanceWith);
+        // nothing happens
       } else if( (type === 'highlight' || type === 'quiz' ) && typeof index !== undefined && advanceWith.action === 'pattern'){
         //TODO: put into separate function?
         //slide.checkScanningPattern();
