@@ -232,6 +232,18 @@ AVIATION.common.Slide.prototype = {
       end: function(e, data){
         var i;
 
+        if(slide.slideContent[slide.contentActiveIndex] &&
+          slide.slideContent[slide.contentActiveIndex].advanceWith &&
+            slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
+          if(slide.slideContent[slide.contentActiveIndex].type === 'quiz' &&
+            slide.slideContent[slide.contentActiveIndex].index !== slide.slideContent[slide.contentActiveIndex].advanceWith.index){
+              if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index]){
+                slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index]();
+              }
+            }
+          console.log("resetting quiz inside wrongAdvance");
+        }
+
         if(slide.slideContent[slide.contentActiveIndex+1] &&
           slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
             slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz'){
@@ -242,12 +254,6 @@ AVIATION.common.Slide.prototype = {
               }
             }
           console.log("resetting quiz inside wrongAdvance");
-          /**
-          for(i=0; i<slide.resetSlickQuiz.length; i++){
-            console.log("we have a reset avail at: " + i);
-            slide.resetSlickQuiz[i]();
-          }
-          **/
         }
 
         if(data && data.element && data.element.type !== undefined){
