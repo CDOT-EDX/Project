@@ -232,25 +232,15 @@ AVIATION.common.Slide.prototype = {
       end: function(e, data){
         var i;
 
-        if(slide.slideContent[slide.contentActiveIndex] &&
-          slide.slideContent[slide.contentActiveIndex].advanceWith &&
-            slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
-
-          if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index] && data.type !== "csv"){
-            slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index]();
+        if( (slide.slideContent[slide.contentActiveIndex].advanceWith &&
+              slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz') ||
+              (slide.slideContent[slide.contentActiveIndex+1] &&
+                  slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
+                    slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz') ){
+          for(i=0; i<slide.resetSlickQuiz.length; i++){
+            console.log("we have a reset avail at: " + i);
+            slide.resetSlickQuiz[i]();
           }
-          console.log("resetting quiz inside wrongAdvance");
-        }
-
-        if(slide.slideContent[slide.contentActiveIndex+1] &&
-          slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
-            slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz'){
-
-          if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index] && data.type !== "csv"){
-            slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]();
-          }
-
-          console.log("resetting quiz inside wrongAdvance");
         }
 
         if(data && data.element && data.element.type !== undefined){
