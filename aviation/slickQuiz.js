@@ -38,6 +38,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             _element = '#' + $element.attr('id'),
 
             defaults = {
+                isDirty: false,
                 checkAnswerText: 'Check My Answer!',
                 nextQuestionText: 'Next &raquo;',
                 backButtonText: '',
@@ -421,24 +422,26 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
-                $quizResults.fadeOut(300, function () {
-                    $(_element + ' input').prop('checked', false).prop('disabled', false);
+                if(plugin.config.isDirty){
+                  $quizResults.fadeOut(300, function () {
+                      $(_element + ' input').prop('checked', false).prop('disabled', false);
 
-                    $quizLevel.attr('class', 'quizLevel');
-                    $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
-                    $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
+                      $quizLevel.attr('class', 'quizLevel');
+                      $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
+                      $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
 
-                    $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
+                      $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
 
-                    $(_element + ' ' + _questionCount + ',' + _element + ' ' + _answers + ',' + _element + ' ' + _checkAnswerBtn).show();
-                    $quizArea.append($(_element + ' ' + _questions)).show();
+                      $(_element + ' ' + _questionCount + ',' + _element + ' ' + _answers + ',' + _element + ' ' + _checkAnswerBtn).show();
+                      $quizArea.append($(_element + ' ' + _questions)).show();
 
-                    kN(key, 1).apply(null, []);
+                      kN(key, 1).apply(null, []);
 
-                    plugin.method.startQuiz({
-                        callback: plugin.config.animationCallbacks.startQuiz
-                    }, $quizResults); // TODO: determine why $quizResults is being passed
-                });
+                      plugin.method.startQuiz({
+                          callback: plugin.config.animationCallbacks.startQuiz
+                      }, $quizResults); // TODO: determine why $quizResults is being passed
+                  });
+                }
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
             },
 
@@ -555,17 +558,11 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         kN(key, 2).apply(null, []); // 2nd notch on key must be on both sides of if/else, otherwise key won't turn
                     }
 
+                    plugin.config.isDirty = true;
 
                     internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
-
-
                 });
-                    //checkCorrectAnswer(questionIdFound, questionIndex, selectedAnswers);
-                    ///////////////////////////////////////////////////////////////////////checkCorrectAnswer
-                    //passing the array of selected answers
-
-
-                    // Verify all/any true answers (and no false ones) were submitted
+                // Verify all/any true answers (and no false ones) were submitted
                 $(anySlide).trigger("completedQuiz");
                 console.log("after completedQuizTrig");
 
@@ -599,6 +596,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         callback: plugin.config.animationCallbacks.completeQuiz
                     });
                 }
+
+                plugin.config.isDirty = true;
 
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
             },
@@ -666,6 +665,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 key = internal.method.getKey(1); // how many notches == how many jQ animations you will run
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
+
+                plugin.config.isDirty = true;
 
                 var score = $(_element + ' ' + _correct).length,
                     displayScore = score;
