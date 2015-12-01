@@ -37,7 +37,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             $element = $(element),
             _element = '#' + $element.attr('id'),
 
+
+
             defaults = {
+                quizId: "",
                 isDirty: false,
                 checkAnswerText: 'Check My Answer!',
                 nextQuestionText: 'Next &raquo;',
@@ -135,6 +138,9 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             $quizHeader = $(_quizHeader),
             $quizScore = $(_quizScore),
             $quizLevel = $(_quizLevel);
+
+            console.log("quiz element: ");
+            console.log(_element);
 
         // Reassign user-submitted deprecated options
         var depMsg = '';
@@ -427,6 +433,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                       $(_element + ' input').prop('checked', false).prop('disabled', false);
 
                       $quizLevel.attr('class', 'quizLevel');
+
+                      $(_element + '_remediation_header').parent().remove();
+                      $(_element + '_remediation_ul').remove();
+
                       $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
                       $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
 
@@ -466,13 +476,13 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     }
                 }
 
-                var optionHeader = '<i><h2 class="' + correctResponseClassPr + '">OK, now let\'s look at what options show:</h2></i>';
+                var optionHeader = '<i><h2 id="' + _element + '_remediation_header" class="' + correctResponseClassPr + '">OK, now let\'s look at what options show:</h2></i>';
 
                 var buttonQuestion = '#question' + questionIndexPr + ' > a.button.nextQuestion'/* + '.lastQuestion'*/;
 
                 $(buttonQuestion).before(optionHeader);
 
-                var remidiationResponseHTML = $('<ul class="' + responsesClassPr + '"></ul>');
+                var remidiationResponseHTML = $('<ul id="' + _element + '_remediation_ul" class="' + responsesClassPr + '"></ul>');
                 for (i in remidiation)
                         remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
                 $(buttonQuestion).before(remidiationResponseHTML);

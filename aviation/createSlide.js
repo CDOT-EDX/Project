@@ -594,7 +594,7 @@ AVIATION.common.Slide.prototype = {
 
     console.log("inside build slide before init media");
     slide.initMedia(callback);
-    this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, true);
+    this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false);
 
   },
 
