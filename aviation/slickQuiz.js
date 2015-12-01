@@ -423,34 +423,51 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
             // Resets (restarts) the quiz (hides results, resets inputs, and displays first question)
             resetQuiz: function (startButton, options) {
-                var key, keyNotch, kN;
+                var key, keyNotch, kN, i;
                 key = internal.method.getKey(1); // how many notches == how many jQ animations you will run
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
                 if(plugin.config.isDirty){
-                  $quizResults.fadeOut(300, function () {
+                  plugin.config.remediationCount = 0;
+
+                  //$quizResults.fadeOut(300, function () {
                       $(_element + ' input').prop('checked', false).prop('disabled', false);
 
                       $quizLevel.attr('class', 'quizLevel');
 
-                      $(_element + '_remediation_header').parent().remove();
-                      $(_element + '_remediation_ul').remove();
+
 
                       $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
                       $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
 
                       $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
+                      $(_element + ' ' + correctClass).parent().hide();
+                      $(_element + ' ' + incorrectClass).parent().hide();
+
+
+                      while( $(_element + '_remediation_header').parent().length > 0 ){
+                        $(_element + '_remediation_header').parent().remove();
+                      }
+
+                      while( $(_element + '_remediation_ul').length > 0 ){
+                        $(_element + '_remediation_ul').remove();
+                      }
+
+
+                      //$(_element + " " + _nextQuestionBtn).hide();
+                      //$(_element + " " + _prevQuestionBtn).hide();
 
                       $(_element + ' ' + _questionCount + ',' + _element + ' ' + _answers + ',' + _element + ' ' + _checkAnswerBtn).show();
                       $quizArea.append($(_element + ' ' + _questions)).show();
-
+                      //$(_element + ' ' + _questions)
                       kN(key, 1).apply(null, []);
 
                       plugin.method.startQuiz({
                           callback: plugin.config.animationCallbacks.startQuiz
-                      }, $quizResults); // TODO: determine why $quizResults is being passed
-                  });
+                      }, $quizResults);
+                  //});
+                  plugin.config.isDirty = false;
                 }
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
             },
@@ -458,34 +475,40 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             buildRemediation: function(questionIndexPr, answersPr, correctResponseClassPr, responsesClassPr, questionId){
                 var remidiation = [], i;
                 var singleRemidiation = '';
-                for (i in answersPr) {
-                    //console.log("questionIndexPr" + );
-                    if (answersPr.hasOwnProperty(i)) {
-                        var answer = answersPr[i];
-                        if(answer.reason !== undefined || answer.reason != ''){
-                            if (!plugin.config.showRemediationOne){
-                                singleRemidiation = '<i>' + 'Q.' + answer.option + '</i><br />' + answer.reason;
-                                remidiation.push(singleRemidiation);
-                            }else
-                                if (i == questionId){
-                                    singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason ;
-                                    remidiation.push(singleRemidiation);
-                            }
-                        }
 
-                    }
-                }
+                if (plugin.config.remediationCount === 0){
+                  for (i in answersPr) {
+                      //console.log("questionIndexPr" + );
+                      if (answersPr.hasOwnProperty(i)) {
+                          var answer = answersPr[i];
+                          if(answer.reason !== undefined && answer.reason !== ''){
+                              if (!plugin.config.showRemediationOne){
+                                  singleRemidiation = '<i>' + 'Q.' + answer.option + '</i><br />' + answer.reason;
+                                  remidiation.push(singleRemidiation);
+                              } else {
+                                  if (i == questionId){
+                                      singleRemidiation = '<i>Q. ' + answer.option + '</i><br />' + answer.reason ;
+                                      remidiation.push(singleRemidiation);
+                                  }
+                              }
+                          }
 
-                var optionHeader = '<i><h2 id="' + _element + '_remediation_header" class="' + correctResponseClassPr + '">OK, now let\'s look at what options show:</h2></i>';
+                      }
+                  }
+
+                var optionHeader = '<i><h2 id="' + _element.split("#")[1] + '_remediation_header" class="' + correctResponseClassPr + '">OK, now let\'s look at what options show:</h2></i>';
 
                 var buttonQuestion = '#question' + questionIndexPr + ' > a.button.nextQuestion'/* + '.lastQuestion'*/;
 
                 $(buttonQuestion).before(optionHeader);
 
-                var remidiationResponseHTML = $('<ul id="' + _element + '_remediation_ul" class="' + responsesClassPr + '"></ul>');
-                for (i in remidiation)
+                var remidiationResponseHTML = $('<ul id="' + _element.split("#")[1] + '_remediation_ul" class="' + responsesClassPr + '"></ul>');
+                for (i in remidiation){
                         remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
+                      }
                 $(buttonQuestion).before(remidiationResponseHTML);
+                plugin.config.remediationCount++;
+              }
 
             },
 
@@ -527,22 +550,27 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     }
 
                     if (correctResponse) {
-                        if (plugin.config.showRemediationOnSuccess)
+                        if (plugin.config.showRemediationOnSuccess){
                             //"Firing callback"
-                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
-
-                        questionLI.addClass(correctClass);
+                              plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
+                              questionLI.addClass(correctClass);
+                              //plugin.config.remediationCount += 1;
+                            //}
+                          }
+                        //questionLI.addClass(correctClass);
                     } else {
 
                         if (plugin.config.showRemediationOnFail){
                             //"Firing callback"
-                            if (plugin.config.remediationCount == 0){
+                            //if (plugin.config.remediationCount == 0){
                               plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId)
                               questionLI.addClass(incorrectClass);
-                              plugin.config.remediationCount += 1;
-                          }}}
-                    // Toggle appropriate response (either for display now and / or on completion)
-                        questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
+                              //plugin.config.remediationCount += 1;
+                            //}
+                        }
+                      }
+                      // Toggle appropriate response (either for display now and / or on completion)
+                      questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
 
                     // If perQuestionResponseMessaging is enabled, toggle response and navigation now
                     if (plugin.config.perQuestionResponseMessaging) {
