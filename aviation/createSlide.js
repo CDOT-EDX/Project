@@ -580,15 +580,9 @@ AVIATION.common.Slide.prototype = {
       slide.activateSlide();
     };
 
-    if(this.options.studentGraph){
+    if(this.options.studentGraph || this.options.instructorGraph){
       callback();
-      this.buildStudentGraph();
-      return;
-    }
-
-    if(this.options.instructorGraph){
-      callback();
-      this.buildInstructorGraph();
+      this.buildGraph();
       return;
     }
 
@@ -599,131 +593,131 @@ AVIATION.common.Slide.prototype = {
   },
 
   // will generate the graph of KCs for student and their progress
-  buildStudentGraph: function(){
+  buildGraph: function(){
     "use strict";
 
-    var helpers = Chart.helpers, canvas = document.getElementById('studentGraph'), randomScalingFactor, barChartData, bar, legendHolder;
+    var helpers = Chart.helpers, canvas = document.getElementById('studentGraph'),
+    randomScalingFactor, barChartData, bar, legendHolder, slide = this;
     randomScalingFactor = function() {
       return Math.round(Math.random() * 100);
     };
 
-    $(slide).on("studentGraphData", function(data){
-      console.log("give me the student data!");
-      console.log(data);
+    $(slide).trigger("getGraphData", slide.options.studentGraph);
+
+    $(slide).on("drawGraph", function(result){
+      console.log("which graph are we drawing ...");
+      console.log("and what are the results?");
+      console.log(result);
+
+      barChartData = {
+        labels: ["Student Knowledge Components"],
+        datasets: [{
+          label: "KC3 - Knowledge of instruments principles of operation and functions",
+          fillColor: "#949FB1",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC8 - Full panel instrument malfunction recognition",
+          fillColor: "#4D5360",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC11 - Scanning dynamic (changing indications) instruments",
+          fillColor: "#F7464A",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
+          fillColor: "#46BFBD",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC16 - Selecting corrective action when departing from cleared flightpath",
+          fillColor: "#FDB45C",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }]
+      };
+
+      bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
+        multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
+        animation: false,
+      });
+
+      legendHolder = document.createElement('div');
+      legendHolder.innerHTML = bar.generateLegend();
+
+      document.getElementById('legend').appendChild(legendHolder.firstChild);
 
     });
-
-    barChartData = {
-      labels: ["Student Knowledge Components"],
-      datasets: [{
-        label: "KC3 - Knowledge of instruments principles of operation and functions",
-        fillColor: "#949FB1",
-        strokeColor: "rgba(220,220,220,0.8)",
-        highlightStroke: "rgba(220,220,220,1)",
-        data: [randomScalingFactor()]
-      }, {
-        label: "KC8 - Full panel instrument malfunction recognition",
-        fillColor: "#4D5360",
-        strokeColor: "rgba(151,187,205,0.8)",
-        highlightStroke: "rgba(151,187,205,1)",
-        data: [randomScalingFactor()]
-      },{
-        label: "KC11 - Scanning dynamic (changing indications) instruments",
-        fillColor: "#F7464A",
-        strokeColor: "rgba(220,220,220,0.8)",
-        highlightStroke: "rgba(220,220,220,1)",
-        data: [randomScalingFactor()]
-      }, {
-        label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
-        fillColor: "#46BFBD",
-        strokeColor: "rgba(151,187,205,0.8)",
-        highlightStroke: "rgba(151,187,205,1)",
-        data: [randomScalingFactor()]
-      },{
-        label: "KC16 - Selecting corrective action when departing from cleared flightpath",
-        fillColor: "#FDB45C",
-        strokeColor: "rgba(220,220,220,0.8)",
-        highlightStroke: "rgba(220,220,220,1)",
-        data: [randomScalingFactor()]
-      }]
-    };
-
-    bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
-      multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
-      animation: false,
-    });
-
-    legendHolder = document.createElement('div');
-    legendHolder.innerHTML = bar.generateLegend();
-
-    document.getElementById('legend').appendChild(legendHolder.firstChild);
 
   },
 
-
-  buildInstructorGraph: function(){
-    "use strict";
-
-    var helpers = Chart.helpers, canvas = document.getElementById('instructorGraph'), randomScalingFactor, barChartData, bar, legendHolder;
-
-    randomScalingFactor = function() {
-      return Math.round(Math.random() * 100);
-    };
-
-    $(slide).on("instructorGraphData", function(data){
-      console.log("give me the instructor data!");
-      console.log(data);
-
-    });
-
-
-    barChartData = {
-      labels: ["Student 1", "Student 2", "Student 3", "Student 4"],
-      datasets: [{
-        label: "KC3 - Knowledge of instruments principles of operation and functions",
-        fillColor: "#949FB1",
-        strokeColor: "rgba(220,220,220,0.8)",
-        highlightStroke: "rgba(220,220,220,1)",
-        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
-      }, {
-        label: "KC8 - Full panel instrument malfunction recognition",
-        fillColor: "#4D5360",
-        strokeColor: "rgba(151,187,205,0.8)",
-        highlightStroke: "rgba(151,187,205,1)",
-        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
-      },{
-        label: "KC11 - Scanning dynamic (changing indications) instruments",
-        fillColor: "#F7464A",
-        strokeColor: "rgba(220,220,220,0.8)",
-        highlightStroke: "rgba(220,220,220,1)",
-        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
-      }, {
-        label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
-        fillColor: "#46BFBD",
-        strokeColor: "rgba(151,187,205,0.8)",
-        highlightStroke: "rgba(151,187,205,1)",
-        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
-      },{
-        label: "KC16 - Selecting corrective action when departing from cleared flightpath",
-        fillColor: "#FDB45C",
-        strokeColor: "rgba(220,220,220,0.8)",
-        highlightStroke: "rgba(220,220,220,1)",
-        data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
-      }]
-
-    };
-
-    bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
-      multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
-      animation: false,
-    });
-
-    legendHolder = document.createElement('div');
-    legendHolder.innerHTML = bar.generateLegend();
-
-    document.getElementById('legend').appendChild(legendHolder.firstChild);
-
-  },
+  //
+  // buildInstructorGraph: function(){
+  //   "use strict";
+  //
+  //   var helpers = Chart.helpers, canvas = document.getElementById('instructorGraph'), randomScalingFactor, barChartData, bar, legendHolder;
+  //
+  //   randomScalingFactor = function() {
+  //     return Math.round(Math.random() * 100);
+  //   };
+  //
+  //   $(slide).trigger("getGraphData", false);
+  //
+  //
+  //   barChartData = {
+  //     labels: ["Student 1", "Student 2", "Student 3", "Student 4"],
+  //     datasets: [{
+  //       label: "KC3 - Knowledge of instruments principles of operation and functions",
+  //       fillColor: "#949FB1",
+  //       strokeColor: "rgba(220,220,220,0.8)",
+  //       highlightStroke: "rgba(220,220,220,1)",
+  //       data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+  //     }, {
+  //       label: "KC8 - Full panel instrument malfunction recognition",
+  //       fillColor: "#4D5360",
+  //       strokeColor: "rgba(151,187,205,0.8)",
+  //       highlightStroke: "rgba(151,187,205,1)",
+  //       data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+  //     },{
+  //       label: "KC11 - Scanning dynamic (changing indications) instruments",
+  //       fillColor: "#F7464A",
+  //       strokeColor: "rgba(220,220,220,0.8)",
+  //       highlightStroke: "rgba(220,220,220,1)",
+  //       data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+  //     }, {
+  //       label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
+  //       fillColor: "#46BFBD",
+  //       strokeColor: "rgba(151,187,205,0.8)",
+  //       highlightStroke: "rgba(151,187,205,1)",
+  //       data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+  //     },{
+  //       label: "KC16 - Selecting corrective action when departing from cleared flightpath",
+  //       fillColor: "#FDB45C",
+  //       strokeColor: "rgba(220,220,220,0.8)",
+  //       highlightStroke: "rgba(220,220,220,1)",
+  //       data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor()]
+  //     }]
+  //
+  //   };
+  //
+  //   bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
+  //     multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
+  //     animation: false,
+  //   });
+  //
+  //   legendHolder = document.createElement('div');
+  //   legendHolder.innerHTML = bar.generateLegend();
+  //
+  //   document.getElementById('legend').appendChild(legendHolder.firstChild);
+  //
+  // },
 
   // modal that will prompt user to retry/review/continue
   buildRetryModal: function(){
