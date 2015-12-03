@@ -607,6 +607,12 @@ AVIATION.common.Slide.prototype = {
       return Math.round(Math.random() * 100);
     };
 
+    $(slide).on("studentGraphData", function(data){
+      console.log("give me the student data!");
+      console.log(data);
+
+    });
+
     barChartData = {
       labels: ["Student Knowledge Components"],
       datasets: [{
@@ -663,6 +669,13 @@ AVIATION.common.Slide.prototype = {
     randomScalingFactor = function() {
       return Math.round(Math.random() * 100);
     };
+
+    $(slide).on("instructorGraphData", function(data){
+      console.log("give me the instructor data!");
+      console.log(data);
+
+    });
+
 
     barChartData = {
       labels: ["Student 1", "Student 2", "Student 3", "Student 4"],
@@ -3094,7 +3107,7 @@ AVIATION.common.Slide.prototype = {
 
       if(!slide.options.isModal){
         for(i=0; i < slide.modalSlides.length; i++){
-          slide.modalSlides[i].instrumentResizer(size-20, size-20);
+          slide.modalSlides[i].instrumentResizer(size, size-20);
         }
       }
 
@@ -3527,10 +3540,14 @@ AVIATION.common.Slide.prototype = {
 
     var slide = this, completedScan = slide.completedScan || 0, overallScanIndex,
         allowedUnsuccesful, unsuccesfulAttempts, i, innerIndex, element,
-        onSuccess = event.data.onSuccess,
+        onSuccess = "",
         //scanPattern = [ 0, 3, 0, 1, 0, 4, 0, 2, 0, 5],
         scanPattern = slide.options.scanningPatternArray, patternId,
         highlightInstrument = [ "attitude", "altimeter", "heading", "airspeed", "variometer", "turn_coordinator"];
+
+    if(event.data && event.data.onSuccess){
+      onSuccess = event.data.onSuccess;
+    }
 
     // new check to see if we've already moved past this advanceWith index
     console.log("new actionable index: ");
