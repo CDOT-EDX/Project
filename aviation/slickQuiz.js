@@ -431,42 +431,36 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 if(plugin.config.isDirty){
                   plugin.config.remediationCount = 0;
 
-                  //$quizResults.fadeOut(300, function () {
-                      $(_element + ' input').prop('checked', false).prop('disabled', false);
+                  $(_element + ' input').prop('checked', false).prop('disabled', false);
 
-                      $quizLevel.attr('class', 'quizLevel');
-
+                  $quizLevel.attr('class', 'quizLevel');
 
 
-                      $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
-                      $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
 
-                      $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
-                      $(_element + ' ' + correctClass).parent().hide();
-                      $(_element + ' ' + incorrectClass).parent().hide();
+                  $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
+                  $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
 
+                  $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
+                  $(_element + ' ' + correctClass).parent().hide();
+                  $(_element + ' ' + incorrectClass).parent().hide();
 
-                      while( $(_element + '_remediation_header').parent().length > 0 ){
-                        $(_element + '_remediation_header').parent().remove();
-                      }
+                  while( $(_element + '_remediation_header').parent().length > 0 ){
+                    $(_element + '_remediation_header').parent().remove();
+                  }
 
-                      while( $(_element + '_remediation_ul').length > 0 ){
-                        $(_element + '_remediation_ul').remove();
-                      }
+                  while( $(_element + '_remediation_ul').length > 0 ){
+                    $(_element + '_remediation_ul').remove();
+                  }
 
+                  $(_element + ' ' + _questionCount + ',' + _element + ' ' + _answers + ',' + _element + ' ' + _checkAnswerBtn).show();
+                  $quizArea.append($(_element + ' ' + _questions)).show();
 
-                      //$(_element + " " + _nextQuestionBtn).hide();
-                      //$(_element + " " + _prevQuestionBtn).hide();
+                  kN(key, 1).apply(null, []);
 
-                      $(_element + ' ' + _questionCount + ',' + _element + ' ' + _answers + ',' + _element + ' ' + _checkAnswerBtn).show();
-                      $quizArea.append($(_element + ' ' + _questions)).show();
-                      //$(_element + ' ' + _questions)
-                      kN(key, 1).apply(null, []);
+                  plugin.method.startQuiz({
+                      callback: plugin.config.animationCallbacks.startQuiz
+                  }, $quizResults);
 
-                      plugin.method.startQuiz({
-                          callback: plugin.config.animationCallbacks.startQuiz
-                      }, $quizResults);
-                  //});
                   plugin.config.isDirty = false;
                 }
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});

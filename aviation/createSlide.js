@@ -822,7 +822,10 @@ AVIATION.common.Slide.prototype = {
   checkForContentResize: function(){
     "use strict";
 
-    var $body = $(this.bodyId), $sliderContainer = $(this.throttleContainer), $slider = $(this.throttleId), slide = this;
+    var $body = $(this.bodyId), $sliderContainer = $(this.throttleContainer),
+        $slider = $(this.throttleId), slide = this, modalInsts, i;
+
+    slide.resizeSensor = "";
 
     if(this.options.enableSlider || this.options.enablePanel){
 
@@ -832,21 +835,24 @@ AVIATION.common.Slide.prototype = {
       console.log($slider);
 
       if(slide.options.enablePanel){
-
         $body = $(this.options.panelId);
         console.log("and body is... ");
         console.log($body);
       }
 
-      new ResizeSensor( $body , function(){
+      slide.resizeSensor = new ResizeSensor( $body , function(){
         console.log("resetting slider height!!");
         $sliderContainer.height( $body.height() );
+
         $slider.height( $body.height() - 22 );
         slide.instrumentResizer( $body.width(), $body.height() );
         console.log($slider.height() );
         console.log($sliderContainer.height() );
         console.log($body.height() );
       });
+
+      console.log("resize sensor...");
+      console.log(slide.resizeSensor);
 
     }
   },
@@ -3025,8 +3031,12 @@ AVIATION.common.Slide.prototype = {
     if(!slide.options.noAudio && !slide.options.isModal){
       $(slide).trigger("play");
     }
-
-    slide.checkForContentResize();
+    if(slide.options.isModal){
+      console.log("activate slide as modal");
+    }else {
+      console.log("activate slide");
+      slide.checkForContentResize();
+    }
 
     slide.centerModals();
   },
@@ -3057,8 +3067,16 @@ AVIATION.common.Slide.prototype = {
     window.location.assign(newUrl + "jump_to_id/" + pageId);
   },
 
+  // function to ensure that modal instrument (one instrument)
+  // fits the width and height of the modal properly
+  resizeModalPanel: function(){
+
+  },
+
   centerModals: function() {
+    var slide = this;
     function centerModal(){
+      var i, size;
       $(this).attr("style", "top: -90px !important");
       $(this).css('display', 'block');
       $(this).css('overflow', 'visible');
@@ -3067,6 +3085,18 @@ AVIATION.common.Slide.prototype = {
       var $dialog  = $(this).find(".modal-dialog"),
       offset       = ($(window).height() - $dialog.height()) / 2,
       bottomMargin = parseInt($dialog.css('marginBottom'), 10);
+
+      size = parseInt($(this).width() - 30);
+
+      $(this).find('.instruments').height(size);
+      $(this).find('.instruments').width(size);
+
+
+      if(!slide.options.isModal){
+        for(i=0; i < slide.modalSlides.length; i++){
+          slide.modalSlides[i].instrumentResizer(size-20, size-20);
+        }
+      }
 
       // Make sure you don't hide the top part of the modal w/ a negative margin if it's longer than the screen height, and keep the margin equal to the bottom margin of the modal
       if(offset < bottomMargin) offset = bottomMargin;
@@ -3589,7 +3619,7 @@ AVIATION.common.Slide.prototype = {
         //TODO: put into separate function?
         //slide.checkScanningPattern();
 
-        slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
+        slide.setStatus("Succesful completed scans: " + completedScan + " |  Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful);
 
         if(type === 'quiz'){
           // all good, let's wait for next input...
