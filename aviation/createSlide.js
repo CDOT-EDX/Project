@@ -153,7 +153,8 @@ AVIATION.common.Slide.prototype = {
         var slide = this, content = slide.slideContent[slide.contentActiveIndex], data;
 
         if(content && content.advanceWith && content.advanceWith.action && content.advanceWith.action === 'pattern'){
-          slide.checkActionables("quiz", undefined, e, content.advanceWith);
+          slide.checkActionables("quiz", slide.slideContent[slide.contentActiveIndex+slide.patternInnerIndex].quiz[0],
+            e, content.advanceWith, slide.contentActiveIndex);
         } else {
           console.log("result of quiz.... ");
           console.log(result);
@@ -1558,6 +1559,7 @@ AVIATION.common.Slide.prototype = {
                    (slide.highlights[act].width ? ";width:" + slide.highlights[act].width : "") +
                    (slide.highlights[act].height ? ";height:" + slide.highlights[act].height : "") +
                    (slide.highlights[act].position? ";position:" + slide.highlights[act].position : "") +
+                   (slide.highlights[act].transform? ";transform:" + slide.highlights[act].transform : "") +
                    (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );
 
           switch(slide.highlights[act].parent){
@@ -2677,7 +2679,6 @@ AVIATION.common.Slide.prototype = {
           // get the proper array of slideElements
           // attach the buildContent callback to be added to their array of onclicks/callbacks
           // and add it to the existing data("action") of the element
-          //
         }
       }
   },
@@ -3638,6 +3639,8 @@ AVIATION.common.Slide.prototype = {
         slide.setStatus("Succesful completed scans: " + completedScan + " |  Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful);
 
         if(type === 'quiz'){
+          // let's rebuild the 'pattern' content...
+          slide.buildContent(true, slide.contentActiveIndex);
           // all good, let's wait for next input...
         } else if(scanPattern[overallScanIndex+1] === index){
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
