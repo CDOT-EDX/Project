@@ -589,7 +589,6 @@ AVIATION.common.Slide.prototype = {
 
     console.log("inside build slide before init media");
     slide.initMedia(callback);
-    this.buildContent(true, this.contentActiveIndex, this.mediaActiveIndex, false);
 
   },
 
@@ -2630,6 +2629,8 @@ AVIATION.common.Slide.prototype = {
 
         slide.players = players;
 
+        slide.buildContent(true, slide.contentActiveIndex, slide.mediaActiveIndex, false);
+
         slide.initMediaEvents();
 
         if(callback && typeof callback === 'function'){
@@ -2638,9 +2639,13 @@ AVIATION.common.Slide.prototype = {
 
       });
     } else {
+
       if(callback && typeof callback === 'function'){
         callback();
       }
+
+      slide.buildContent(true, slide.contentActiveIndex, slide.mediaActiveIndex, false);
+
     }
   },
 
