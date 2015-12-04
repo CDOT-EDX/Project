@@ -1402,6 +1402,24 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("next");
         return;
       }
+
+      if(element && element.type === "button" && element.mediaIndex !== undefined){
+        // pause whatever was playing, play the indices specified instead without
+        // playing the next media?
+        $(slide).trigger("reset");
+        slide.mediaActiveIndex = element.mediaIndex;
+        slide.csvTriggeredByButton = true;
+        $(slide).trigger("play");
+        return;
+      }
+
+      if(element && element.type === "csv" && slide.csvTriggeredByButton){
+        slide.csvTriggeredByButton = false;
+        return;
+      }
+
+
+
       if(!content.advanceWith){
         $(slide).trigger("next");
         return;
@@ -1614,6 +1632,7 @@ AVIATION.common.Slide.prototype = {
           } else {
             callback = [];
           }
+          callback.push(function(){ console.log("test exec of actionables callback");})
 
           $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]),
                                 mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
