@@ -2651,7 +2651,8 @@ AVIATION.common.Slide.prototype = {
         }
 
         if(content[i].media && content[i].media.type &&
-            (content[i].media.type !== "button" && content[i].media.type !== "highlight") ){
+            (content[i].media.type !== "button" && content[i].media.type !== "highlight" &&
+                content[i].media.type !== 'quiz') ){
           // case for audio, csv, timer
           console.log("initing mediaEvents:");
           console.log(content[i]);
@@ -2667,7 +2668,11 @@ AVIATION.common.Slide.prototype = {
         } else if(content[i].media && content[i].media.type){
           // case for btn, hlight
           console.log("the media event should be a btn/hlight");
-          slide.attachActionableEvent(content[i], slide, i);
+
+          if(content[i].media.type !== 'quiz'){
+            slide.attachActionableEvent(content[i], slide, i);
+          }
+
           // for content.media.type
           // get the proper array of slideElements
           // attach the buildContent callback to be added to their array of onclicks/callbacks
