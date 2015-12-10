@@ -215,7 +215,8 @@ AVIATION.common.Slide.prototype = {
         if(data && data.mediaIndex !== undefined){
           $(slide).trigger("instrumentResetPlay", data.mediaIndex);
         } else
-        if(slide.slideContent && slide.contentActiveIndex < slide.slideContent.length-1){
+        if( slide.slideContent && (slide.contentActiveIndex < slide.slideContent.length-1 ||
+              !slide.slideContent[slide.contentActiveIndex].slideEnd) ){
           slide.buildContent(true, slide.contentActiveIndex+1);
           slide.checkSlideControlPlayButtons("play");
         } else {
@@ -224,6 +225,12 @@ AVIATION.common.Slide.prototype = {
       },
       slideEnd: function(e, data){
         console.log("attempting reset");
+        // e.stopImmediatePropagation();
+        // $(slide).clearQueue("trigger");
+        // $(slide).clearQueue("on");
+        // $(slide).clearQueue();
+        slide.contentActiveIndex = slide.slideContent.length-1;
+        slide.mediaIndex = slide.players.length-1;
         $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
         console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
@@ -330,7 +337,8 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("pause");
         $(slide).trigger("reset");
         slide.mediaActiveIndex++;
-        if(slide.slideContent && slide.mediaActiveIndex < slide.players.length){
+        if(slide.slideContent && (slide.mediaActiveIndex < slide.players.length ||
+            !slide.slideContent[slide.contentActiveIndex].slideEnd) ){
           $(slide).trigger("play");
           console.log("play triggered from nextMedia");
         } else {
@@ -1039,8 +1047,15 @@ AVIATION.common.Slide.prototype = {
         callback();
       }
 
+
+      console.log("slideContent.callback...?");
       if(slideContent.callback && typeof slideContent.callback !== 'function'){
-        slideContent.callback = eval(slideContent.callback);
+        console.log("is there a content callback?");
+        //slideContent.callback = eval(slideContent.callback);
+        //if(slideContent.callback === undefined){
+          slideContent.callback = new Function(slideContent.callback);
+        //}
+
       }
 
       if(slideContent.callback && typeof slideContent.callback === 'function'){
@@ -1631,7 +1646,7 @@ AVIATION.common.Slide.prototype = {
           } else {
             callback = [];
           }
-          callback.push(function(){ console.log("test exec of actionables callback");})
+          //callback.push(function(){ console.log("test exec of actionables callback");});
 
           $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]),
                                 mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
@@ -3002,6 +3017,7 @@ AVIATION.common.Slide.prototype = {
             controls.pause.hide();
             controls.play.hide();
             controls.replay.show();
+            return;
           } else {
             controls.play.hide();
             controls.pause.show();
