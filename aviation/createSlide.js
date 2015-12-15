@@ -215,7 +215,7 @@ AVIATION.common.Slide.prototype = {
         if(data && data.mediaIndex !== undefined){
           $(slide).trigger("instrumentResetPlay", data.mediaIndex);
         } else
-        if( slide.slideContent && (slide.contentActiveIndex < slide.slideContent.length-1 ||
+        if( slide.slideContent && (slide.contentActiveIndex < slide.slideContent.length-1 &&
               !slide.slideContent[slide.contentActiveIndex].slideEnd) ){
           slide.buildContent(true, slide.contentActiveIndex+1);
           slide.checkSlideControlPlayButtons("play");
@@ -1396,7 +1396,7 @@ AVIATION.common.Slide.prototype = {
       content.advanceWith.index = [content.advanceWith.index];
     }
 
-    if( (content.media.type !== element.type || content.media.index !== element.index) && content.advanceWith){
+    if( content.media && (content.media.type !== element.type || content.media.index !== element.index) && content.advanceWith){
     // check to see if the actual audio is triggering, if so, and there is an advance with, wait for action
       if(content.advanceWith){
         for(advance in content.advanceWith){
@@ -1432,7 +1432,12 @@ AVIATION.common.Slide.prototype = {
         return;
       }
 
-
+      // allow for CSV to end pattern scan if minimum requirement met
+      if(element && element.type === "csv" && slide.completedScan >= slide.options.minScan){
+        slide.contentActiveIndex = slide.contentActiveIndex + slide.patternInnerIndex;
+        //$(slide).trigger("correctAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
+        $(slide).trigger("next");
+      }
 
       if(!content.advanceWith){
         $(slide).trigger("next");
@@ -1700,6 +1705,7 @@ AVIATION.common.Slide.prototype = {
     };
 
     oldActions = slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].data('action');
+
     console.log(oldActions);
     /*
     oldActions.push(function(){
@@ -3007,9 +3013,9 @@ AVIATION.common.Slide.prototype = {
             controls.previous.prop("disabled", false);
             controls.previous.removeAttr("disabled");
           }
-          if( ( (active > players.length - 1) &&
-              (contentActive + 1 > this.slideContent.length - 1) ) ||
-                (contentActive + 1 > this.slideContent.length - 1 ||
+          if( ( (active !== 0 && active > players.length) &&
+              (contentActive !==0 && contentActive + 1 > this.slideContent.length - 1) ) ||
+                (contentActive !==0 && contentActive + 1 > this.slideContent.length - 1 ||
                   this.slideContent[contentActive].slideEnd) ){
             if(action !== 'replay'){
               $(slide).trigger("slideEnd");
@@ -3668,7 +3674,9 @@ AVIATION.common.Slide.prototype = {
         }
 
       } else if(type === 'csv' && slide.completedScan >= slide.options.minScan){
-        $(slide).trigger("correctAdvance", advanceWith);
+        // scan is done and csv is ended, reset the contentActiveIndex and go to next
+        slide.contentActiveIndex = slide.contentActiveIndex + innerIndex;
+        $(slide).trigger("correctAdvance", slide.slideContent[slide.contentActiveIndex+innerIndex].advanceWith);
       } else if(type === 'csv') {
         //$(slide).trigger("wrongAdvance", advanceWith);
         // nothing happens
@@ -3723,7 +3731,7 @@ AVIATION.common.Slide.prototype = {
             overallScanIndex = -1;
             slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
 
-            if(completedScan >= slide.options.minScan && slide.panelEnd){
+            if( (completedScan >= slide.options.minScan && slide.panelEnd) || slide.slideContent[slide.contentActiveIndex+innerIndex].patternEnd ){
               $(slide).trigger("correctAdvance", advanceWith);
             }
           }
