@@ -235,7 +235,7 @@ AVIATION.common.Slide.prototype = {
         console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
         slide.setStatus('Click "Continue" to proceed to the next slide');
-        slide.activateTimer(6, slide.options.autoRedirect);
+        slide.activateTimer(slide.options.autoRedirectTimer, slide.options.autoRedirect);
       },
       end: function(e, data){
         var i;
@@ -3242,6 +3242,7 @@ AVIATION.common.Slide.prototype = {
           showBorder: true,
           autoplay: true,
           autoRedirect: false,
+          autoRedirectTimer: 6,
           noAudio: false,
           enablePanel: false,
           enableModals: false,
