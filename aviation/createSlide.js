@@ -230,7 +230,13 @@ AVIATION.common.Slide.prototype = {
         // $(slide).clearQueue("on");
         // $(slide).clearQueue();
         slide.contentActiveIndex = slide.slideContent.length-1;
-        slide.mediaIndex = slide.players.length-1;
+
+        if(slide.players){
+          slide.mediaIndex = slide.players.length-1;
+        } else {
+          slide.mediaIndex = 0;
+        }
+
         $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
         console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
@@ -370,7 +376,7 @@ AVIATION.common.Slide.prototype = {
       reset: function(e, status){
         console.log("!* reset event fired");
 
-        if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
+        if(slide.players && slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
           slide.players[slide.mediaActiveIndex].player.pause();
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
