@@ -230,7 +230,13 @@ AVIATION.common.Slide.prototype = {
         // $(slide).clearQueue("on");
         // $(slide).clearQueue();
         slide.contentActiveIndex = slide.slideContent.length-1;
-        slide.mediaIndex = slide.players.length-1;
+
+        if(slide.players){
+          slide.mediaIndex = slide.players.length-1;
+        } else {
+          slide.mediaIndex = 0;
+        }
+
         $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
         console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
@@ -303,8 +309,7 @@ AVIATION.common.Slide.prototype = {
 
         var active = slide.mediaActiveIndex, players = slide.players;
 
-        console.log(players[active]);
-        if(players[active] && players[active].player){
+        if(players && players[active] && players[active].player){
           slide.checkSlideControlPlayButtons("pause");
           console.log("trying to pause ");
           players[active].player.pause();
@@ -337,7 +342,7 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("pause");
         $(slide).trigger("reset");
         slide.mediaActiveIndex++;
-        if(slide.slideContent && (slide.mediaActiveIndex < slide.players.length ||
+        if(slide.slideContent && (slide.players && slide.mediaActiveIndex < slide.players.length ||
             !slide.slideContent[slide.contentActiveIndex].slideEnd) ){
           $(slide).trigger("play");
           console.log("play triggered from nextMedia");
@@ -370,7 +375,7 @@ AVIATION.common.Slide.prototype = {
       reset: function(e, status){
         console.log("!* reset event fired");
 
-        if(slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
+        if(slide.players && slide.players[slide.mediaActiveIndex] && slide.players[slide.mediaActiveIndex].player){
           slide.players[slide.mediaActiveIndex].player.pause();
           slide.players[slide.mediaActiveIndex].player.currentTime(0);
         }
@@ -2958,7 +2963,6 @@ AVIATION.common.Slide.prototype = {
 
     this.checkSlideControlPlayButtonsState( action );
 
-    this.setStatus(action);
   },
 
   // constrols the state of the Previous/Next 'player' buttons
@@ -2989,22 +2993,16 @@ AVIATION.common.Slide.prototype = {
         controls.next.attr("disabled", false);
         controls.next.removeProp("disabled");
         controls.next.removeAttr("disabled");
-        //if(this.slideHasListened[active]){
-        //}
       } else {
         if (active < players.length - 1){
           console.log("active is before the last player");
           controls.previous.prop("disabled", false);
           controls.previous.removeAttr("disabled");
-          //if(this.slideHasListened[active]){
-            //controls.next.prop("disabled", false);
-            //controls.next.removeAttr("disabled");
-          //} else {
+
           controls.next.prop("disabled", false);
           controls.next.attr("disabled", false);
           controls.next.removeProp("disabled");
           controls.next.removeAttr("disabled");
-          //}
         } else if (active >= players.length - 1){
           console.log("active is the last players length");
           console.log("active: " + active);
@@ -3036,6 +3034,13 @@ AVIATION.common.Slide.prototype = {
         }
       }
 
+    }
+    this.setStatus(action);
+
+    if( (contentActive > 0 && contentActive + 1 > this.slideContent.length - 1) || this.slideContent[contentActive].slideEnd ){
+      if(action !== 'replay'){
+        $(slide).trigger("slideEnd");
+      }
     }
 
     if(disableAll){
