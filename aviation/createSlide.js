@@ -3690,6 +3690,11 @@ AVIATION.common.Slide.prototype = {
         if(type === 'quiz'){
           // let's rebuild the 'pattern' content...
           slide.buildContent(true, slide.contentActiveIndex);
+          // is it slideEnd here?
+          if(slide.slideContent[slide.contentActiveIndex + innerIndex] && slide.slideContent[slide.contentActiveIndex + innerIndex].slideEnd){
+              $(slide).trigger("slideEnd");
+          }
+
           // all good, let's wait for next input...
         } else if(scanPattern[overallScanIndex+1] === index){
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
