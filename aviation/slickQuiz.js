@@ -512,7 +512,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     questionId = answerSelects.attr('id').split('_')[3];
                     questionIndex = parseInt(questionLI.attr('id').replace(/(question)/, ''), 10),
                     answers = questions[questionIndex].a,
-                    selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
+                    selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false,
+                    attemptsBeforeRemediation = plugin.config.attemptsBeforeRemediation;
 
                 // Collect the true answers needed for a correct response
                 var trueAnswers = [];
