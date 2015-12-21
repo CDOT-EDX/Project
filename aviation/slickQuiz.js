@@ -509,7 +509,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 var questionLI = $($(checkButton).parents(_question)[0]),
                     answerLIs = questionLI.find(_answers + ' li'),
                     answerSelects = answerLIs.find('input:checked'),
-                    questionId = answerSelects.attr('id').split('_')[3];
+                    questionId = answerSelects.attr('id').split('_')[3],
                     questionIndex = parseInt(questionLI.attr('id').replace(/(question)/, ''), 10),
                     answers = questions[questionIndex].a,
                     selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false,

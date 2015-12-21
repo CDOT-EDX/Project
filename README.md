@@ -57,6 +57,8 @@ therefore use: `var anySlide = new AVIATION.Slide( options )` (if ComplexHTML xb
 Acceptable options and defaults are as follows:
 
 ```javascript
+    patternQuiz:        false, // are there quizzes that need to be answered during a pattern scan?
+    patternQuizzes:     0,  // number of quizzes that need to be answered throughout the pattern scan
     serverBaseUrl:      window.location.protocol + "//" + window.location.host + "/",
     apacheServerBaseUrl:window.location.protocol + "//" + window.location.host + ":25080/",
     setPanel:           false, // makes the first line of the first CSV set panel before CSV plays
@@ -187,6 +189,8 @@ Acceptable options and defaults are as follows:
         // not mentioned on SlickQuiz page but added by edX CDOT team
         "showRemediationOnSuccess": true,
         "showRemediationOnFail": true,
+        "attemptsBeforeRemediation": 1 // how many attempts does the user have until remediations show and
+        // the quiz is skipped and user goes on to the next content ** Gordon's request
         "animationCallbacks": {
           "checkAnswer": (function(){
             console.log("do something");
