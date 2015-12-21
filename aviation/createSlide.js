@@ -1438,7 +1438,7 @@ AVIATION.common.Slide.prototype = {
       }
 
       // allow for CSV to end pattern scan if minimum requirement met
-      if(element && element.type === "csv" && slide.completedScan >= slide.options.minScan){
+      if(element && element.type === "csv" && slide.completedScan >= slide.options.minScan && !slide.options.patternQuiz){
         slide.contentActiveIndex = slide.contentActiveIndex + slide.patternInnerIndex;
         //$(slide).trigger("correctAdvance", slide.slideContent[slide.contentActiveIndex].advanceWith);
         $(slide).trigger("next");
@@ -3080,7 +3080,6 @@ AVIATION.common.Slide.prototype = {
           } else {
             status.text("Status is undefined!");
           }
-
           break;
       }
       if($().pulse){
@@ -3408,6 +3407,8 @@ AVIATION.common.Slide.prototype = {
 
     this.altMediaFiles = options.altMediaFiles;
 
+    this.patternQuizzesCompleted = 0;
+
     console.log("** AUDIO FILES? ****");
     console.log(this.mediaFiles);
     console.log(this);
@@ -3432,7 +3433,6 @@ AVIATION.common.Slide.prototype = {
                                                           audio: 0
                                                         }
                                                       ];
-
 
     // a way to keep track of the modals on the page
     this.modalSlides = [];
@@ -3667,7 +3667,6 @@ AVIATION.common.Slide.prototype = {
         if(type === 'quiz'){
           // checked through "checkQuizResult" event
         } else if( _.contains(advanceWith.index, index) ){
-//        } else if( _.invoke(advanceWith.index, index, function(a,b){ console.log("inside func"); console.log(a); console.log(b); return a===b; }) ){
 
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
           $(slide).trigger("correctAdvance", advanceWith);
@@ -3694,12 +3693,16 @@ AVIATION.common.Slide.prototype = {
 
         if(type === 'quiz'){
           // let's rebuild the 'pattern' content...
-          slide.buildContent(true, slide.contentActiveIndex);
-          // is it slideEnd here?
-          if(slide.slideContent[slide.contentActiveIndex + innerIndex] && slide.slideContent[slide.contentActiveIndex + innerIndex].slideEnd){
-              $(slide).trigger("slideEnd");
+          slide.patternQuizzesCompleted++;
+
+          if( (completedScan >= slide.options.minScan && slide.panelEnd) || slide.slideContent[slide.contentActiveIndex+innerIndex].patternEnd ){
+            if( (slide.options.patternQuiz && slide.patternQuizzesCompleted === slide.options.patternQuizzes) || (!slide.options.patternQuiz) ){
+              slide.contentActiveIndex = slide.contentActiveIndex + innerIndex + 1;
+              //$(slide).trigger("correctAdvance", advanceWith);
+            }
           }
 
+          slide.buildContent(true, slide.contentActiveIndex);
           // all good, let's wait for next input...
         } else if(scanPattern[overallScanIndex+1] === index){
           $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
@@ -3737,13 +3740,15 @@ AVIATION.common.Slide.prototype = {
               if($().pulse){
                 slide.slideElements.highlightElements[i].pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
               }
-              //$(".instrument.col-xs-4").pulse(slide.options.pulseCorrectProp, slide.options.pulseInstrumentSettings);
             }
             overallScanIndex = -1;
             slide.setStatus("Succesful completed scans: " + completedScan + " Unsuccesful attempts: " + unsuccesfulAttempts + " out of " + allowedUnsuccesful + " allowed");
 
             if( (completedScan >= slide.options.minScan && slide.panelEnd) || slide.slideContent[slide.contentActiveIndex+innerIndex].patternEnd ){
-              $(slide).trigger("correctAdvance", advanceWith);
+              if( (slide.options.patternQuiz && slide.patternQuizzesCompleted === slide.options.patternQuizzes) || (!slide.options.patternQuiz) ){
+                slide.contentActiveIndex = slide.contentActiveIndex + innerIndex;
+                $(slide).trigger("correctAdvance", advanceWith);
+              }
             }
           }
         } else {

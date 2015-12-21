@@ -66,6 +66,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 displayQuestionCount: true, // Deprecate?
                 displayQuestionNumber: true, // Deprecate?
                 resultStatus: false,
+                attemptsBeforeRemediation: 1,
                 attempts: 0,
                 remediationCount: 0,
                 //..
@@ -138,9 +139,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             $quizHeader = $(_quizHeader),
             $quizScore = $(_quizScore),
             $quizLevel = $(_quizLevel);
-
-            console.log("quiz element: ");
-            console.log(_element);
 
         // Reassign user-submitted deprecated options
         var depMsg = '';
@@ -286,9 +284,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                             }
                         }
 
-
-                        console.log("----------TRUTHS " + truths);
-
                         // Now let's append the answers with checkboxes or radios depending on truth count
                         var answerHTML = $('<ul class="' + answersClass + '"></ul>');
 
@@ -391,8 +386,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 $(_responses).removeClass(incorrectResponseClass);
                 $("h2.incorrect").hide();
                 plugin.config.attempts += 1;
-                console.log("Attempts");
-                console.log(plugin.config.attempts);
                 function start(options) {
                     var firstQuestion = $(_element + ' ' + _questions + ' li').first();
                     if (firstQuestion.length) {
@@ -521,7 +514,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     answers = questions[questionIndex].a,
                     selectAny = questions[questionIndex].select_any ? questions[questionIndex].select_any : false;
 
-                //answerLIs.addClass(incorrectResponseClass);
                 // Collect the true answers needed for a correct response
                 var trueAnswers = [];
                 var attempts = 0;
@@ -530,12 +522,14 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     attempts += 1;
                 console.log(attempts);
                 $(anySlide).off('checkCompleted');
+
                 $(anySlide).on('checkCompleted', function(evt, data){
                     console.log("remediationCount");
                     console.log(plugin.config.remediationCount);
-                    var correctResponse = data.quiz_result_id.correct;
+                    var correctResponse = data.quiz_result_id.correct,
+                        storedAttempts = data.quiz_result_id.attempts;
 
-                    if(correctResponse && correctResponse === "true"){
+                    if( (correctResponse && correctResponse === "true") || storedAttempts >= attemptsBeforeRemediation){
                         correctResponse = true;
                         plugin.config.resultStatus = true;
                     } else {
@@ -545,22 +539,13 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                     if (correctResponse) {
                         if (plugin.config.showRemediationOnSuccess){
-                            //"Firing callback"
-                              plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
-                              questionLI.addClass(correctClass);
-                              //plugin.config.remediationCount += 1;
-                            //}
-                          }
-                        //questionLI.addClass(correctClass);
+                          plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
+                          questionLI.addClass(correctClass);
+                        }
                     } else {
-
                         if (plugin.config.showRemediationOnFail){
-                            //"Firing callback"
-                            //if (plugin.config.remediationCount == 0){
-                              plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId)
-                              questionLI.addClass(incorrectClass);
-                              //plugin.config.remediationCount += 1;
-                            //}
+                          plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId)
+                          questionLI.addClass(incorrectClass);
                         }
                       }
                       // Toggle appropriate response (either for display now and / or on completion)
@@ -828,7 +813,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             $(_element + ' ' + _checkAnswerBtn).on('click', function (e) {
                 e.preventDefault();
                 console.log("Element");
-                console.log();
                 plugin.method.checkAnswer(this, {
                     callback: plugin.config.animationCallbacks.checkAnswer
                 });
