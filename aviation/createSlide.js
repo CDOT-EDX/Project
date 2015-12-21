@@ -1658,8 +1658,10 @@ AVIATION.common.Slide.prototype = {
           }
           //callback.push(function(){ console.log("test exec of actionables callback");});
 
-          $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]),
-                                mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
+          if(!actions[act].hasModal){
+            $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]),
+                                  mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
+          }
 
           $action.data("action", callback);
           slide.elementsToShow[action].push(false);
@@ -2258,6 +2260,7 @@ AVIATION.common.Slide.prototype = {
             headerId: "#modal_header_" + this.modals[i].id,
             footerId: "#modal_footer_" + this.modals[i].id,
             bodyId: "#modal_body_" + this.modals[i].id,
+            generalContentId: "#generalContent_modal_" + this.modals[i].id,
             panelId: "#modal_panelContainer_" + this.modals[i].id,
             contentParentId : "#contentParent_modal_" + this.modals[i].id,
             imageParentId: "#imageParent_modal_" + this.modals[i].id,
