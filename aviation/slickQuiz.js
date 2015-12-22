@@ -66,7 +66,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 displayQuestionCount: true, // Deprecate?
                 displayQuestionNumber: true, // Deprecate?
                 resultStatus: false,
-                attemptsBeforeRemediation: 2,
+                attemptsBeforeRemediation: 0,
                 attempts: 0,
                 remediationCount: 0,
                 //..
@@ -96,8 +96,10 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             completeClass = 'complete',
             correctClass = 'correctResponse',
             incorrectClass = 'incorrectResponse',
+            incorrectMaxClass = 'incorrectMaxClass',
             correctResponseClass = 'correct',
             incorrectResponseClass = 'incorrect',
+            incorrectResponseAttemptsClass = 'incorrectMaxAttempts',
             checkAnswerClass = 'checkAnswer',
             nextQuestionClass = 'nextQuestion',
             lastQuestionClass = 'lastQuestion',
@@ -115,6 +117,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             _correct = '.' + correctClass,
             _correctResponse = '.' + correctResponseClass,
             _incorrectResponse = '.' + incorrectResponseClass,
+            _incorrectResponseAttemptsClass = '.' + incorrectResponseAttemptsClass,
             _checkAnswerBtn = '.' + checkAnswerClass,
             _nextQuestionBtn = '.' + nextQuestionClass,
             _prevQuestionBtn = '.' + backToQuestionClass,
@@ -330,6 +333,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                             var responseHTML = $('<ul class="' + responsesClass + '"></ul>');
                             responseHTML.append('<li class="' + correctResponseClass + '">' + question.correct + '</li>');
                             responseHTML.append('<li class="' + incorrectResponseClass + '">' + question.incorrect + '</li>');
+                            responseHTML.append('<li class="' + incorrectResponseAttemptsClass + '">' + question.incorrectMaxAttempts + '</li>');
 
                             // Append responses to question
                             questionHTML.append(responseHTML);
@@ -384,6 +388,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
                 $(_responses).removeClass(incorrectResponseClass);
+
                 $("h2.incorrect").hide();
                 plugin.config.attempts += 1;
                 function start(options) {
@@ -428,10 +433,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                   $quizLevel.attr('class', 'quizLevel');
 
-
-
                   $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
-                  $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass);
+                  $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass).removeClass(incorrectResponseAttemptsClass);
 
                   $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
                   $(_element + ' ' + correctClass).parent().hide();
@@ -528,7 +531,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     console.log("remediationCount");
                     console.log(plugin.config.remediationCount);
                     var correctResponse = data.quiz_result_id.correct,
-                        storedAttempts = data.attempts;
+                        storedAttempts = data.attempts, incorrectMaxResponse = false;
 
                     if( ( (correctResponse && correctResponse === "true") || storedAttempts >= attemptsBeforeRemediation) && attemptsBeforeRemediation !== 0 ){
                         correctResponse = true;
@@ -540,8 +543,15 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                     if (correctResponse) {
                         if (plugin.config.showRemediationOnSuccess){
-                          plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
-                          questionLI.addClass(correctClass);
+                          if( (storedAttempts >= attemptsBeforeRemediation) && attemptsBeforeRemediation !== 0){
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseAttemptsClass, responsesClass, questionId);
+                            questionLI.addClass(incorrectMaxClass);
+                            incorrectMaxResponse = true;
+                          } else {
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, correctResponseClass, responsesClass, questionId);
+                            questionLI.addClass(correctClass);
+                          }
+
                         }
                     } else {
                         if (plugin.config.showRemediationOnFail){
@@ -550,7 +560,14 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                         }
                       }
                       // Toggle appropriate response (either for display now and / or on completion)
-                      questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
+                      if(incorrectMaxResponse){
+                        questionLI.find(_incorrectResponseAttemptsClass).show();
+                      } else if(correctResponse){
+                        questionLI.find(_correctResponse).show();
+                      } else {
+                        questionLI.find(_incorrectResponse).show();
+                      }
+                      //questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
 
                     // If perQuestionResponseMessaging is enabled, toggle response and navigation now
                     if (plugin.config.perQuestionResponseMessaging) {

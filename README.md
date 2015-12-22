@@ -182,7 +182,8 @@ Acceptable options and defaults are as follows:
                 {"option": "Climb on runway heading to 1500 ft, turning right onto 135 degrees. Continue climb to 3000 feet to complete the correct read back.",  "correct": "",  "reason": ""} // no comma here
               ],
               "correct": "<p><span>Control, correct, AS12 is clear to take-off</span></p>",
-              "incorrect": "<p><span>That's not correct.  Ask for the clearance to be repeated.</span></p>" // no comma here
+              "incorrect": "<p><span>That's not correct.  Ask for the clearance to be repeated.</span></p>",
+              "incorrectMaxAttempts": "<p>Incorrect, but you've had enough. Next...</p>"
             }
           ],
         },
