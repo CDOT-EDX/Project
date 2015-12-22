@@ -66,7 +66,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 displayQuestionCount: true, // Deprecate?
                 displayQuestionNumber: true, // Deprecate?
                 resultStatus: false,
-                attemptsBeforeRemediation: 1,
+                attemptsBeforeRemediation: 2,
                 attempts: 0,
                 remediationCount: 0,
                 //..
@@ -530,7 +530,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     var correctResponse = data.quiz_result_id.correct,
                         storedAttempts = data.quiz_result_id.attempts;
 
-                    if( (correctResponse && correctResponse === "true") || storedAttempts >= attemptsBeforeRemediation){
+                    if( ( (correctResponse && correctResponse === "true") || storedAttempts >= attemptsBeforeRemediation) && attemptsBeforeRemediation !== 0 ){
                         correctResponse = true;
                         plugin.config.resultStatus = true;
                     } else {

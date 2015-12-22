@@ -905,14 +905,16 @@ AVIATION.common.Slide.prototype = {
       contentContainer = jQuery('<div/>', {
         id: this.bodyId.split("#")[1]
         //"class": this.options.showAvatars || this.options.enableSlider ? "cdot_contentText col-xs-8" : "cdot_contentText col-xs-12"
-      }).appendTo(slide.container);
+      });
 
       if(slide.options.isModal){
+        contentContainer.insertBefore( (slide.container) + " > .modal-footer");
         console.log("building Modal content...");
         console.log(this.slideContent[contentActiveIndex]);
         console.log(this);
         contentContainer.addClass("modal-body");
       } else {
+        contentContainer.appendTo(slide.container)
         if(slide.options.showAvatars || slide.options.enableSlider){
           contentContainer.addClass("col-xs-8");
         } else {
@@ -1120,8 +1122,8 @@ AVIATION.common.Slide.prototype = {
 
       footer = jQuery('<div/>', {
         id: this.options.footerId.split("#")[1],
-        class: "slide_footer " + (this.options.isModal ? "modal-footer" : "row"),
-        "html": this.options.isModal ? "Footer Test" : ""
+        class: (this.options.isModal ? "modal-footer" : "row slide-footer"),
+        "html": this.options.isModal ? '<button type="button" class="btn btn-default" data-dismiss="modal">Back</button>' : ""
       });
 
       if(this.options.isModal){
@@ -1182,7 +1184,9 @@ AVIATION.common.Slide.prototype = {
 
       this.initSlideButtonEvents();
     } else {
-      this.insertLineBreak( parent );
+      if(!this.options.isModal){
+        this.insertLineBreak( parent );
+      }
     }
   },
 
