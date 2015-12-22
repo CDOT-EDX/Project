@@ -1962,6 +1962,8 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
+    // find an efficient way to resize modal instruments as well (if they exist)
+
     // resize panelHighlights as well to be the same size as inst panel
     //$(slide.options.panelHighlightsId).height( bodyHeight );
     //$(slide.options.panelHighlightsId).width( bodyWidth );
@@ -2272,6 +2274,7 @@ AVIATION.common.Slide.prototype = {
             generalHighlightsId: "#generalHighlightContainer_modal_" + this.modals[i].id,
             contentHighlightsId: "#contentHighlightContainer_modal_" + this.modals[i].id,
             imageHighlightsId: "#imageHighlightContainer_modal_" + this.modals[i].id,
+            buttonContainer: "#buttonContainer_modal_" + this.modals[i].id,
             "buttons": slide.modals[i].buttons,
             instRow1: "#modal_instRow1_" + this.modals[i].id,
             instRow2: "#modal_instRow2_" + this.modals[i].id,
