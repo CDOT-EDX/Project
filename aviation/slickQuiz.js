@@ -37,8 +37,6 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             $element = $(element),
             _element = '#' + $element.attr('id'),
 
-
-
             defaults = {
                 quizId: "",
                 isDirty: false,

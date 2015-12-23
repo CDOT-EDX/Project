@@ -620,58 +620,49 @@ AVIATION.common.Slide.prototype = {
     $(slide).on("drawGraph", function(e, result){
       console.log("which graph are we drawing ...");
       console.log("and what are the results?");
-      console.log(result);
+      console.log(result.to_graph[0]);
 
-      graphValues = result.to_graph;
+      graphValues = result.to_graph[0];
+
+      for(i=0; i<graphValues; i++){
+        // graphValues[i].kc;
+        // graphValues[i].slide_name;
+      }
 
       barChartData = {
         labels: ["Student Knowledge Components"],
-        datasets: []
+        datasets: [{
+          label: "KC3 - Knowledge of instruments principles of operation and functions",
+          fillColor: "#949FB1",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC8 - Full panel instrument malfunction recognition",
+          fillColor: "#4D5360",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC11 - Scanning dynamic (changing indications) instruments",
+          fillColor: "#F7464A",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }, {
+          label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
+          fillColor: "#46BFBD",
+          strokeColor: "rgba(151,187,205,0.8)",
+          highlightStroke: "rgba(151,187,205,1)",
+          data: [randomScalingFactor()]
+        },{
+          label: "KC16 - Selecting corrective action when departing from cleared flightpath",
+          fillColor: "#FDB45C",
+          strokeColor: "rgba(220,220,220,0.8)",
+          highlightStroke: "rgba(220,220,220,1)",
+          data: [randomScalingFactor()]
+        }]
       };
-
-      for(i=0; i<graphValues.length; i++){
-        // graphValues[i].kc;
-        // graphValues[i].slide_name;
-        barChartData.datasets.push({
-        	label: graphValues[i].slide_name,
-        	data: [graphValues[i].kc]
-        });
-      }
-
-      // barChartData = {
-      //   labels: ["Student Knowledge Components"],
-      //   datasets: [{
-      //     label: "KC3 - Knowledge of instruments principles of operation and functions",
-      //     fillColor: "#949FB1",
-      //     strokeColor: "rgba(220,220,220,0.8)",
-      //     highlightStroke: "rgba(220,220,220,1)",
-      //     data: [randomScalingFactor()]
-      //   }, {
-      //     label: "KC8 - Full panel instrument malfunction recognition",
-      //     fillColor: "#4D5360",
-      //     strokeColor: "rgba(151,187,205,0.8)",
-      //     highlightStroke: "rgba(151,187,205,1)",
-      //     data: [randomScalingFactor()]
-      //   },{
-      //     label: "KC11 - Scanning dynamic (changing indications) instruments",
-      //     fillColor: "#F7464A",
-      //     strokeColor: "rgba(220,220,220,0.8)",
-      //     highlightStroke: "rgba(220,220,220,1)",
-      //     data: [randomScalingFactor()]
-      //   }, {
-      //     label: "KC15 - Recognizing departure from desired flightpath from instrument scan",
-      //     fillColor: "#46BFBD",
-      //     strokeColor: "rgba(151,187,205,0.8)",
-      //     highlightStroke: "rgba(151,187,205,1)",
-      //     data: [randomScalingFactor()]
-      //   },{
-      //     label: "KC16 - Selecting corrective action when departing from cleared flightpath",
-      //     fillColor: "#FDB45C",
-      //     strokeColor: "rgba(220,220,220,0.8)",
-      //     highlightStroke: "rgba(220,220,220,1)",
-      //     data: [randomScalingFactor()]
-      //   }]
-      // };
 
       bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
         multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
