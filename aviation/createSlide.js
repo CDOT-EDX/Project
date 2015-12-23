@@ -610,7 +610,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var helpers = Chart.helpers, canvas = document.getElementById('resultGraph'),
-    randomScalingFactor, barChartData, bar, legendHolder, slide = this;
+    randomScalingFactor, barChartData, bar, legendHolder, slide = this, i, graphValues;
     randomScalingFactor = function() {
       return Math.round(Math.random() * 100);
     };
@@ -621,6 +621,13 @@ AVIATION.common.Slide.prototype = {
       console.log("which graph are we drawing ...");
       console.log("and what are the results?");
       console.log(result);
+
+      graphValues = result.to_graph;
+
+      for(i=0; i<graphValues; i++){
+        // graphValues[i].kc;
+        // graphValues[i].slide_name;
+      }
 
       barChartData = {
         labels: ["Student Knowledge Components"],
