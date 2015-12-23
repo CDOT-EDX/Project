@@ -625,10 +625,12 @@ AVIATION.common.Slide.prototype = {
       graphValues = result.to_graph[0];
 
       for(i=0; i<graphValues; i++){
-        // graphValues[i].kc;
-        // graphValues[i].slide_name;
+        barChartData.datasets.push({
+          label: graphValues[i].slide_name,
+          data: [graphValues[i].kc]
+        });
       }
-
+/*
       barChartData = {
         labels: ["Student Knowledge Components"],
         datasets: [{
@@ -663,7 +665,7 @@ AVIATION.common.Slide.prototype = {
           data: [randomScalingFactor()]
         }]
       };
-
+*/
       bar = new Chart(canvas.getContext('2d')).Bar(barChartData, {
         multiTooltipTemplate: "<%=datasetLabel.split('-')[0]%>: <%= value %>",
         animation: false,
