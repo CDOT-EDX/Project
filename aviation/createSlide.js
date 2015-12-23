@@ -610,7 +610,7 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var helpers = Chart.helpers, canvas = document.getElementById('resultGraph'),
-    randomScalingFactor, barChartData = {}, bar, legendHolder, slide = this, i, graphValues;
+    randomScalingFactor, barChartData = {}, bar, legendHolder, slide = this, i, j, k, graphValues;
     barChartData = {
       datasets: [],
       labels: ["Student Results"]
@@ -629,13 +629,69 @@ AVIATION.common.Slide.prototype = {
 
       graphValues = result.to_graph[0];
 
+      var colors = [{
+    			fillColor: "#949FB1",
+    			strokeColor: "rgba(220,220,220,0.8)",
+    			highlightStroke: "rgba(220,220,220,1)"
+    		}, {
+    			fillColor: "#4D5360",
+    			strokeColor: "rgba(151,187,205,0.8)",
+    			highlightStroke: "rgba(151,187,205,1)"
+    		},{
+    			fillColor: "#F7464A",
+    			strokeColor: "rgba(220,220,220,0.8)",
+    			highlightStroke: "rgba(220,220,220,1)"
+    		}, {
+    			fillColor: "#46BFBD",
+    			strokeColor: "rgba(151,187,205,0.8)",
+    			highlightStroke: "rgba(151,187,205,1)"
+    		},{
+    			fillColor: "#FDB45C",
+    			strokeColor: "rgba(220,220,220,0.8)",
+    			highlightStroke: "rgba(220,220,220,1)"
+    		}
+      ];
+
+      // One student chart
       for(i=0; i < graphValues.length; i++){
+        j = i;
+
         console.log(graphValues[i]);
         barChartData.datasets.push({
           label: graphValues[i].slide_name,
           data: [graphValues[i].kc]
         });
+
+        if (!colors[j]) {
+          j %= colors.length;
+        }
+
+        for (var attrname in colors[j]) {
+          barChartData.datasets[barChartData.datasets.length - 1][attrname] = colors[j][attrname];
+        }
       }
+
+      // Instructor (Many students) chart
+      // for(i=0; i < graphValues.length; i++) {
+      //   barChartData.datasets.push({
+      //     label: graphValues[i].student_id,
+      //     data: []
+      //   });
+      //
+      //   for(j = 0; j < graphValues.slides.length; j++) {
+      //     k = i;
+      //
+      //     barChartData.datasets[barChartData.datasets.length - 1].data.push(slides[j].kc);
+      //
+      //     if (!colors[k]) {
+      //       k %= colors.length;
+      //     }
+      //
+      //     for (var attrname in colors[k]) {
+      //       barChartData.datasets[barChartData.datasets.length - 1][attrname] = colors[k][attrname];
+      //     }
+      //   }
+      // }
 /*
       barChartData = {
         labels: ["Student Knowledge Components"],
