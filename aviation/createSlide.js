@@ -610,7 +610,8 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var helpers = Chart.helpers, canvas = document.getElementById('resultGraph'),
-    randomScalingFactor, barChartData, bar, legendHolder, slide = this, i, graphValues;
+    randomScalingFactor, barChartData = {}, bar, legendHolder, slide = this, i, graphValues;
+    barChartData.datasets = [];
     randomScalingFactor = function() {
       return Math.round(Math.random() * 100);
     };
