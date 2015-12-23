@@ -609,7 +609,7 @@ AVIATION.common.Slide.prototype = {
   buildGraph: function(){
     "use strict";
 
-    var helpers = Chart.helpers, canvas = document.getElementById('studentGraph'),
+    var helpers = Chart.helpers, canvas = document.getElementById('resultGraph'),
     randomScalingFactor, barChartData, bar, legendHolder, slide = this;
     randomScalingFactor = function() {
       return Math.round(Math.random() * 100);
@@ -617,7 +617,7 @@ AVIATION.common.Slide.prototype = {
 
     $(slide).trigger("getGraphData", slide.options.studentGraph);
 
-    $(slide).on("drawGraph", function(result){
+    $(slide).on("drawGraph", function(e, result){
       console.log("which graph are we drawing ...");
       console.log("and what are the results?");
       console.log(result);
@@ -914,7 +914,7 @@ AVIATION.common.Slide.prototype = {
         console.log(this);
         contentContainer.addClass("modal-body");
       } else {
-        contentContainer.appendTo(slide.container)
+        contentContainer.appendTo(slide.container);
         if(slide.options.showAvatars || slide.options.enableSlider){
           contentContainer.addClass("col-xs-8");
         } else {
