@@ -611,7 +611,11 @@ AVIATION.common.Slide.prototype = {
 
     var helpers = Chart.helpers, canvas = document.getElementById('resultGraph'),
     randomScalingFactor, barChartData = {}, bar, legendHolder, slide = this, i, graphValues;
-    barChartData.datasets = [];
+    barChartData = {
+      datasets: [],
+      labels: ["Student Results"]
+    };
+
     randomScalingFactor = function() {
       return Math.round(Math.random() * 100);
     };
