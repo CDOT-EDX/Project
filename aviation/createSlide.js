@@ -625,7 +625,7 @@ AVIATION.common.Slide.prototype = {
 
       graphValues = result.to_graph[0];
 
-      for(i=0; i<graphValues; i++){
+      for(i=0; i < graphValues.length; i++){
         barChartData.datasets.push({
           label: graphValues[i].slide_name,
           data: [graphValues[i].kc]
