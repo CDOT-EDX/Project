@@ -3756,13 +3756,13 @@ AVIATION.common.Slide.prototype = {
           // checked through "checkQuizResult" event
         } else if( _.contains(advanceWith.index, index) ){
 
-          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: index, actionId: "True", elementType: type} );
           $(slide).trigger("correctAdvance", advanceWith);
         } else {
           if(onSuccess && typeof onSuccess === 'function'){
             onSuccess();
           }
-          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "False"} );
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: index, actionId: "False", elementType: type} );
           $(slide).trigger("wrongAdvance", advanceWith);
         }
 
@@ -3795,7 +3795,7 @@ AVIATION.common.Slide.prototype = {
         } else if(scanPattern[overallScanIndex+1] === index){
           console.log("pattern click index: ");
           console.log(index);
-          $(slide).trigger("completedQuiz", { "type": "action", patternId: index, actionId: "True"} );
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: index, actionId: "True", elemenetType: type});
           if(element !== undefined){
             //$(element).pulse('destroy');
 
@@ -3842,7 +3842,7 @@ AVIATION.common.Slide.prototype = {
             }
           }
         } else {
-          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "False"} );
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: index, actionId: "False", elemenetType: type} );
           unsuccesfulAttempts++;
           if(element !== undefined){
             //$(element).pulse('destroy');
