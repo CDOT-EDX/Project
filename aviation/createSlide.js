@@ -609,7 +609,7 @@ AVIATION.common.Slide.prototype = {
   buildGraph: function(){
     "use strict";
 
-    var helpers = Chart.helpers, canvas = document.getElementById('resultGraph'),
+    var helpers = Chart.helpers, canvas = document.getElementById('resultGraph'), attrname,
     randomScalingFactor, barChartData = {}, bar, legendHolder, slide = this, i, j, k, graphValues;
     barChartData = {
       datasets: [],
@@ -626,8 +626,6 @@ AVIATION.common.Slide.prototype = {
       console.log("which graph are we drawing ...");
       console.log("and what are the results?");
       console.log(result.to_graph[0]);
-
-      graphValues = result.to_graph[0];
 
       var colors = [{
     			fillColor: "#949FB1",
@@ -653,6 +651,13 @@ AVIATION.common.Slide.prototype = {
       ];
 
       // One student chart
+      if(slide.options.studentGraph){
+        graphValues = result.to_graph[0];
+      } else {
+        graphValues = result.to_graph;
+      }
+
+
       for(i=0; i < graphValues.length && slide.options.studentGraph; i++){
         j = i;
 
@@ -666,7 +671,7 @@ AVIATION.common.Slide.prototype = {
           j %= colors.length;
         }
 
-        for (var attrname in colors[j]) {
+        for (attrname in colors[j]) {
           barChartData.datasets[barChartData.datasets.length - 1][attrname] = colors[j][attrname];
         }
       }
@@ -678,16 +683,16 @@ AVIATION.common.Slide.prototype = {
           data: []
         });
 
-        for(j = 0; j < graphValues.slides.length; j++) {
+        for(j = 0; j < graphValues[i].slides.length; j++) {
           k = i;
 
-          barChartData.datasets[barChartData.datasets.length - 1].data.push(slides[j].kc);
+          barChartData.datasets[barChartData.datasets.length - 1].data.push(graphValues[i].slides[j].kc);
 
           if (!colors[k]) {
             k %= colors.length;
           }
 
-          for (var attrname in colors[k]) {
+          for(attrname in colors[k]) {
             barChartData.datasets[barChartData.datasets.length - 1][attrname] = colors[k][attrname];
           }
         }
