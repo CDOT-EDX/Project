@@ -861,7 +861,9 @@ AVIATION.common.Slide.prototype = {
               if(slide.avatars[avatars[i].character].hasOwnProperty(avatarElement)){
                 tempImg = $("#" + avatars[i].character + "_" + avatarElement);
 
-                if(!tempImg || tempImg.linstructor
+                if(!tempImg || tempImg.length < 1){
+                  filename = slide.options.apacheServerBaseUrl + slide.avatars[avatars[i].character][avatarElement];
+
                   if(avatarElement === avatars[i].type){
                     // make this one visible
                     jQuery('<img/>',{
