@@ -653,7 +653,7 @@ AVIATION.common.Slide.prototype = {
       ];
 
       // One student chart
-      for(i=0; i < graphValues.length; i++){
+      for(i=0; i < graphValues.length && slide.options.studentGraph; i++){
         j = i;
 
         console.log(graphValues[i]);
@@ -672,26 +672,26 @@ AVIATION.common.Slide.prototype = {
       }
 
       // Instructor (Many students) chart
-      // for(i=0; i < graphValues.length; i++) {
-      //   barChartData.datasets.push({
-      //     label: graphValues[i].student_id,
-      //     data: []
-      //   });
-      //
-      //   for(j = 0; j < graphValues.slides.length; j++) {
-      //     k = i;
-      //
-      //     barChartData.datasets[barChartData.datasets.length - 1].data.push(slides[j].kc);
-      //
-      //     if (!colors[k]) {
-      //       k %= colors.length;
-      //     }
-      //
-      //     for (var attrname in colors[k]) {
-      //       barChartData.datasets[barChartData.datasets.length - 1][attrname] = colors[k][attrname];
-      //     }
-      //   }
-      // }
+      for(i=0; i < graphValues.length && slide.options.instructorGraph; i++) {
+        barChartData.datasets.push({
+          label: graphValues[i].student_id,
+          data: []
+        });
+
+        for(j = 0; j < graphValues.slides.length; j++) {
+          k = i;
+
+          barChartData.datasets[barChartData.datasets.length - 1].data.push(slides[j].kc);
+
+          if (!colors[k]) {
+            k %= colors.length;
+          }
+
+          for (var attrname in colors[k]) {
+            barChartData.datasets[barChartData.datasets.length - 1][attrname] = colors[k][attrname];
+          }
+        }
+      }
 /*
       barChartData = {
         labels: ["Student Knowledge Components"],
