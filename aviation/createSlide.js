@@ -3793,6 +3793,8 @@ AVIATION.common.Slide.prototype = {
           slide.buildContent(true, slide.contentActiveIndex);
           // all good, let's wait for next input...
         } else if(scanPattern[overallScanIndex+1] === index){
+          console.log("pattern click index: ");
+          console.log(index);
           $(slide).trigger("completedQuiz", { "type": "action", patternId: index, actionId: "True"} );
           if(element !== undefined){
             //$(element).pulse('destroy');
