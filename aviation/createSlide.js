@@ -659,6 +659,7 @@ AVIATION.common.Slide.prototype = {
 
 
       for(i=0; i < graphValues.length && slide.options.studentGraph; i++){
+        console.log("drawing strudent graph...");
         j = i;
 
         console.log(graphValues[i]);
@@ -678,6 +679,7 @@ AVIATION.common.Slide.prototype = {
 
       // Instructor (Many students) chart
       for(i=0; i < graphValues.length && slide.options.instructorGraph; i++) {
+        console.log("drawing instructor graph...");
         barChartData.datasets.push({
           label: graphValues[i].student_id,
           data: []
@@ -859,9 +861,7 @@ AVIATION.common.Slide.prototype = {
               if(slide.avatars[avatars[i].character].hasOwnProperty(avatarElement)){
                 tempImg = $("#" + avatars[i].character + "_" + avatarElement);
 
-                if(!tempImg || tempImg.length < 1){
-                  filename = slide.options.apacheServerBaseUrl + slide.avatars[avatars[i].character][avatarElement];
-
+                if(!tempImg || tempImg.linstructor
                   if(avatarElement === avatars[i].type){
                     // make this one visible
                     jQuery('<img/>',{
@@ -3791,7 +3791,7 @@ AVIATION.common.Slide.prototype = {
           slide.buildContent(true, slide.contentActiveIndex);
           // all good, let's wait for next input...
         } else if(scanPattern[overallScanIndex+1] === index){
-          $(slide).trigger("completedQuiz", { "type": "action", patternId: patternId, actionId: "True"} );
+          $(slide).trigger("completedQuiz", { "type": "action", patternId: index, actionId: "True"} );
           if(element !== undefined){
             //$(element).pulse('destroy');
 
