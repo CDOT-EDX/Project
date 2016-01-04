@@ -531,15 +531,21 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     var correctResponse = data.quiz_result_id.correct,
                         storedAttempts = data.attempts, incorrectMaxResponse = false;
 
-                    if( ( (correctResponse && correctResponse === "true") || storedAttempts >= attemptsBeforeRemediation) && attemptsBeforeRemediation !== 0 ){
-                        if(correctResponse && correctResponse !== "true"){
-                          incorrectMaxResponse = true;
-                        }
-                        correctResponse = true;
-                        plugin.config.resultStatus = true;
+                    if(correctResponse && correctResponse === "true"){
+                      correctResponse = true;
+                      plugin.config.resultStatus = true;
                     } else {
+                      correctResponse = false;
+                    }
+
+                    if(storedAttempts >= attemptsBeforeRemediation && attemptsBeforeRemediation !== 0 && !correctResponse){
+                      incorrectMaxResponse = true;
+                      if (!plugin.config.showRemediationOnSuccess){
                         correctResponse = false;
-                        plugin.config.resultStatus = false;
+                      } else {
+                        correctResponse = true;
+                      }
+                      plugin.config.resultStatus = true;
                     }
 
                     if (correctResponse) {
@@ -553,17 +559,21 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                       }
                     } else {
                         if (plugin.config.showRemediationOnFail){
-                          plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId)
+                          if(incorrectMaxResponse){
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseAttemptsClass, responsesClass, questionId);
+                          } else {
+                            plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId);
+                          }
                           //questionLI.addClass(incorrectClass);
                         }
                       }
                       // Toggle appropriate response (either for display now and / or on completion)
                       if(incorrectMaxResponse){
-                        questionLI.removeClass(correctClass);
+                        //questionLI.removeClass(correctClass);
                         questionLI.addClass(incorrectMaxClass);
                         questionLI.find(_incorrectResponseAttemptsClass).show();
                       } else if(correctResponse){
-                        questionLI.removeClass(incorrectMaxClass);
+                        //questionLI.removeClass(incorrectMaxClass);
                         questionLI.addClass(correctClass);
                         questionLI.find(_correctResponse).show();
                       } else {
