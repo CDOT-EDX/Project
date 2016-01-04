@@ -24,7 +24,7 @@
   */
   min-height: 350px;
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: hidden;
 }
 
 .cdot_contentText {

@@ -2326,7 +2326,7 @@ AVIATION.common.Slide.prototype = {
             "aria-hidden" : true,
             "data-backdrop": "static",
             "data-keyboard": false
-        }).appendTo(slide.container);
+        }).appendTo(slide.container.parent());
 
         modalOptions = {
             serverBaseUrl: slide.options.serverBaseUrl,
