@@ -1368,7 +1368,7 @@ AVIATION.common.Slide.prototype = {
     if(this.options.showStatus){
       var closeButton, statusBar;
 
-      this.insertLineBreak(parent);
+      //this.insertLineBreak(parent);
 
       statusBar = jQuery('<div/>', {
         "class": "row",

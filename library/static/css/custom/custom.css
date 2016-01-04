@@ -20,10 +20,11 @@
   border-right-style: outset;
   border-bottom-style: inset;
   border-left-style: outset;
-  border-radius: 5px; 
+  border-radius: 5px;
   */
-  min-height: 410px;
-  overflow: hidden;
+  min-height: 350px;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .cdot_contentText {
@@ -31,29 +32,29 @@
   margin-top: 30px;
 }
 #btnN {
-  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnNext.png') ;   
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnNext.png') ;
   background-repeat: no-repeat;
-  background-size: 32px; 
+  background-size: 32px;
 }
 #btnP {
-  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPrev.png') ;   
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPrev.png') ;
   background-repeat: no-repeat;
-  background-size: 32px; 
+  background-size: 32px;
 }
 #btnPlay {
-  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPlay.png') ;  
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPlay.png') ;
   background-repeat: no-repeat;
-  background-size: 40px; 
+  background-size: 40px;
 }
 #btnR {
-  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnReplay.png') ; 
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnReplay.png') ;
   background-repeat: no-repeat;
-  background-size: 40px; 
+  background-size: 40px;
 }
 #btnPause {
-  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPause.png') ;  
+  background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPause.png') ;
   background-repeat: no-repeat;
-  background-size: 40px; 
+  background-size: 40px;
 }
 
 .avatar.jane {
@@ -101,7 +102,7 @@
 .cdotBtn2 {
     background-color: #1899f3 ;
     color: white;
-    background-position: center; 
+    background-position: center;
     height: 32px;
     overflow: hidden;
     border-color: transparent;
@@ -110,7 +111,7 @@
 a.btn.cdotBtn2 {
     background-color: #1899f3 ;
     color: white;
-    background-position: center; 
+    background-position: center;
     height: 32px;
     overflow: hidden;
     border-color: transparent;
@@ -120,7 +121,7 @@ a.btn.cdotBtn2 {
 .cdotBtn2:hover:not(:disabled) {
     background-color: #6DBFF8 ;
     color: white;
-    background-position: center; 
+    background-position: center;
     height: 32px;
     overflow: hidden;
 }
@@ -129,7 +130,7 @@ a.btn.cdotBtn2.disabled,
 a.btn.cdotBtn2[disabled] {
     background-color: #CCCCCC ;
     color: white;
-    background-position: center; 
+    background-position: center;
     height: 32px;
 }
 
@@ -147,7 +148,7 @@ div.modal-dialog.modal-cdot{
   margin-bottom: 40px;
 }
 
-#slideContainer .ui-state-disabled, .ui-widget-content .ui-state-disabled, 
+#slideContainer .ui-state-disabled, .ui-widget-content .ui-state-disabled,
   .ui-widget-header .ui-state-disabled{
   opacity: 1;
 }
@@ -192,5 +193,5 @@ hr.style-two {
 }
 
 .cdot_quiz_container{
-  margin-top: -30px; 
+  margin-top: -30px;
 }
