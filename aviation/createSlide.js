@@ -249,22 +249,6 @@ AVIATION.common.Slide.prototype = {
         console.log("event data before resetting of quiz in end: ");
         console.log(data);
 
-        if(slide.slideContent[slide.contentActiveIndex].advanceWith &&
-              slide.slideContent[slide.contentActiveIndex].advanceWith.type === 'quiz'){
-          if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index]){
-            console.log('resetting same quiz as we are on...');
-            slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex].advanceWith.index]();
-          }
-        }
-        if(slide.slideContent[slide.contentActiveIndex+1] &&
-          slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
-            slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz'){
-          if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]){
-            console.log('resetting next quiz...');
-            slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]();
-          }
-        }
-
         if(data && data.element && data.element.type !== undefined){
           if(data.element.type === 'csv'){
             // set inst panel status as 'ended'
@@ -297,6 +281,8 @@ AVIATION.common.Slide.prototype = {
         console.log("!* play event fired");
 
         var active = slide.mediaActiveIndex, players = slide.players, content = slide.slideContent;
+
+        slide.checkForQuizReset(active);
 
         console.log(players[active]);
         if(players[active] && players[active].player){
@@ -420,7 +406,26 @@ AVIATION.common.Slide.prototype = {
     this.states = states[state];
   },
 
-
+  checkForQuizReset: function(indexToReset){
+    var slide = this;
+    console.log("checking for slickQuiz reset...");
+    if(slide.slideContent[indexToReset].advanceWith &&
+          slide.slideContent[indexToReset].advanceWith.type === 'quiz'){
+      if(slide.resetSlickQuiz[slide.slideContent[indexToReset].advanceWith.index]){
+        console.log('resetting same quiz as we are on...');
+        slide.resetSlickQuiz[slide.slideContent[indexToReset].advanceWith.index]();
+      }
+    }
+    //
+    // if(slide.slideContent[slide.contentActiveIndex+1] &&
+    //   slide.slideContent[slide.contentActiveIndex+1].advanceWith &&
+    //     slide.slideContent[slide.contentActiveIndex+1].advanceWith.type === 'quiz'){
+    //   if(slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]){
+    //     console.log('resetting next quiz...');
+    //     slide.resetSlickQuiz[slide.slideContent[slide.contentActiveIndex+1].advanceWith.index]();
+    //   }
+    // }
+  },
 
   // method that initializes building of simple slides
   _initSimple: function(options){
@@ -970,6 +975,8 @@ AVIATION.common.Slide.prototype = {
     } else {
       contentActiveIndex = this.contentActiveIndex;
     }
+
+    slide.checkForQuizReset(contentActiveIndex);
 
     if(outerIndex === undefined && this.mediaActiveIndex !== undefined){
       outerIndex = this.mediaActiveIndex;

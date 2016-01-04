@@ -40,6 +40,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             defaults = {
                 quizId: "",
                 isDirty: false,
+                inProgress: false,
                 checkAnswerText: 'Check My Answer!',
                 nextQuestionText: 'Next &raquo;',
                 backButtonText: '',
@@ -387,6 +388,8 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
                 $(_responses).removeClass(incorrectResponseClass);
 
+                plugin.config.inProgress = true;
+
                 $("h2.incorrect").hide();
                 plugin.config.attempts += 1;
                 function start(options) {
@@ -424,14 +427,14 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
-                if(plugin.config.isDirty){
+                if(plugin.config.isDirty && !plugin.config.inProgress){
                   plugin.config.remediationCount = 0;
 
                   $(_element + ' input').prop('checked', false).prop('disabled', false);
 
                   $quizLevel.attr('class', 'quizLevel');
 
-                  $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).remove(completeClass);
+                  $(_element + ' ' + _question).removeClass(correctClass).removeClass(incorrectClass).removeClass(incorrectMaxClass).removeClass(completeClass);
                   $(_element + ' ' + _answer).removeClass(incorrectResponseClass).removeClass(correctResponseClass).removeClass(incorrectResponseAttemptsClass);
 
                   $(_element + ' ' + _question + ',' + _element + ' ' + _responses + ',' + _element + ' ' + _response + ',' + _element + ' ' + _nextQuestionBtn + ',' + _element + ' ' + _prevQuestionBtn).hide();
@@ -488,13 +491,13 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                 var buttonQuestion = '#question' + questionIndexPr + ' > a.button.nextQuestion'/* + '.lastQuestion'*/;
 
-                $(buttonQuestion).before(optionHeader);
+                $(_element + ' ' + buttonQuestion).before(optionHeader);
 
                 var remidiationResponseHTML = $('<ul id="' + _element.split("#")[1] + '_remediation_ul" class="' + responsesClassPr + '"></ul>');
                 for (i in remidiation){
-                        remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
-                      }
-                $(buttonQuestion).before(remidiationResponseHTML);
+                  remidiationResponseHTML.append('<li class="' + correctResponseClassPr + '">' + remidiation[i] + '</li>');
+                }
+                $(_element + ' ' + buttonQuestion).before(remidiationResponseHTML);
                 plugin.config.remediationCount++;
               }
 
@@ -564,23 +567,19 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                           } else {
                             plugin.method.buildRemediation(questionIndex, questions[questionIndex].a, incorrectResponseClass, responsesClass,questionId);
                           }
-                          //questionLI.addClass(incorrectClass);
                         }
                       }
                       // Toggle appropriate response (either for display now and / or on completion)
                       if(incorrectMaxResponse){
-                        //questionLI.removeClass(correctClass);
                         questionLI.addClass(incorrectMaxClass);
                         questionLI.find(_incorrectResponseAttemptsClass).show();
                       } else if(correctResponse){
-                        //questionLI.removeClass(incorrectMaxClass);
                         questionLI.addClass(correctClass);
                         questionLI.find(_correctResponse).show();
                       } else {
                         questionLI.addClass(incorrectClass);
                         questionLI.find(_incorrectResponse).show();
                       }
-                      //questionLI.find(correctResponse ? _correctResponse : _incorrectResponse).show();
 
                     // If perQuestionResponseMessaging is enabled, toggle response and navigation now
                     if (plugin.config.perQuestionResponseMessaging) {
@@ -758,9 +757,12 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
 
                 console.log("quiz end inside slickQuiz");
                 console.log(plugin.config.resultStatus);
+
                 $(anySlide).trigger("checkQuizResult", plugin.config.resultStatus);
+
                 // reset result back to false;
                 plugin.config.resultStatus = false;
+                plugin.config.inProgress = false;
 
                 internal.method.turnKeyAndGo(key, options && options.callback ? options.callback : function () {});
 
@@ -861,7 +863,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
             $(_element + ' ' + _nextQuestionBtn).on('click', function (e) {
                 e.preventDefault();
                 plugin.method.nextQuestion(this, {
-                    callback: plugin.config.animationCallbacks.nextQuestion
+                  callback: plugin.config.animationCallbacks.nextQuestion
                 });
             });
 
