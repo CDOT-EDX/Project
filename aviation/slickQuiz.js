@@ -529,7 +529,7 @@ function checkCorrectAnswer(quizId, questionIndex, selectedAnswer) {
                     console.log("remediationCount");
                     console.log(plugin.config.remediationCount);
                     var correctResponse = data.quiz_result_id.correct,
-                        storedAttempts = data.attempts, incorrectMaxResponse = false;
+                        storedAttempts = parseInt(data.attempts) + 1, incorrectMaxResponse = false;
 
                     if(correctResponse && correctResponse === "true"){
                       correctResponse = true;
