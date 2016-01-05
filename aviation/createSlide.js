@@ -2446,10 +2446,12 @@ AVIATION.common.Slide.prototype = {
     };
 
     // enable the status bar because we need to accept clicks
-    statusBar.prop("disabled", false);
+    if(slide.options.showStatus){
+      statusBar.prop("disabled", false);
 
-    statusBar.off();
-    statusBar.on('click', resetTimerOnClick);
+      statusBar.off();
+      statusBar.on('click', resetTimerOnClick);
+    }
 
     if(isAuto) {
       slideObject.setStatus("Continuing in " + counter.toString() + "... Click here to cancel");
