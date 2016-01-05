@@ -443,6 +443,7 @@ Acceptable options and defaults are as follows:
               "content": {"html": "This is the MODAL custom HTML" },
               "buttons": [],
               "highlights": [],
+              "largeModal": false, // defaults to false
             },
             {
               "id": "alt",

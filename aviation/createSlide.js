@@ -495,6 +495,7 @@ AVIATION.common.Slide.prototype = {
           newHeader = jQuery('<div/>', {
             id: slide.headerId.split("#")[1],
             class : "modal-header",
+            style : "border-radius:6px;"
           });
 
           xButton = jQuery('<button/>', {
@@ -998,8 +999,8 @@ AVIATION.common.Slide.prototype = {
         console.log(this.slideContent[contentActiveIndex]);
         console.log(this);
         contentContainer.addClass("modal-body");
-        contentContainer.css("maxHeight", $(".course-wrapper").height() / 2 + 100 );
-        contentContainer.css("overflow-y", "scroll");
+        //contentContainer.css("maxHeight", $(".course-wrapper").height() / 2 + 100 );
+        //contentContainer.css("overflow-y", "scroll");
       } else {
         contentContainer.appendTo(slide.container);
         if(slide.options.showAvatars || slide.options.enableSlider){
@@ -2334,8 +2335,9 @@ AVIATION.common.Slide.prototype = {
             "aria-labelledby" : this.modals[i].id + "_label",
             "aria-hidden" : true,
             "data-backdrop": "static",
-            "data-keyboard": false
-        }).appendTo( $(slide.container).parent().parent() );
+            "data-keyboard": false,
+            "style": "width:100%;overflow:auto;top:0!important;bottom:0;position:fixed!important;"
+        }).appendTo( $(".content-wrapper").parent() );
 
         $(this.modals[i]).attr("href", "modal_" + this.modals[i])
 
@@ -2391,10 +2393,11 @@ AVIATION.common.Slide.prototype = {
         modalOptions = $.extend(modalOptions, this.modals[i]);
         // highlights and audios should be handled automatically by slide functions
 
+
         // lets create the rest of the modal body where we can add our content and make sure that the IDs
         // conform to what the buildContent expects
         modalDialog = jQuery('<div/>', {
-            class: "modal-dialog",
+            class: "modal-dialog " + (modalOptions.largeModal ? "modal-lg": ""),
             role: "document",
         }).appendTo(modal);
 
@@ -3268,11 +3271,12 @@ AVIATION.common.Slide.prototype = {
     }
 
     // TODO: add resizing of instruments for modals inside here?
+/*
     $('.modal').on('show.bs.modal', centerModal);
     $(window).on("resize", function () {
         $('.modal:visible').each(centerModal);
     });
-
+*/
   },
 
   buildQuizzes: function(){
