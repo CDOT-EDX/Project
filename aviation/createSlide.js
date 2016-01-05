@@ -1856,9 +1856,9 @@ AVIATION.common.Slide.prototype = {
       if(throttleContainer && throttleContainer.length < 1){
         throttleContainer = jQuery("<div/>", {
           id: this.throttleContainer.split("#")[1],
-          class: "col-xs-4",
+          class: "col-xs-3",
 
-        }).appendTo(slide.container);
+        }).insertBefore(slide.options.panelId);
       }
 
       newSlider = jQuery('<div/>', {
@@ -1931,7 +1931,7 @@ AVIATION.common.Slide.prototype = {
         if(!this.options.enableSlider)
           bootCol = 12;
         else
-          bootCol = 8;
+          bootCol = 9;
       }
 
       console.log("initing panel!");
