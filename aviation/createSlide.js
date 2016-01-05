@@ -2337,6 +2337,8 @@ AVIATION.common.Slide.prototype = {
             "data-keyboard": false
         }).appendTo( $(slide.container).parent().parent() );
 
+        $(this.modals[i]).attr("href", "modal_" + this.modals[i])
+
         modalOptions = {
             serverBaseUrl: slide.options.serverBaseUrl,
             apacheServerBaseUrl: slide.options.apacheServerBaseUrl,
