@@ -409,7 +409,7 @@ AVIATION.common.Slide.prototype = {
   checkForQuizReset: function(indexToReset){
     var slide = this;
     console.log("checking for slickQuiz reset...");
-    if(slide.slideContent[indexToReset].advanceWith &&
+    if(slide.slideContent[indexToReset] && slide.slideContent[indexToReset].advanceWith &&
           slide.slideContent[indexToReset].advanceWith.type === 'quiz'){
       if(slide.resetSlickQuiz[slide.slideContent[indexToReset].advanceWith.index]){
         console.log('resetting same quiz as we are on...');
@@ -998,6 +998,8 @@ AVIATION.common.Slide.prototype = {
         console.log(this.slideContent[contentActiveIndex]);
         console.log(this);
         contentContainer.addClass("modal-body");
+        contentContainer.css("maxHeight", $(".course-wrapper").height() / 2 + 100 );
+        contentContainer.css("overflow-y", "scroll");
       } else {
         contentContainer.appendTo(slide.container);
         if(slide.options.showAvatars || slide.options.enableSlider){
@@ -2333,7 +2335,7 @@ AVIATION.common.Slide.prototype = {
             "aria-hidden" : true,
             "data-backdrop": "static",
             "data-keyboard": false
-        }).appendTo( $(slide.container).parent());
+        }).appendTo( $(slide.container).parent().parent() );
 
         modalOptions = {
             serverBaseUrl: slide.options.serverBaseUrl,
@@ -2385,7 +2387,7 @@ AVIATION.common.Slide.prototype = {
           };
 
         modalOptions = $.extend(modalOptions, this.modals[i]);
-        // highlights and audios should be handles automatically by slide functions
+        // highlights and audios should be handled automatically by slide functions
 
         // lets create the rest of the modal body where we can add our content and make sure that the IDs
         // conform to what the buildContent expects
