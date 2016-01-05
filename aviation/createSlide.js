@@ -2446,7 +2446,7 @@ AVIATION.common.Slide.prototype = {
     };
 
     // enable the status bar because we need to accept clicks
-    if(slide.options.showStatus){
+    if(slideObject.options.showStatus){
       statusBar.prop("disabled", false);
 
       statusBar.off();
