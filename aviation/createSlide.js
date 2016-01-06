@@ -1261,21 +1261,21 @@ AVIATION.common.Slide.prototype = {
       }).appendTo(slideControlsRow);
 
       var slideControlsPrevious = jQuery('<div/>', {
-        "id": "btnPDiv",
-        html: '<a id="' + this.options.previousBtnId +
+        "class": "btnPDiv",
+        html: '<a id="' + this.options.previousBtnId.split("#")[1] +
                 '" class="btn btn-default cdotBtn2 btnP" disabled role="button"></a>'
       }).appendTo(slideControlsContainer);
 
       var slideControlsPlay = jQuery('<div/>', {
         "class": "btnPlayDiv",
-        html: '<a id="' + this.options.playBtnId + '" class="btn btn-default cdotBtn2 btnPlay" role="button"></a>' +
-              '<a id="' + this.options.pauseBtnId + '" class="btn btn-default cdotBtn2 btnPause" role="button"></a>' +
-              '<a id="' + this.options.replayBtnId + '" class="btn btn-default cdotBtn2 btnR" role="button"></a>'
+        html: '<a id="' + this.options.playBtnId.split("#")[1] + '" class="btn btn-default cdotBtn2 btnPlay" role="button"></a>' +
+              '<a id="' + this.options.pauseBtnId.split("#")[1] + '" class="btn btn-default cdotBtn2 btnPause" role="button"></a>' +
+              '<a id="' + this.options.replayBtnId.split("#")[1] + '" class="btn btn-default cdotBtn2 btnR" role="button"></a>'
       }).appendTo(slideControlsContainer);
 
       var slideControlsNext = jQuery('<div/>', {
         "class": "btnNDiv",
-        html: '<a id="' + this.options.nextBtnId + '" class="btn btn-default cdotBtn2 btnN" disabled role="button"></a>'
+        html: '<a id="' + this.options.nextBtnId.split("#")[1] + '" class="btn btn-default cdotBtn2 btnN" disabled role="button"></a>'
       }).appendTo(slideControlsContainer);
 
       this.slideElements.slideControls = {

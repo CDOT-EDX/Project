@@ -93,6 +93,10 @@
   margin: 0px -10px 0px;
 }
 
+.btnP, .btnN {
+  height: 32px;
+}
+
 .btnPDiv, .btnNDiv {
   position: relative;
   margin-top: 15px;
