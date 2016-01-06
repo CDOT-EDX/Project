@@ -24,34 +24,34 @@
   */
   min-height: 350px;
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: scroll;
 }
 
 .cdot_contentText {
   margin-bottom: 30px;
   margin-top: 30px;
 }
-#btnN {
+.btnN {
   background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnNext.png') ;
   background-repeat: no-repeat;
   background-size: 32px;
 }
-#btnP {
+.btnP {
   background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPrev.png') ;
   background-repeat: no-repeat;
   background-size: 32px;
 }
-#btnPlay {
+.btnPlay {
   background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPlay.png') ;
   background-repeat: no-repeat;
   background-size: 40px;
 }
-#btnR {
+.btnR {
   background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnReplay.png') ;
   background-repeat: no-repeat;
   background-size: 40px;
 }
-#btnPause {
+.btnPause {
   background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnPause.png') ;
   background-repeat: no-repeat;
   background-size: 40px;
@@ -65,7 +65,7 @@
   margin-top: 100px;
 }
 
-#btnPause, #btnPlay, #btnR {
+.btnPause, .btnPlay, .btnR {
   border-radius: 50px;
   height: 60px;
   width: 80px;
@@ -74,26 +74,26 @@
   border: solid 3px white;
 }
 
-#btnP, #btnN {
+.btnP, .btnN {
   width: 60px;
   position: relative;
   z-index: 0;
 }
 
-#playerControls {
+.playerControls {
   width: 180px;
   margin-left: Calc(100% - 50% - 92px);
 }
 
-#playerControls > div {
+.playerControls > div {
   float: left;
 }
 
-#btnPlayDiv {
+.btnPlayDiv {
   margin: 0px -10px 0px;
 }
 
-#btnPDiv, #btnNDiv {
+.btnPDiv, .btnNDiv {
   position: relative;
   margin-top: 15px;
   z-index: 0;
@@ -143,9 +143,9 @@ div.modal-dialog.modal-cdot{
 }
 
 #sliderContainer{
-  /*padding-left: 30px;*/
-  margin-top: 15px;
-  margin-bottom: 20px;
+  padding-left: 30px;
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 
 #slideContainer .ui-state-disabled, .ui-widget-content .ui-state-disabled,
@@ -183,8 +183,7 @@ hr.style-two {
     background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
 }
 
-#panelHighlightContainer, .highlightContainer
-{
+#panelHighlightContainer{
   width: 100%;
   height: 100%;
   position: absolute;
