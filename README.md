@@ -224,7 +224,11 @@ Acceptable options and defaults are as follows:
         height: "50%",
         classes: ["col-xs-4"],
         border : "7px ridge yellow",
-        parent: 'panel'
+        parent: 'panel',
+        "hasModal": false // the default when no modals with the same id present
+        // but can be used to prevent content from advancing
+        // if a modal with same id is found, defaults to True
+        // use modal.advanceOnClose instead to advance slideContent
       },
       {
         id: "ai",
@@ -448,6 +452,7 @@ Acceptable options and defaults are as follows:
             {
               "id": "alt",
               "title": "Altimeter",
+              "advanceOnClose": true
             }
     ],
     // these audioFiles are for the slide only

@@ -559,7 +559,7 @@ AVIATION.common.Slide.prototype = {
 
     console.log("building slide");
 
-    var slide = this, callback, panelContainer = $(slide.options.panelId);
+    var slide = this, callback, panelContainer = $(slide.options.panelId), bsClass;
 
     this.attachEvents();
     this.attachStates();
@@ -567,9 +567,16 @@ AVIATION.common.Slide.prototype = {
     //console.log("no audio and building content! *** " + this.mediaActiveIndex);
     console.log(this);
     if(this.options.enablePanel && panelContainer && panelContainer.length < 1){
+
+      if(this.options.enableSlider){
+        bsClass = "col-xs-9 col-xs-offset-3";
+      } else {
+        bsClass = "col-xs-12";
+      }
+
       jQuery("<div/>",{
         id: slide.options.instStatusId1.split("#")[1],
-        class: "row",
+        class: bsClass,
       }).appendTo(slide.container);
 
       panelContainer = jQuery("<div/>", {
@@ -581,7 +588,7 @@ AVIATION.common.Slide.prototype = {
 
       jQuery("<div/>",{
         id: slide.options.instStatusId2.split("#")[1],
-        class: "row",
+        class: bsClass,
       }).appendTo(slide.container);
     }
 
@@ -1696,6 +1703,16 @@ AVIATION.common.Slide.prototype = {
                    (slide.highlights[act].transform? ";transform:" + slide.highlights[act].transform : "") +
                    (this.options.hiddenHighlights ? ";cursor:default; border-style: solid; border-width: 0px;" : (";border:" + this.highlights[act].border + ";cursor:pointer") );
 
+          slide.modals.filter(function(modal){
+            console.log('setting highlight hasModal...');
+            if(modal.id === actions[act].id){
+              console.log('setting hasModal to true...');
+              actions[act].hasModal = true;
+              return true;
+            }
+            return false;
+          });
+
           switch(slide.highlights[act].parent){
             case "panel":
               parent = $(slide.options.panelHighlightsId);
@@ -1717,7 +1734,7 @@ AVIATION.common.Slide.prototype = {
           if(parent.length < 1){
             parent = jQuery('<div/>', {
               id: parent.selector.split('#')[1],
-              class: "row"
+              class: "row highlightContainer"
             }).appendTo(appendParent);
           }
         }
@@ -1750,7 +1767,10 @@ AVIATION.common.Slide.prototype = {
           }
           //callback.push(function(){ console.log("test exec of actionables callback");});
 
+
           if(!actions[act].hasModal){
+            console.log("it doesn't hasModal?");
+            console.log(actions[act]);
             $action.on('click', { callbacks: callback, element: { type: action, index: slide.countObjectLength(slide.slideElements[obj.elementArray]),
                                   mediaIndex: actions[act].mediaIndex }, slide: slide }, slide.checkAdvanceWith );
           }
@@ -1819,21 +1839,25 @@ AVIATION.common.Slide.prototype = {
     console.log(content.media.index);
 
     slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].off();
-    slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', {
-      element: { type: content.media.type, index: content.media.index },
-      slide: slide
-    }, function(evt){
-      console.log("executing actionable here");
-      console.log(evt);
-      $(slide).trigger("end", {
-        callbacks: oldActions,
-        onSuccess: function(){
-          slide.buildContent(true, index);
-        },
+
+
+    if(!slide[possibleActions[content.media.type].arrayName][content.media.index].hasModal){
+      slide.slideElements[possibleActions[content.media.type].elementArray][content.media.index].on('click', {
         element: { type: content.media.type, index: content.media.index },
         slide: slide
+      }, function(evt){
+        console.log("executing actionable here");
+        console.log(evt);
+        $(slide).trigger("end", {
+          callbacks: oldActions,
+          onSuccess: function(){
+            slide.buildContent(true, index);
+          },
+          element: { type: content.media.type, index: content.media.index },
+          slide: slide
+        });
       });
-    });
+    }
 
     console.log("assigning EVENTS to ACTS: ");
     console.log("type: "+ content.media.type + " index: " + content.media.index);
@@ -2322,8 +2346,16 @@ AVIATION.common.Slide.prototype = {
   buildModals: function(){
     "use strict";
 
-    var newModal, slide = this, i, modalOptions, modal, modalDialog, modalHeader;
-    // modals are basically slides with an extra option
+    var newModal, slide = this, i, modalOptions, modal, modalDialog, modalHeader, checkForSameHighlights,
+        advanceOnModalClose;
+
+    advanceOnModalClose = function(modal){
+      modal.on("hidden.bs.modal", function(){
+        $(slide).trigger("next");
+      });
+    };
+
+    // modals are basically slides with an extra options
     // build constrained inside a modal window
     if(this.options.enableModals && this.options.enableHighlights){
       for(i = 0; i < this.modals.length; i++){
@@ -2339,8 +2371,6 @@ AVIATION.common.Slide.prototype = {
             "style": "width:100%;overflow:auto;top:0!important;bottom:0;position:fixed!important;"
         }).appendTo( $(".content-wrapper").parent() );
 
-        $(this.modals[i]).attr("href", "modal_" + this.modals[i])
-
         modalOptions = {
             serverBaseUrl: slide.options.serverBaseUrl,
             apacheServerBaseUrl: slide.options.apacheServerBaseUrl,
@@ -2353,6 +2383,7 @@ AVIATION.common.Slide.prototype = {
             parent: slide,
             noAudio: this.modals[i].audio && this.modals[i].audio.length  > 0 ? false : true,
             container: "#modal_container_" + this.modals[i].id,
+            contentRow: "#modal_contentRow_" + this.modals[i].id,
             statusId: "#modal_status_" + this.modals[i].id,
             headerId: "#modal_header_" + this.modals[i].id,
             footerId: "#modal_footer_" + this.modals[i].id,
@@ -2403,6 +2434,7 @@ AVIATION.common.Slide.prototype = {
 
         modalHeader = jQuery('<div/>', {
             id: modalOptions.container.split("#")[1],
+            html: '<div id="' + modalOptions.contentRow.split("#")[1] + '" class="row"></div>',
             class: "modal-content",
         }).appendTo(modalDialog);
 
@@ -2411,6 +2443,10 @@ AVIATION.common.Slide.prototype = {
         console.log(newModal);
         // constructor builds the slide/content and media events
         newModal.constructor();
+
+        if(modalOptions.advanceOnClose){
+          modal.on("hidden.bs.modal", advanceOnModalClose);
+        }
 
         slide.modalSlides.push(newModal);
       }
