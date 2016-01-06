@@ -1003,7 +1003,7 @@ AVIATION.common.Slide.prototype = {
         //contentContainer.css("overflow-y", "scroll");
       } else {
         contentContainer.appendTo(slide.container);
-        if(slide.options.showAvatars || slide.options.enableSlider){
+        if(slide.options.showAvatars || (slide.options.enableSlider && !slide.options.enablePanel) ){
           contentContainer.addClass("col-xs-8");
         } else {
           contentContainer.addClass("col-xs-12");
@@ -1190,7 +1190,7 @@ AVIATION.common.Slide.prototype = {
     if(!quiz || quiz.length < 1){
       quiz = jQuery('<div/>', {
         id: this.options.quizId.split("#")[1],
-        class: this.options.quizContainerClass
+        class: "col-xs-12 " + this.options.quizContainerClass
       });
 
       if(this.options.isModal){
@@ -1648,7 +1648,7 @@ AVIATION.common.Slide.prototype = {
           if($parent && $parent.length < 1){
             $parent = jQuery('<div/>',{
               id: slide[possibleActions[action].container].split("#")[1],
-              class: "row"
+              class: (action === "highlight" ? "row" : "col-xs-12")
             }).appendTo(appendParent);
           }
 
@@ -1956,7 +1956,7 @@ AVIATION.common.Slide.prototype = {
           id: slide.options.panelId.split("#")[1],
           class: "instruments col-xs-" + bootCol,
           html: '<div id="'+this.options.panelHighlightsId.split("#")[1]+'"></div><div id="'+this.options.instRow1.split("#")[1]+'" class="row">'+
-                '</div><div id="'+this.options.instRow2.split("#")[1]+'" class="row"></div>'
+                '</div><div id="'+this.options.instRow2.split("#")[1]+'" class="'+ col-xs +'"></div>'
         }).appendTo(slide.container);
       } else {
         $(slide.options.panelId)
@@ -3107,7 +3107,7 @@ AVIATION.common.Slide.prototype = {
           controls.next.attr("disabled", false);
           controls.next.removeProp("disabled");
           controls.next.removeAttr("disabled");
-        } else if (active >= players.length - 1){
+        } else if (active >= players.length - 1  || slide.slideContent[active+1].slideEnd){
           console.log("active is the last players length");
           console.log("active: " + active);
           console.log("playerslength: " + players.length);
