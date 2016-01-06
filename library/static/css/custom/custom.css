@@ -103,7 +103,7 @@
     background-color: #1899f3 ;
     color: white;
     background-position: center;
-    height: 32px;
+    /*height: 32px;*/
     overflow: hidden;
     border-color: transparent;
 }
@@ -112,7 +112,7 @@ a.btn.cdotBtn2 {
     background-color: #1899f3 ;
     color: white;
     background-position: center;
-    height: 32px;
+    /*height: 32px;*/
     overflow: hidden;
     border-color: transparent;
 }
@@ -122,7 +122,7 @@ a.btn.cdotBtn2 {
     background-color: #6DBFF8 ;
     color: white;
     background-position: center;
-    height: 32px;
+    /*height: 32px;*/
     overflow: hidden;
 }
 
@@ -131,7 +131,7 @@ a.btn.cdotBtn2[disabled] {
     background-color: #CCCCCC ;
     color: white;
     background-position: center;
-    height: 32px;
+    /*height: 32px;*/
 }
 
 div.modal-dialog.modal-cdot{
@@ -183,7 +183,7 @@ hr.style-two {
     background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
 }
 
-#panelHighlightContainer{
+.highlightContainer{
   width: 100%;
   height: 100%;
   position: absolute;
