@@ -23,8 +23,8 @@
   border-radius: 5px;
   */
   min-height: 350px;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-x: visible;
+  overflow-y: visible;
 }
 
 .cdot_contentText {
@@ -81,7 +81,7 @@
 }
 
 .playerControls {
-  width: 180px;
+  width: 200px;
   margin-left: Calc(100% - 50% - 92px);
 }
 

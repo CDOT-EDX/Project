@@ -1260,6 +1260,8 @@ AVIATION.common.Slide.prototype = {
         "class": "playerControls",
       }).appendTo(slideControlsRow);
 
+      slideControlsRow.after("<br/>");
+
       var slideControlsPrevious = jQuery('<div/>', {
         "class": "btnPDiv",
         html: '<a id="' + this.options.previousBtnId.split("#")[1] +
