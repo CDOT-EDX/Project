@@ -351,6 +351,9 @@ AVIATION.common.Slide.prototype = {
       },
       replay: function(e){
         console.log("!* replay event fired");
+        $(slide).trigger("pause");
+        $(slide).trigger("reset");
+
         slide.resetStatusBar();
 
         slide.resetSlide();
