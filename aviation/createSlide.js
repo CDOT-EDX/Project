@@ -3268,17 +3268,23 @@ AVIATION.common.Slide.prototype = {
     if( (contentActive > 0 && contentActive + 1 > this.slideContent.length - 1) || this.slideContent[contentActive].slideEnd ){
       if(action !== 'replay'){
         if(action === "pause"){
-          controls.play.show();
-          controls.pause.hide();
+          if(this.options.showSlideControls){
+            controls.play.show();
+            controls.pause.hide();
+          }
         } else {
-          controls.play.hide();
-          controls.pause.show();
+          if(this.options.showSlideControls){
+            controls.play.hide();
+            controls.pause.show();
+          }
         }
         $(slide).trigger("slideEnd");
       } else {
-        controls.pause.hide();
-        controls.play.hide();
-        controls.replay.show();
+        if(this.options.showSlideControls){
+          controls.pause.hide();
+          controls.play.hide();
+          controls.replay.show();
+        }
       }
     }
 

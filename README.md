@@ -1,10 +1,10 @@
 *last updated on Jan 7/2016*
 
-*new option on slideContent - `"playAudio"` works only for CSVs and doesn't build content if option is specified
+*new option on slideContent - `"playAudio"` works only for CSVs and doesn't build content if option is specified (uses altMediaFiles)*
 
-*new option on slideContent - `"hideNext"`
+*new option on slideContent - `"hideNext"`*
 
-*new option on slideContent - `"noAdvanceByMedia"`
+*new option on slideContent - `"noAdvanceByMedia"`*
 
 *new option on slideContent - `"clearEvents"` is available, this clears all events on that media or actionable*
 
