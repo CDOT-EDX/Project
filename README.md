@@ -446,9 +446,11 @@ Acceptable options and defaults are as follows:
           "type": "button",
           "index": 1
         },
-        "action":{
-          "type": "play",
-          "index": 2 // can only be a mediaIndex (not contentIndex)
+        "action":{            "advanceWith": {
+                "type": "highlight",
+                "index": [0, 1]
+            }
+can only be a mediaIndex (not contentIndex)
           "second": 7.1 // in this case its an audio
         }
     }],
@@ -477,7 +479,7 @@ Acceptable options and defaults are as follows:
     ],
     altMediaFiles: [ // media files that will be used in alternative content (in case a student answered a question wrong)
         {type: "audio", src: "someURL/toAudioFile"},
-        {type: "audio", src: "anotherURL/toOtherFile"},
+        {type: "audio", src: "anotherURL/toOtherFile", "silent": true}, // silent makes sure that altMedia doesn't fire an "end" event
     ]
 ```
 

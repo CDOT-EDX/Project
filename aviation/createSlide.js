@@ -276,7 +276,7 @@ AVIATION.common.Slide.prototype = {
       altEnd: function(e, data){
         console.log("!* altEnd event fired");
         console.log(data);
-        slide.checkSlideControlPlayButtons("pause");
+        //slide.checkSlideControlPlayButtons("pause");
 
       },
       play: function(e){
@@ -2719,29 +2719,34 @@ AVIATION.common.Slide.prototype = {
     "use strict";
 
     var slide = this, altMediaFiles = slide.altMediaFiles, altAudioFiles = [], altMedia = [], buttonStateToggle,
-        mediaEndAction;
+        mediaEndAction, assignEnd;
 
     buttonStateToggle = function(e){
-      slide.checkSlideControlPlayButtonsState(null, true);
+      slide.checkSlideControlPlayButtonsState("Audio playing...", true);
     };
 
     console.log("initting altmedia");
 
     slide.altPlayers = [];
 
-    mediaEndAction = function(e){
-      console.log("ended pop");
-      console.log(altMedia[i]);
-      var data = {};
-      data.element = {};
-      data.element.type = "altAudio";
-      data.element.index = i;
+    assignEnd = function(altMedia, index){
+      altMedia.on("ended", function(e){
+        console.log("ended pop");
+        console.log(altMedia);
+        var data = {};
+        data.element = {};
+        data.element.type = "altAudio";
+        data.element.index = index;
 
-      data.slide = slide;
+        data.slide = slide;
 
-      console.log("audio ended event");
-      $(slide).trigger("end", data);
-    };
+        console.log("audio ended event");
+
+        if(!slide.altMediaFiles[index].silent){
+          $(slide).trigger("end", data);
+        }
+      });
+    }
 
     if(altMediaFiles){
       altMedia = slide.buildSlideAudios(altMediaFiles, true);
@@ -2749,7 +2754,10 @@ AVIATION.common.Slide.prototype = {
       for(i=0; i < altMedia.length; i++){
         altMedia[i].on("playing", buttonStateToggle);
 
-        altMedia[i].on("ended", mediaEndAction);
+        assignEnd(altMedia[i], i);
+
+        //assign end
+        //altMedia[i].on("ended", mediaEndAction);
 
         slide.altPlayers.push({ type: "audio", player: altMedia[i] });
       }
