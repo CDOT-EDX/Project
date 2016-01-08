@@ -377,8 +377,8 @@ Acceptable options and defaults are as follows:
         },
         "playAudio": {
           "index": 0, // altMediaIndex
-          "resetMediaIndex": 3,
-          "resetContentIndex": 6
+          "resetMediaIndex": 3, // optional
+          "resetContentIndex": 6 // optional
         },
         // only has been tested for CSVs
         "clearEvents": {

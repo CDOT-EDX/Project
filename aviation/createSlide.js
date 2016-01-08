@@ -2983,7 +2983,7 @@ AVIATION.common.Slide.prototype = {
 
           player.cueLine(content.media.line, function(){
             if(content.playAudio !== undefined){
-              (slide).trigger("playAltIndex",
+              $(slide).trigger("playAltIndex",
                 {
                   index: content.playAudio.index,
                   resetMediaIndex: content.playAudio.resetMediaIndex,
