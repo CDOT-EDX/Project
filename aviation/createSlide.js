@@ -1526,7 +1526,8 @@ AVIATION.common.Slide.prototype = {
           if(content.advanceWith.hasOwnProperty(advance)){
             slide.checkActionables(element.type, element.index, event, content.advanceWith, slide.contentActiveIndex);
             // TODO: better solution over a break?
-            break;
+            //break;
+            return;
           }
         }
       } else if(element.type === "highlight" || element.type === "button" || element.type === 'quiz'){
@@ -2976,7 +2977,13 @@ AVIATION.common.Slide.prototype = {
           outerPlayer.eventsCued.push(content.media.line);
 
           player.cueLine(content.media.line, function(){
-            slide.buildContent(true, index);
+            if(content.playAudioIndex !== undefined){
+              slide.players[content.playAudioIndex].player.pause();
+              slide.players[content.playAudioIndex].player.currentTime(0);
+              slide.players[content.playAudioIndex].player.play();
+            } else {
+              slide.buildContent(true, index);
+            }
 
             if(content.callback && typeof content.callback != "function"){
               content.callback = eval(content.callback);
@@ -3213,8 +3220,13 @@ AVIATION.common.Slide.prototype = {
             controls.replay.show();
             return;
           } else {
-            controls.play.hide();
-            controls.pause.show();
+            if(action === "pause"){
+              controls.play.show();
+              controls.pause.hide();
+            } else {
+              controls.play.hide();
+              controls.pause.show();
+            }
           }
           controls.next.attr("disabled", true);
           controls.next.prop("disabled", true);
@@ -3235,7 +3247,18 @@ AVIATION.common.Slide.prototype = {
 
     if( (contentActive > 0 && contentActive + 1 > this.slideContent.length - 1) || this.slideContent[contentActive].slideEnd ){
       if(action !== 'replay'){
+        if(action === "pause"){
+          controls.play.show();
+          controls.pause.hide();
+        } else {
+          controls.play.hide();
+          controls.pause.show();
+        }
         $(slide).trigger("slideEnd");
+      } else {
+        controls.pause.hide();
+        controls.play.hide();
+        controls.replay.show();
       }
     }
 

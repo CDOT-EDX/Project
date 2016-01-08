@@ -1,5 +1,7 @@
 *last updated on Jan 7/2016*
 
+*new option on slideContent - `"playAudioIndex"` works only for CSVs and doesn't build content if option is specified
+
 *new option on slideContent - `"hideNext"`
 
 *new option on slideContent - `"noAdvanceByMedia"`
@@ -373,6 +375,7 @@ Acceptable options and defaults are as follows:
             "line": 100,
             "index": 2
         },
+        "playAudioIndex": 3,
         // only has been tested for CSVs
         "clearEvents": {
           "type": "media", // or actionable
