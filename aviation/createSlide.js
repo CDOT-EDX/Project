@@ -175,8 +175,8 @@ AVIATION.common.Slide.prototype = {
 
         console.log("!* playAltIndex triggered");
         console.log("!* altIndex: " + index);
-        slide.checkSlideControlPlayButtons("play");
-        // TODO: or disable all buttons
+        // set to playing and disable all buttons
+        slide.checkSlideControlPlayButtons("play", true);
 
 
         if(altPlayer[index] && altPlayer[index].player){
@@ -276,6 +276,8 @@ AVIATION.common.Slide.prototype = {
       altEnd: function(e, data){
         console.log("!* altEnd event fired");
         console.log(data);
+        slide.checkSlideControlPlayButtons("pause");
+
       },
       play: function(e){
         console.log("!* play event fired");
@@ -2980,10 +2982,17 @@ AVIATION.common.Slide.prototype = {
           outerPlayer.eventsCued.push(content.media.line);
 
           player.cueLine(content.media.line, function(){
-            if(content.playAudioIndex !== undefined){
-              slide.players[content.playAudioIndex].player.pause();
-              slide.players[content.playAudioIndex].player.currentTime(0);
-              slide.players[content.playAudioIndex].player.play();
+            if(content.playAudio !== undefined){
+              (slide).trigger("playAltIndex",
+                {
+                  index: content.playAudio.index,
+                  resetMediaIndex: content.playAudio.resetMediaIndex,
+                  resetContentIndex: content.playAudio.resetContentIndex
+                }
+              );
+              //slide.players[content.playAudioIndex].player.pause();
+              //slide.players[content.playAudioIndex].player.currentTime(0);
+              //slide.players[content.playAudioIndex].player.play();
             } else {
               slide.buildContent(true, index);
             }

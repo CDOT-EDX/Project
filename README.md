@@ -1,6 +1,6 @@
 *last updated on Jan 7/2016*
 
-*new option on slideContent - `"playAudioIndex"` works only for CSVs and doesn't build content if option is specified
+*new option on slideContent - `"playAudio"` works only for CSVs and doesn't build content if option is specified
 
 *new option on slideContent - `"hideNext"`
 
@@ -8,7 +8,7 @@
 
 *new option on slideContent - `"clearEvents"` is available, this clears all events on that media or actionable*
 
-*experimental conditional version, needs testing*
+*experimental conditional version, needs test ing*
 
 *new option on slideContent - `"slideEnd": true` is available to trigger slideEnd event for sure*
 
@@ -375,7 +375,11 @@ Acceptable options and defaults are as follows:
             "line": 100,
             "index": 2
         },
-        "playAudioIndex": 3,
+        "playAudio": {
+          "index": 0, // altMediaIndex
+          "resetMediaIndex": 3,
+          "resetContentIndex": 6
+        },
         // only has been tested for CSVs
         "clearEvents": {
           "type": "media", // or actionable
