@@ -1,4 +1,8 @@
-*last updated on November 18/2015*
+*last updated on Jan 7/2016*
+
+*new option on slideContent - `"hideNext"`
+
+*new option on slideContent - `"noAdvanceByMedia"`
 
 *new option on slideContent - `"clearEvents"` is available, this clears all events on that media or actionable*
 
@@ -344,6 +348,7 @@ Acceptable options and defaults are as follows:
                 "resetContentIndex": 0 // which slideContent index do we need show as altMedia starts to play?
                 "resetMediaIndex": 0 // which media index do we need to play after altMedia?
             },
+            "noAdvanceByMedia": false // set to true when next audio/csv shouldn't play automatically
             "content": true // if there is content to that should be triggered during the scanning pattern
         }
     },
