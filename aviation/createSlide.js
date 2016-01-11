@@ -3342,7 +3342,7 @@ AVIATION.common.Slide.prototype = {
     }
     if(slide.options.isModal){
       slide.modalElement.on("shown.bs.modal", function(){
-        $(slide.options.parent).trigger("pause");
+        $(slide.options.parent).trigger("reset");
         if(!slide.options.noAudio){
           $(slide).trigger("play");
         }
@@ -3353,7 +3353,7 @@ AVIATION.common.Slide.prototype = {
         $(slide).trigger("reset");
         slide.resetSlide();
         if(slide.options.advanceOnClose){
-          $(parent).trigger("next");
+          $(slide.options.parent).trigger("next");
         }
       });
 
