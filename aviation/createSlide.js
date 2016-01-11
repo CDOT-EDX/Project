@@ -237,10 +237,23 @@ AVIATION.common.Slide.prototype = {
           slide.mediaIndex = 0;
         }
 
-        $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
+        if(slide.options.continueId || slide.options.isModal){
+          $(slide).trigger('reset', 'Click "Continue" to proceed to the next slide');
+        } else {
+          $(slide).trigger('reset', 'Continue to the next Snap');
+        }
+
+
         console.log("after reset");
         slide.checkSlideControlPlayButtons("replay");
-        slide.setStatus('Click "Continue" to proceed to the next slide');
+
+        if(slide.options.continueId || slide.options.isModal){
+          slide.setStatus('Click "Continue" to proceed to the next slide');
+        } else {
+          slide.setStatus('Continue to the next Snap');
+        }
+
+
         slide.activateTimer(slide.options.autoRedirectTimer, slide.options.autoRedirect);
       },
       end: function(e, data){
@@ -2561,7 +2574,12 @@ AVIATION.common.Slide.prototype = {
       console.log("timer after setting");
       console.log(slideObject._timer);
     } else {
-      slideObject.setStatus('Click "Continue" when ready');
+      if(slideObject.options.continueId || slideObject.options.isModal){
+        slideObject.setStatus('Click "Continue" when ready');
+      } else {
+        slideObject.setStatus('Continue to the next Snap');
+      }
+
       slideObject._timer = null;
     }
   },
@@ -2571,7 +2589,11 @@ AVIATION.common.Slide.prototype = {
     var slide = this;
     if(slide._timer){
       if(manual){
-        slide.setStatus('Click "Continue" when ready');
+        if(slide.options.continueId || slide.options.isModal){
+          slide.setStatus('Click "Continue" when ready');
+        } else {
+          slide.setStatus('Continue to the next Snap');
+        }
       }
 
       console.log("trying to resetTimer");
