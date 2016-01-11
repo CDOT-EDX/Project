@@ -859,7 +859,14 @@ AVIATION.common.Slide.prototype = {
     var avatarLeft = "", avatarRight = "", contentClass = 12, i, slide = this;
 
     function createAvatars( avatars ){
-      var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg, filename = "";
+
+      var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg,
+          filename = "", avatars2, avatarCanvasId;
+
+
+      avatars2 = AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
+      // avatarLeftId: "avatarJane",
+      // avatarRightId: "avatarTom",
 
       for(i = 0; i < avatars.length; i++){
 
@@ -868,12 +875,13 @@ AVIATION.common.Slide.prototype = {
           if(i === 0){
             avatarSide = "Left";
             avatarClass = "pull-left";
-
+            avatarCanvasId = slide.options.avatarLeftId;
           }
 
           if(i === 1){
             avatarSide = "Right";
             avatarClass = "pull-right";
+            avatarCanvasId = slide.options.avatarRightId;
 
           }
 
@@ -882,7 +890,8 @@ AVIATION.common.Slide.prototype = {
           if(!avatarDiv || avatarDiv.length < 1){
             avatarDiv = jQuery('<div/>', {
               id: "avatar" + avatarSide + "Div",
-              "class": "avatar col-lg-2 " + avatarClass + " " + avatars[i].character,
+              "class": "avatar col-lg-2 ",
+              html: '<canvas id="' + avatarCanvasId + '" width="100%" height="100%" style="background-color:#FFFFFF"></canvas>'
             });
 
             if(i === 0){
@@ -895,12 +904,22 @@ AVIATION.common.Slide.prototype = {
           if(slide.avatars && slide.avatars[avatars[i].character]){
             for(avatarElement in slide.avatars[avatars[i].character]){
               if(slide.avatars[avatars[i].character].hasOwnProperty(avatarElement)){
+
+                console.log("whats this avatar doing?");
+                console.log(avatarElement);
+                console.log(avatars[i].type);
+                /*
+
                 tempImg = $("#" + avatars[i].character + "_" + avatarElement);
 
                 if(!tempImg || tempImg.length < 1){
                   filename = slide.options.apacheServerBaseUrl + slide.avatars[avatars[i].character][avatarElement];
 
                   if(avatarElement === avatars[i].type){
+                    console.log("whats this avatar doing?");
+                    console.log(avatarElement);
+                    console.log(avatars[i].type);
+
                     // make this one visible
                     jQuery('<img/>',{
                       id: avatars[i].character + "_" + avatarElement,
@@ -926,6 +945,7 @@ AVIATION.common.Slide.prototype = {
                     $("#" + avatars[i].character + "_" + avatarElement).hide();
                   }
                 }
+              */
               }
             }
           }
@@ -933,7 +953,7 @@ AVIATION.common.Slide.prototype = {
       }
     }
 
-    if(this.options.showAvatars && avatar && avatar.length > 0){
+    if(slide.options.showAvatars && avatar && avatar.length > 0){
       for(i = 0; i < avatar.length; i++){
         if(avatar[i].position === "left"){
           avatarLeft = avatar[i];
@@ -3568,6 +3588,9 @@ AVIATION.common.Slide.prototype = {
           replayBtnId: "#btnReplay",
           nextBtnId: "#btnN",
 
+          avatarLeftId: "avatarJane",
+          avatarRightId: "avatarTom",
+
           scanningPatternArray: [ 1, 0, 1, 2, 1, 5, 1, 4, 1, 3 ],
           minScan: 1,
           pulseCorrectProp: {
@@ -4076,3 +4099,4 @@ AVIATION.common.Slide.prototype = {
 
 };
 console.log("testing this class execution");
+/******************** END CREATE SLIDE LIRBARY ******************************/
