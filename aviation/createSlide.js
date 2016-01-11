@@ -2561,7 +2561,7 @@ AVIATION.common.Slide.prototype = {
       console.log("timer after setting");
       console.log(slideObject._timer);
     } else {
-      slideObject.setStatus('Press "Continue" when ready');
+      slideObject.setStatus('Click "Continue" when ready');
       slideObject._timer = null;
     }
   },
@@ -2571,7 +2571,7 @@ AVIATION.common.Slide.prototype = {
     var slide = this;
     if(slide._timer){
       if(manual){
-        slide.setStatus('Press "Continue" when ready');
+        slide.setStatus('Click "Continue" when ready');
       }
 
       console.log("trying to resetTimer");
