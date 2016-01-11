@@ -1132,9 +1132,13 @@ AVIATION.common.Slide.prototype = {
           contentParent.children().remove(".innerContent");
 
           imageParent.children().remove(".innerImage");
+
+          generalParent.parent().hide();
         }
 
         if(action === "append" || action === "replace"){
+          generalParent.parent().show();
+
           if(innerContent){
             innerContent.appendTo(contentParent);
           }
@@ -1154,6 +1158,8 @@ AVIATION.common.Slide.prototype = {
         }
       } else {
         generalParent.children().remove();
+        generalParent.parent().hide();
+
       }
 
 
@@ -3351,7 +3357,7 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("reset");
           slide.resetSlide();
           if(slide.options.advanceOnClose){
-            $(parent).trigger("next");
+            $(slide.options.parent).trigger("next");
           }
         });
         /*
