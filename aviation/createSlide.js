@@ -3341,26 +3341,21 @@ AVIATION.common.Slide.prototype = {
       $(slide).trigger("play");
     }
     if(slide.options.isModal){
-        slide.modalElement.on("shown.bs.modal", function(){
-          $(slide.options.parent).trigger("reset");
-          if(!slide.options.noAudio){
-            $(slide).trigger("play");
-          }
-          slide.resizeModalInstruments();
-        });
+      slide.modalElement.on("shown.bs.modal", function(){
+        $(slide.options.parent).trigger("pause");
+        if(!slide.options.noAudio){
+          $(slide).trigger("play");
+        }
+        slide.resizeModalInstruments();
+      });
 
-        slide.modalElement.on("hidden.bs.modal", function(){
-          $(slide).trigger("reset");
-          slide.resetSlide();
-          if(slide.options.advanceOnClose){
-            $(parent).trigger("next");
-          }
-        });
-        /*
-        slide.modalElement.on("show.bs.modal", function(){
-
-        });
-        */
+      slide.modalElement.on("hidden.bs.modal", function(){
+        $(slide).trigger("reset");
+        slide.resetSlide();
+        if(slide.options.advanceOnClose){
+          $(parent).trigger("next");
+        }
+      });
 
       console.log("activate slide as modal");
     } else {
