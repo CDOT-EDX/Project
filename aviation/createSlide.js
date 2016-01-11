@@ -1132,13 +1132,9 @@ AVIATION.common.Slide.prototype = {
           contentParent.children().remove(".innerContent");
 
           imageParent.children().remove(".innerImage");
-
-          generalParent.parent().hide();
         }
 
         if(action === "append" || action === "replace"){
-          generalParent.parent().show();
-
           if(innerContent){
             innerContent.appendTo(contentParent);
           }
@@ -1158,8 +1154,6 @@ AVIATION.common.Slide.prototype = {
         }
       } else {
         generalParent.children().remove();
-        generalParent.parent().hide();
-
       }
 
 
@@ -3347,6 +3341,7 @@ AVIATION.common.Slide.prototype = {
     }
     if(slide.options.isModal){
         slide.modalElement.on("shown.bs.modal", function(){
+          $(slide.options.parent).trigger("reset");
           if(!slide.options.noAudio){
             $(slide).trigger("play");
           }
@@ -3357,7 +3352,7 @@ AVIATION.common.Slide.prototype = {
           $(slide).trigger("reset");
           slide.resetSlide();
           if(slide.options.advanceOnClose){
-            $(slide.options.parent).trigger("next");
+            $(parent).trigger("next");
           }
         });
         /*
@@ -3386,7 +3381,7 @@ AVIATION.common.Slide.prototype = {
 
     if(slide.options.noAudio){
       if(slide.options.continueId){
-        slide.setStatus('Press "Continue" when ready');
+        slide.setStatus('Click "Continue" when ready');
       } else {
         slide.setStatus('Continue to the next Snap');
       }
