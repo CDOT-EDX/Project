@@ -598,7 +598,7 @@ AVIATION.common.Slide.prototype = {
 
       jQuery("<div/>",{
         id: slide.options.instStatusId2.split("#")[1],
-        class: bsClass,
+        class: bsClass + " text-center",
       }).appendTo( slide.options.isModal ? slide.options.contentRow : slide.container );
     }
 
