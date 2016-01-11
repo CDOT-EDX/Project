@@ -22,14 +22,14 @@
   border-left-style: outset;
   border-radius: 5px;
   */
-  min-height: 350px;
+  min-height: 100px;
   overflow-x: visible;
   overflow-y: visible;
 }
 
 .cdot_contentText {
-  margin-bottom: 30px;
-  margin-top: 30px;
+  margin-bottom: 15px;
+  margin-top: 15px;
 }
 .btnN {
   background-image: url('//online.cdot.senecacollege.ca/c4x/Seneca_College/M01S01_Test/asset/BtnNext.png') ;
