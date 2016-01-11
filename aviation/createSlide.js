@@ -3385,7 +3385,11 @@ AVIATION.common.Slide.prototype = {
     slide.checkSlideControlPlayButtons();
 
     if(slide.options.noAudio){
-      slide.setStatus('Press "Continue" when ready');
+      if(slide.options.continueId){
+        slide.setStatus('Press "Continue" when ready');
+      } else {
+        slide.setStatus('Continue to the next Snap');
+      }
     }
 
   },
