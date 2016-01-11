@@ -1236,7 +1236,7 @@ AVIATION.common.Slide.prototype = {
       footer = jQuery('<div/>', {
         id: this.options.footerId.split("#")[1],
         class: (this.options.isModal ? "modal-footer" : "row slide-footer"),
-        "html": this.options.isModal && !this.options.showStatus ? '<button type="button" class="btn btn-default" data-dismiss="modal">Back</button>' : ""
+        "html": this.options.isModal && !this.options.showStatus ? '<button type="button" class="btn btn-default" data-dismiss="modal">' + this.options.modalClose + '</button>' : ""
       });
 
       if(this.options.isModal){
@@ -2453,6 +2453,7 @@ AVIATION.common.Slide.prototype = {
               image: this.modals[i].image,
               callback: this.modals[i].callback,
             }],
+            "modalClose" : "Back",
             "mediaFiles": slide.modals[i].media,
             instrumentIds: {
               airspeed:         "modal_airspeed_" + this.modals[i].id,
@@ -3380,7 +3381,7 @@ AVIATION.common.Slide.prototype = {
     slide.checkSlideControlPlayButtons();
 
     if(slide.options.noAudio){
-      if(slide.options.continueId){
+      if(slide.options.continueId || slide.options.isModal){
         slide.setStatus('Click "Continue" when ready');
       } else {
         slide.setStatus('Continue to the next Snap');
