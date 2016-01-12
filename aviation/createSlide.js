@@ -303,6 +303,8 @@ AVIATION.common.Slide.prototype = {
         if(players[active] && players[active].player){
           slide.checkSlideControlPlayButtons("play");
           players[active].player.play();
+
+          slide.resumeLastPausedAvatar();
         }
       },
       pause: function(e){
@@ -314,6 +316,7 @@ AVIATION.common.Slide.prototype = {
           console.log("trying to pause ");
           players[active].player.pause();
           slide.checkSlideControlPlayButtons("pause");
+          slide.closeAllAvatars();
         }
 
       },
@@ -852,6 +855,52 @@ AVIATION.common.Slide.prototype = {
 
   },
 
+  closeAllAvatars: function(){
+    "use strict";
+    var action = "close", slide = this;
+
+    if(slide.options.showAvatars){
+      _.each(slide.avatars, function(element, i, list){
+        if(slide.avatars && slide.avatars[i] && slide.avatarsInitted){
+          if(slide.avatars[i].status !== action){
+            slide.pausedAvatar = i;
+            slide.avatarObject[slide.avatars[i][action]]();
+            slide.avatars[i].status = action;
+          }
+        }
+      });
+    }
+  },
+
+  resumeLastPausedAvatar: function(){
+    "use strict";
+
+    var action = "open", slide = this;
+
+    if(slide.options.showAvatars){
+
+      if(slide.avatarsInitted && slide.pausedAvatar && slide.pausedAvatar !== ''){
+        if(slide.avatars[slide.pausedAvatar].status !== action){
+          slide.avatarObject[slide.avatars[slide.pausedAvatar][action]]();
+          slide.avatars[slide.pausedAvatar].status = action;
+        }
+
+      }
+      slide.pausedAvatar = "";
+    }
+    /*
+    _.each(function(element, i, list){
+      if(slide.avatars && slide.avatars[i] && slide.avatarsInitted){
+        if(slide.avatars[i].status !== action){
+          slide.pausedAvatar = i;
+          avatarObject[slide.avatars[i][action]();
+          slide.avatars[i].status = action;
+        }
+      }
+    });
+    */
+  },
+
   // method for building avatars into the slide
   buildAvatars: function(parent, avatar, callback){
     "use strict";
@@ -861,23 +910,15 @@ AVIATION.common.Slide.prototype = {
     function createAvatars( avatars ){
 
       var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg,
-          filename = "", avatars2, avatarCanvasId, possibleAvatarActions;
+          filename = "", avatarObject, avatarCanvasId;
 
-      possibleAvatarActions = {
-        "tom": {
-          "open": "maleAvatarOpen",
-          "close": "maleAvatarClose"
-        },
-        "jane": {
-          "open": "femaleAvatarOpen",
-          "close": "femaleAvatarClose"
-        }
-      };
+      //avatarObject = AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
+      //if(!slide.avatarObject){
+        slide.avatarObject = new AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
+        slide.avatarObject.init();
+      //}
 
-      //avatars2 = AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
-      avatars2 = new AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
 
-      avatars2.init();
       console.log("avatars!?");
       // avatarLeftId: "avatarJane",
       // avatarRightId: "avatarTom",
@@ -916,58 +957,21 @@ AVIATION.common.Slide.prototype = {
             }
           }
 
-          if(slide.avatars && slide.avatars[avatars[i].character]){
-            for(avatarElement in slide.avatars[avatars[i].character]){
-              if(slide.avatars[avatars[i].character].hasOwnProperty(avatarElement)){
+          if(slide.avatars && slide.avatars[avatars[i].character] && slide.avatarsInitted){
 
-                console.log("whats this avatar doing?");
-                console.log(avatarElement);
-                console.log(avatars[i]);
+            console.log("whats this avatar doing?");
+            console.log(avatars[i].type);
+            console.log(avatars[i].character);
 
-                avatars2[possibleAvatarActions[avatars[i].character][avatars[i].type]]();
-
-                /*
-
-                tempImg = $("#" + avatars[i].character + "_" + avatarElement);
-
-                if(!tempImg || tempImg.length < 1){
-                  filename = slide.options.apacheServerBaseUrl + slide.avatars[avatars[i].character][avatarElement];
-
-                  if(avatarElement === avatars[i].type){
-                    console.log("whats this avatar doing?");
-                    console.log(avatarElement);
-                    console.log(avatars[i].type);
-
-                    // make this one visible
-                    jQuery('<img/>',{
-                      id: avatars[i].character + "_" + avatarElement,
-                      "class": "img-responsive avatar" + avatarSide,
-                      src: filename
-                    }).appendTo(avatarDiv);
-                  } else {
-                    // make the rest hidden
-                    jQuery('<img/>',{
-                      id: avatars[i].character + "_" + avatarElement,
-                      "class": "img-responsive avatar" + avatarSide,
-                      "css" : {
-                        "display" : "none"
-                      },
-                      src: filename
-                    }).appendTo(avatarDiv);
-                  }
-                } else {
-                  // switch between hiding/showing the proper avatar type
-                  if(avatarElement === avatars[i].type){
-                    $("#" + avatars[i].character + "_" + avatarElement).show();
-                  } else {
-                    $("#" + avatars[i].character + "_" + avatarElement).hide();
-                  }
-                }
-              */
-              }
+            if(slide.avatars[avatars[i].character].status !== avatars[i].type){
+              slide.avatarObject[slide.avatars[avatars[i].character][avatars[i].type]]();
+              slide.avatars[avatars[i].character].status = avatars[i].type;
             }
           }
         }
+      }
+      if(!slide.avatarsInitted){
+        slide.avatarsInitted = true;
       }
     }
 
@@ -3643,12 +3647,14 @@ AVIATION.common.Slide.prototype = {
           },
           avatars: {
             tom: {
-              open: "aviation/img/tomOpen.png",
-              close: "aviation/img/tomClose.png"
+              "open": "maleAvatarOpen",
+              "close": "maleAvatarClose",
+              "status": "close"
             },
             jane: {
-              open: "aviation/img/janeOpen.png",
-              close: "aviation/img/janeClose.png"
+              "open": "femaleAvatarOpen",
+              "close": "femaleAvatarClose",
+              "status": "close"
             }
           },
           highlights:
@@ -3791,6 +3797,8 @@ AVIATION.common.Slide.prototype = {
     this.footerId = options.footerId || "#footer";
     this.bodyId = options.bodyId || "#body";
 
+    this.avatarsInitted = false;
+
     this.throttleId = options.throttleId || "#slider";
     this.throttleContainer = options.throttleContainer || "#sliderContainer";
 
@@ -3882,16 +3890,24 @@ AVIATION.common.Slide.prototype = {
               slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
               slide.slideElements[possibleActions[action].elements][i].css('pointer-events', 'auto');
             } else {
-              slide.slideElements[possibleActions[action].elements][i].show();
-              // only disable the ones we show (btn, quizzes only)
-              if(slide.elementsToDisable[action][i]){
-                slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
-                slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
+              if(slide.slideElements[possibleActions[action].elements].length > 0 &&
+                  slide.slideElements[possibleActions[action].elements][i]){
+                slide.slideElements[possibleActions[action].elements][i].show();
+                // only disable the ones we show (btn, quizzes only)
+                if(slide.elementsToDisable[action][i]){
+                  slide.slideElements[possibleActions[action].elements][i].attr('disabled', true);
+                  slide.slideElements[possibleActions[action].elements][i].prop('disabled', true);
+                } else {
+                  slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
+                  slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
+                  slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
+                  slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
+                }
               } else {
-                slide.slideElements[possibleActions[action].elements][i].attr('disabled', false);
-                slide.slideElements[possibleActions[action].elements][i].prop('disabled', false);
-                slide.slideElements[possibleActions[action].elements][i].removeAttr('disabled');
-                slide.slideElements[possibleActions[action].elements][i].removeProp('disabled');
+                console.log("You are tring to show " + possibleActions[action].elements);
+                console.log("But this array is either empty or doesn't have an item at index: " + i);
+                console.log("Array on next lin below:");
+                console.log(slide.slideElements[possibleActions[action].elements]);
               }
             }
           } else {
