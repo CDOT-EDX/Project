@@ -505,7 +505,7 @@ p.nominalBounds = new cjs.Rectangle(-102.6,-163.6,153.8,381.5);
 
 	// Layer 1
 	this.instance = new maleLib.MaleDefault();
-	this.instance.setTransform(110,210.2,0.8,0.8,0,0,0,-21.28,25.28);
+	this.instance.setTransform(120,210.2,0.8,0.8,0,0,0,-21.28,25.28);
 
 	this.addChild(this.instance);
 }).prototype = p = new cjs.Container();

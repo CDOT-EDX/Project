@@ -905,7 +905,7 @@ AVIATION.common.Slide.prototype = {
             avatarDiv = jQuery('<div/>', {
               id: "avatar" + avatarSide + "Div",
               "class": "avatar col-lg-2 ",
-              "style": "z-index:1",
+              "style": "z-index:1; " + (avatarSide === "Right"? "margin-left:-70px;":""),
               html: '<canvas id="' + avatarCanvasId + '" width="200px" height="400px"></canvas>'
             });
 
