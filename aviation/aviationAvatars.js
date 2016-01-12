@@ -505,14 +505,14 @@ p.nominalBounds = new cjs.Rectangle(-102.6,-163.6,153.8,381.5);
 
 	// Layer 1
 	this.instance = new maleLib.MaleDefault();
-	this.instance.setTransform(145,210.2,1,1,0,0,0,-26.6,31.6);
+	this.instance.setTransform(110,210.2,0.8,0.8,0,0,0,-21.28,25.28);
 
 	this.addChild(this.instance);
 }).prototype = p = new cjs.Container();
 p.nominalBounds = new cjs.Rectangle(470,215,153.8,381.5);
 
 })(maleLib = maleLib||{}, images = maleImages||{}, createjs = createjs||{}, ss = maleSs||{});
-var maleLib, maleImages, maleCreatejs, maleSs;
+var maleLib, maleImages, createjs, maleSs;
 
 /******************* FEMALE AVATAR START *************************************************/
 
@@ -1040,7 +1040,7 @@ p.nominalBounds = new cjs.Rectangle(173.1,-207.4,230.8,616.1);
 
 	// Layer 1
 	this.instance = new femaleLib.FemaleDefault();
-	this.instance.setTransform(90,201.8,0.605,0.605,0,0,0,300.5,104.8);
+	this.instance.setTransform(45,201.8,0.484,0.484,0,0,0,240.4,83.84);
 
 	this.addChild(this.instance);
 }).prototype = p = new cjs.Container();
@@ -1048,6 +1048,10 @@ p.nominalBounds = new cjs.Rectangle(473.5,213,139.6,372.6);
 
 })(femaleLib = lib||{}, images = images||{}, createjs = createjs||{}, ss = ss||{});
 var lib, images, createjs, ss;
+
+var AVIATION = {};
+
+AVIATION.common = {};
 
 AVIATION.common.Avatars = function(femaleParent, maleParent){
   'use strict';
@@ -1058,20 +1062,21 @@ AVIATION.common.Avatars = function(femaleParent, maleParent){
 
 AVIATION.common.Avatars.prototype = {
 	init: function() {
+		"use strict";
 		this.maleCanvas = document.getElementById(this.maleParent);
 
 		this.femaleCanvas = document.getElementById(this.femaleParent);
 
 		this.maleAvatar = new maleLib.MaleDefaultInit();
 
-		this.femalteAvatar = new femaleLib.FemaleDefaultInit();
+		this.femaleAvatar = new femaleLib.FemaleDefaultInit();
 
 		this.maleStage = new createjs.Stage(this.maleCanvas);
 
 		this.femaleStage = new createjs.Stage(this.femaleCanvas);
 
 		this.maleStage.addChild(this.maleAvatar);
-		this.femaleStage.addChild(this.femalteAvatar);
+		this.femaleStage.addChild(this.femaleAvatar);
 
 		this.maleStage.update();
 		this.femaleStage.update();
@@ -1084,18 +1089,22 @@ AVIATION.common.Avatars.prototype = {
 	},
 
 	maleAvatarOpen: function(){
+		"use strict";
 		maleLib.open(this.maleAvatar.instance);
 	},
 
 	maleAvatarClose: function(){
+		"use strict";
 		maleLib.close(this.maleAvatar.instance);
 	},
 
 	femaleAvatarOpen: function(){
+		"use strict";
 		femaleLib.open(this.femaleAvatar.instance);
 	},
 
 	femaleAvatarClose: function(){
+		"use strict";
 		femaleLib.close(this.femaleAvatar.instance);
 	}
 };

@@ -26,9 +26,9 @@
 
 // TODO: add a "skip" button to pages
 
-var AVIATION = {};
-
-AVIATION.common = {};
+// var AVIATION = {};
+//
+// AVIATION.common = {};
 
 // make an abstract class to wrap any 'player' action
 /*
@@ -861,10 +861,24 @@ AVIATION.common.Slide.prototype = {
     function createAvatars( avatars ){
 
       var avatarSide = "", avatarClass = "", avatarDiv = "", avatarElement, tempImg,
-          filename = "", avatars2, avatarCanvasId;
+          filename = "", avatars2, avatarCanvasId, possibleAvatarActions;
 
+      possibleAvatarActions = {
+        "tom": {
+          "open": "maleAvatarOpen",
+          "close": "maleAvatarClose"
+        },
+        "jane": {
+          "open": "femaleAvatarOpen",
+          "close": "femaleAvatarClose"
+        }
+      };
 
-      avatars2 = AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
+      //avatars2 = AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
+      avatars2 = new AVIATION.common.Avatars(slide.options.avatarLeftId, slide.options.avatarRightId);
+
+      avatars2.init();
+      console.log("avatars!?");
       // avatarLeftId: "avatarJane",
       // avatarRightId: "avatarTom",
 
@@ -891,7 +905,8 @@ AVIATION.common.Slide.prototype = {
             avatarDiv = jQuery('<div/>', {
               id: "avatar" + avatarSide + "Div",
               "class": "avatar col-lg-2 ",
-              html: '<canvas id="' + avatarCanvasId + '" width="100%" height="100%" style="background-color:#FFFFFF"></canvas>'
+              "style": "z-index:1",
+              html: '<canvas id="' + avatarCanvasId + '" width="200px" height="400px"></canvas>'
             });
 
             if(i === 0){
@@ -907,7 +922,10 @@ AVIATION.common.Slide.prototype = {
 
                 console.log("whats this avatar doing?");
                 console.log(avatarElement);
-                console.log(avatars[i].type);
+                console.log(avatars[i]);
+
+                avatars2[possibleAvatarActions[avatars[i].character][avatars[i].type]]();
+
                 /*
 
                 tempImg = $("#" + avatars[i].character + "_" + avatarElement);

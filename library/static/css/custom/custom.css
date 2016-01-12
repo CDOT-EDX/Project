@@ -65,6 +65,10 @@
   margin-top: 100px;
 }
 
+#avatarLeftDiv.avatar, #avatarRightDiv.avatar {
+  padding:0px;
+}
+
 .btnPause, .btnPlay, .btnR {
   border-radius: 50px;
   height: 60px;
