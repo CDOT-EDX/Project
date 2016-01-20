@@ -53,7 +53,7 @@ Published under GPLv3 License.
             var deg = 0;
 
             if (speed >= 0 && speed < 40) deg = speed * 0.9;
-            if (speed >= 40 && speed <= 160) deg = speed * 1.8 - 36;
+            if (speed >= 40 && speed <= 70) deg = speed * 1.8 - 36;
             if (speed > 70 && speed <= 160) deg = speed * 2 - 50;
             if (speed > 160) deg = speed + 110;
             if (speed > 200) deg = 311 + (speed % 2);
